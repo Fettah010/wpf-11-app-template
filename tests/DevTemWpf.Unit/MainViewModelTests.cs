@@ -1,29 +1,67 @@
 using DevTemWpf.App;
+using DevTemWpf.App.Services;
+using DevTemWpf.App.Views;
 using Microsoft.Extensions.Options;
+using Wpf.Ui.Controls;
 
 namespace DevTemWpf.Unit;
 
-public sealed class MainViewModelTests
+public sealed class MainViewModelTests : IDisposable
 {
-    private static MainViewModel Create(string title = "TestApp")
-        => new(Options.Create(new AppOptions { Title = title }));
+    private readonly string _settingsPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".json");
 
-    [Fact]
-    public void Constructor_UsesConfiguredTitleInStatus()
+    public void Dispose()
     {
-        var vm = Create("TestApp");
-
-        Assert.Contains("TestApp", vm.StatusText);
+        try { File.Delete(_settingsPath); } catch { /* best effort */ }
     }
 
-    [Fact]
-    public async Task GreetCommand_UpdatesStatusWithPressCount()
+    private MainViewModel Create(ShellSettings? seed = null)
     {
-        var vm = Create("TestApp");
+        var settings = new SettingsService(_settingsPath);
+        if (seed is not null)
+        {
+            settings.UpdateAsync(_ => seed, TestContext.Current.CancellationToken).GetAwaiter().GetResult();
+        }
 
-        await vm.GreetCommand.ExecuteAsync(null);
+        return new MainViewModel(settings, Options.Create(new AppOptions()));
+    }
 
-        Assert.Contains("pressed 1x", vm.StatusText);
-        Assert.Contains("TestApp", vm.StatusText);
+    [WpfFact]
+    public void Menu_ContainsHome_And_FooterContainsSettings()
+    {
+        var vm = Create();
+
+        Assert.Contains(vm.MenuItems.OfType<NavigationViewItem>(), i => i.TargetPageType == typeof(HomePage));
+        Assert.Contains(vm.FooterMenuItems.OfType<NavigationViewItem>(), i => i.TargetPageType == typeof(SettingsPage));
+    }
+
+    [WpfFact]
+    public void SidebarDefault_UsesLeftPane_Open()
+    {
+        var vm = Create(new ShellSettings { Shell = ShellMode.Sidebar });
+
+        Assert.Equal(NavigationViewPaneDisplayMode.Left, vm.PaneMode);
+        Assert.True(vm.IsPaneOpen);
+    }
+
+    [WpfFact]
+    public void Rail_UsesMinimalPane()
+    {
+        var vm = Create(new ShellSettings { Shell = ShellMode.Rail });
+
+        Assert.Equal(NavigationViewPaneDisplayMode.LeftMinimal, vm.PaneMode);
+    }
+
+    [WpfFact]
+    public void NarrowWidth_CollapsesPane_And_Widening_Restores()
+    {
+        var vm = Create(new ShellSettings { Shell = ShellMode.Sidebar });
+
+        vm.ApplyResponsiveWidth(600);
+        Assert.False(vm.IsPaneOpen);
+
+        vm.ApplyResponsiveWidth(1200);
+        Assert.True(vm.IsPaneOpen);
+        Assert.Equal(NavigationViewPaneDisplayMode.Left, vm.PaneMode);
     }
 }

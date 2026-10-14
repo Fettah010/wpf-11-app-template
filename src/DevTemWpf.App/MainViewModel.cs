@@ -1,29 +1,67 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+using DevTemWpf.App.Services;
+using DevTemWpf.App.Views;
 using Microsoft.Extensions.Options;
+using Wpf.Ui.Controls;
 
 namespace DevTemWpf.App;
 
-/// <summary>Minimal ViewModel proving the MVVM source-generator path.</summary>
+/// <summary>Shell ViewModel: navigation items + pane state (ADR-0005).</summary>
 public sealed partial class MainViewModel : ObservableObject
 {
-    private readonly AppOptions _options;
-    private int _pressCount;
+    public const double CompactWidthThreshold = 800;
 
-    public MainViewModel(IOptions<AppOptions> options)
+    private readonly ISettingsService _settings;
+
+    public MainViewModel(ISettingsService settings, IOptions<AppOptions> options)
     {
-        _options = options.Value;
-        StatusText = $"Ready — {_options.Title} (press the button)";
+        _settings = settings;
+        AppTitle = options.Value.Title;
+        MenuItems = new ObservableCollection<object>
+        {
+            new NavigationViewItem("Home", SymbolRegular.Home24, typeof(HomePage)),
+        };
+        FooterMenuItems = new ObservableCollection<object>
+        {
+            new NavigationViewItem("Settings", SymbolRegular.Settings24, typeof(SettingsPage)),
+        };
+        RefreshShell(_settings.Current);
+        _settings.Updated += (_, s) => RefreshShell(s);
     }
+
+    public ObservableCollection<object> MenuItems { get; }
+
+    public ObservableCollection<object> FooterMenuItems { get; }
+
+    public string AppTitle { get; }
 
     [ObservableProperty]
-    private string statusText = string.Empty;
+    private NavigationViewPaneDisplayMode paneMode = NavigationViewPaneDisplayMode.Left;
 
-    [RelayCommand]
-    private Task GreetAsync(CancellationToken cancellationToken)
+    [ObservableProperty]
+    private bool isPaneOpen = true;
+
+    /// <summary>Narrow windows collapse the pane; widening restores the preference.</summary>
+    public void ApplyResponsiveWidth(double width)
     {
-        _pressCount++;
-        StatusText = $"Hello from {_options.Title} — pressed {_pressCount}x";
-        return Task.CompletedTask;
+        if (width < CompactWidthThreshold)
+        {
+            IsPaneOpen = false;
+            return;
+        }
+
+        RefreshShell(_settings.Current);
     }
+
+    private void RefreshShell(ShellSettings s)
+    {
+        PaneMode = MapMode(s.Shell);
+        IsPaneOpen = s.Shell == ShellMode.Sidebar;
+    }
+
+    private static NavigationViewPaneDisplayMode MapMode(ShellMode shell)
+        => shell == ShellMode.Rail
+            ? NavigationViewPaneDisplayMode.LeftMinimal
+            : NavigationViewPaneDisplayMode.Left;
 }

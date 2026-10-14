@@ -24,6 +24,12 @@ public partial class App : Application
             _host = builder.Build();
             await _host.StartAsync().ConfigureAwait(true);
 
+            // Settings → theme before the window exists (ADR-0006).
+            var settings = _host.Services.GetRequiredService<DevTemWpf.App.Services.ISettingsService>();
+            await settings.LoadAsync().ConfigureAwait(true);
+            var theme = _host.Services.GetRequiredService<DevTemWpf.App.Services.IThemeService>();
+            await theme.ApplyCurrentAsync().ConfigureAwait(true);
+
             ThemeBootstrap.EnsureLoaded(this);
 
             var window = _host.Services.GetRequiredService<MainWindow>();

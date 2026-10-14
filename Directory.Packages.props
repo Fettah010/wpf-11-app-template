@@ -5,13 +5,19 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <!-- UI foundation (ADR-0001) -->
+    <!-- UI foundation (ADR-0001). DependencyInjection package added in 0.2.0:
+         v4 replaced IPageService with INavigationViewPageProvider, whose only
+         implementation ships here (same repo/version/MIT). See ADR-0005. -->
     <PackageVersion Include="WPF-UI" Version="4.3.0" />
+    <PackageVersion Include="WPF-UI.DependencyInjection" Version="4.3.0" />
     <!-- MVVM + hosting (ADR-0002) -->
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
     <!-- Tests: xUnit.net v3 on Microsoft Testing Platform (verified 2026-10-14:
          xunit.v3.mtp-v2 4.0.2 stable; VSTest path is blocked on .NET 10 SDK) -->
     <PackageVersion Include="xunit.v3.mtp-v2" Version="4.0.2" />
+    <!-- STA tests for WPF control construction (WpfFact). MS-PL, test-only.
+         Verified 2026-10-14: 4.0.24 stable supports xunit.v3 v4+. -->
+    <PackageVersion Include="Xunit.StaFact" Version="4.0.24" />
   </ItemGroup>
 </Project>
