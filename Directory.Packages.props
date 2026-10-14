@@ -14,7 +14,7 @@
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
     <!-- Production services (ADR-0011). Audited 2026-10-14: Serilog 4.4.0 /
-         Hosting 10.0.0 / File 7.0.0 (Apache-2.0); Sqlite 10.0.13 (Apache-2.0);
+         Hosting 10.0.0 / File 7.0.0 (Apache-2.0); Sqlite 10.0.13 (MIT);
          Velopack 1.2.161 (MIT); WPF-UI.Tray 4.3.0 (MIT, same vendor). -->
     <PackageVersion Include="Serilog" Version="4.4.0" />
     <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
@@ -29,6 +29,10 @@
     <!-- Tests: xUnit.net v3 on Microsoft Testing Platform (verified 2026-10-14:
          xunit.v3.mtp-v2 4.0.2 stable; VSTest path is blocked on .NET 10 SDK) -->
     <PackageVersion Include="xunit.v3.mtp-v2" Version="4.0.2" />
+    <!-- UI automation (ADR-0013). Audited 2026-10-14: 5.0.0 stable on both
+         packages, MIT, UIA3 = inbox Windows API, framework-agnostic. -->
+    <PackageVersion Include="FlaUI.Core" Version="5.0.0" />
+    <PackageVersion Include="FlaUI.UIA3" Version="5.0.0" />
     <!-- STA tests for WPF control construction (WpfFact). MS-PL, test-only.
          Verified 2026-10-14: 4.0.24 stable supports xunit.v3 v4+. -->
     <PackageVersion Include="Xunit.StaFact" Version="4.0.24" />

@@ -5,6 +5,7 @@
   <!--#if (IncludeTests) -->
   <Folder Name="/tests/">
     <Project Path="tests/DevTemWpf.Integration/DevTemWpf.Integration.csproj" />
+    <Project Path="tests/DevTemWpf.UiAutomation/DevTemWpf.UiAutomation.csproj" />
     <Project Path="tests/DevTemWpf.Unit/DevTemWpf.Unit.csproj" />
   </Folder>
   <!--#endif -->
