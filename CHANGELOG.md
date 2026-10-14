@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.0 (2026-10-14)
+
+- `dotnet new` scaffolding from a single template tree: Clean/Recommended/
+  Full presets, tests option, generated README + feature manifest.
+- Page + service item templates with convention checklists.
+- `eng/test-templates.ps1` machine-verifies every combo (generate, residue,
+  modules, restore/build/test/launch); CI runs the Clean preset.
+- Shell/theme scaffold flags cut after empirical disproof (runtime switching
+  documented). Tests: 77 passing (repo suite unaffected by directives).
+
 ## 0.7.0 (2026-10-14)
 
 - Production services (all optional/inert by default): Serilog file logging,

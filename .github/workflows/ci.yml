@@ -31,3 +31,7 @@ jobs:
 
       - name: List packages (audit trail)
         run: dotnet list package --include-transitive
+
+      - name: Template gate (Clean preset)
+        run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Presets Clean
+        timeout-minutes: 20
