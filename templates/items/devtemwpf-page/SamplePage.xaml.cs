@@ -8,7 +8,7 @@ namespace DevTemWpf.App.Views;
 /// <summary>
 /// SamplePage view wiring. After scaffolding, register in AppComposition
 /// (AddTransient for page + ViewModel) and add a MainViewModel nav item:
-/// <code>new NavigationViewItem("SamplePage", SymbolRegular.Page24, typeof(SamplePage)),</code>
+/// <code>new NavigationViewItem("SamplePage", SymbolRegular.DocumentAdd24, typeof(SamplePage)),</code>
 /// </summary>
 public partial class SamplePage : Page, INavigableView<SamplePageViewModel>
 {

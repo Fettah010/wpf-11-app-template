@@ -6,16 +6,9 @@
   "description": "Adds a service interface + implementation following project conventions. Register it in AppComposition (see the checklist comment).",
   "identity": "DevTemWPF.Service.CSharp",
   "shortName": "devtemwpf-service",
+  "sourceName": "SampleService",
   "tags": { "language": "C#", "type": "item" },
   "symbols": {
-    "ServiceName": {
-      "type": "parameter",
-      "datatype": "text",
-      "defaultValue": "SampleService",
-      "replaces": "SampleService",
-      "fileRename": "SampleService",
-      "description": "Service name without prefix (ISampleService + SampleService are created)."
-    },
     "Namespace": {
       "type": "parameter",
       "datatype": "text",

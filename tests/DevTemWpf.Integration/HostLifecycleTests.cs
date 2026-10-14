@@ -37,7 +37,9 @@ public sealed class HostLifecycleTests
             Assert.NotNull(host.Services.GetRequiredService<Wpf.Ui.IContentDialogService>());
             Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.IMotionService>());
             //#if (IncludeServices)
+            //#if (IncludeDashboard)
             Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.SampleDataService>());
+            //#endif
             Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.FavoritesStore>());
             Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.IBackupService>());
             Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.IUpdateService>());

@@ -6,16 +6,9 @@
   "description": "Adds a NavigationView page + ViewModel following project conventions. Register it in AppComposition and MainViewModel (see the checklist comment in the page code-behind).",
   "identity": "DevTemWPF.Page.CSharp",
   "shortName": "devtemwpf-page",
+  "sourceName": "SamplePage",
   "tags": { "language": "C#", "type": "item" },
   "symbols": {
-    "PageName": {
-      "type": "parameter",
-      "datatype": "text",
-      "defaultValue": "SamplePage",
-      "replaces": "SamplePage",
-      "fileRename": "SamplePage",
-      "description": "Page name without suffix (a Page, ViewModel, and XAML file are created)."
-    },
     "Namespace": {
       "type": "parameter",
       "datatype": "text",
