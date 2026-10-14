@@ -3,7 +3,7 @@ using Wpf.Ui.Abstractions.Controls;
 
 namespace DevTemWpf.App.ViewModels;
 
-/// <summary>Token preview page ViewModel (disposable example until 0.6.0).</summary>
+/// <summary>Token preview page ViewModel (design-token showcase).</summary>
 public sealed partial class TokensViewModel : ObservableObject, INavigationAware
 {
     public Task OnNavigatedToAsync() => Task.CompletedTask;

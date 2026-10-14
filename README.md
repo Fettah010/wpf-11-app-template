@@ -49,12 +49,16 @@ powershell -ExecutionPolicy Bypass -File eng/smoke.ps1
 
 ## 🖼️ Screenshots
 
-> Coming soon — the reference gallery app lands in `0.6.0`.
-> Tracking: [Roadmap](WPF-Template-Roadmap.md) §8.
+Reference app (`1.1.0`, dark/system theme) — Home shell and Controls gallery:
 
-| Shell | Theme |
+| Home | Controls gallery |
 |---|---|
-| _placeholder_ | _placeholder_ |
+| ![Home shell](docs/images/gallery-home.png) | ![Controls gallery](docs/images/gallery-controls.png) |
+
+Captured 2026-10-14 on Windows 11 build 26300.9711, 2560×1440 display,
+maximized app window, default (system) theme. Recapture with
+`powershell -ExecutionPolicy Bypass -File eng/capture-screenshots.ps1`
+when the shell changes; keep this provenance line accurate.
 
 ## 🗺️ Roadmap & milestones
 
@@ -71,9 +75,8 @@ powershell -ExecutionPolicy Bypass -File eng/smoke.ps1
 | `0.9.0` | Beta hardening | ✅ Released |
 | `1.0.0-rc.1` | API freeze & candidate validation | ✅ Released |
 | `1.0.0` | Stable template and UI foundation | ✅ Released |
-| `1.0.0` | Stable template + UI foundation | ⬜ |
 
-Full product plan: [`WPF-Template-Roadmap.md`](WPF-Template-Roadmap.md) ·
+Full product plan: [`WPF-11-App-Template-Roadmap-1.0-to-2.0.md`](WPF-11-App-Template-Roadmap-1.0-to-2.0.md) ·
 per-version plans/reports: [`docs/releases/`](docs/releases/) ·
 decisions: [`docs/decisions/`](docs/decisions/).
 

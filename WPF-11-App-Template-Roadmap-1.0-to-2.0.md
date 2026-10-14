@@ -5,7 +5,7 @@
 > **Current baseline:** `1.0.0` stable, released 14 October 2026  
 > **Research snapshot:** 14 October 2026  
 > **Target:** Windows 11 desktop applications, initially targeting .NET 10  
-> **Related governing documents:** `WPF-AGENT-EXECUTION-PROTOCOL.md`, current `WPF-Template-Roadmap.md`, `docs/DEFERRED.md`  
+> **Related governing documents:** `WPF-AGENT-EXECUTION-PROTOCOL.md`, `docs/DEFERRED.md` (legacy `WPF-Template-Roadmap.md` removed in `1.1.0`; 0.x history in `CHANGELOG.md` + `docs/releases/`)
 > **Scope note:** This roadmap was prepared outside the repository. It does not change repository files, branches, tags, or releases.
 
 ---
@@ -745,7 +745,7 @@ Follow `WPF-AGENT-EXECUTION-PROTOCOL.md` for the full workflow. This section def
 ## 13. Documentation to maintain
 
 - `README.md`: truthful current features, real screenshots, getting started, install commands, supported presets, supported platform/SDK, version badges and links.
-- `WPF-Template-Roadmap.md`: high-level product direction and milestone statuses, updated without erasing original design decisions/history that remain relevant.
+- `CHANGELOG.md` + `docs/releases/`: 0.x milestone history (the legacy `WPF-Template-Roadmap.md` was removed in `1.1.0`; this document is the single source of truth from `1.0.0` onward).
 - `WPF-AGENT-EXECUTION-PROTOCOL.md`: execution contract; update only if the user-approved workflow changes.
 - `docs/DEFERRED.md`: every deferred item resolved, shipped, rejected with evidence, or assigned to a later release.
 - `docs/DEPENDENCIES.md` and third-party notices: direct/transitive deps, versions, license evidence, targets, native assets, maintenance and removal audit.
@@ -818,7 +818,7 @@ All links below were checked as research leads on 14 October 2026. Package versi
 - [WPF 11 App Template repository](https://github.com/Fettah010/wpf-11-app-template)
 - [Stable v1.0.0 release and package asset](https://github.com/Fettah010/wpf-11-app-template/releases/tag/v1.0.0)
 - [README](https://github.com/Fettah010/wpf-11-app-template/blob/main/README.md)
-- [Product roadmap](https://github.com/Fettah010/wpf-11-app-template/blob/main/WPF-Template-Roadmap.md)
+- [Product roadmap (this document, 1.0.0 → 2.0.0)](https://github.com/Fettah010/wpf-11-app-template/blob/main/WPF-11-App-Template-Roadmap-1.0-to-2.0.md)
 - [Agent execution protocol](https://github.com/Fettah010/wpf-11-app-template/blob/main/WPF-AGENT-EXECUTION-PROTOCOL.md)
 - [Deferred backlog](https://github.com/Fettah010/wpf-11-app-template/blob/main/docs/DEFERRED.md)
 - [1.0.0 completion report](https://github.com/Fettah010/wpf-11-app-template/blob/main/docs/releases/1.0.0-report.md)
