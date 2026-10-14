@@ -1,8 +1,6 @@
-# Dependencies (0.1.0 inventory, verified 2026-10-14)
+# Dependencies (0.2.0 inventory, verified 2026-10-14)
 
 Single version source: `Directory.Packages.props` (CPM + transitive pinning).
-`dotnet list package --vulnerable`: **no vulnerable packages** (nuget.org
-audit source, 2026-10-14).
 
 ## Direct dependencies
 
@@ -12,6 +10,8 @@ audit source, 2026-10-14).
 | `CommunityToolkit.Mvvm` | 8.4.2 | MVVM source generators (ADR-0002) | `github.com/CommunityToolkit/dotnet` | MIT | `net8.0`/`netstandard2.0` → net10 compatible | Stable 2026-03-25 |
 | `Microsoft.Extensions.Hosting` | 10.0.12 | Generic Host + DI/config/logging (ADR-0002) | `github.com/dotnet/dotnet` | MIT | `net10.0` compatible | Stable 2026-09-08; v11 is RC (rejected) |
 | `xunit.v3.mtp-v2` | 4.0.2 | Test framework, MTP runner (ADR-0004) | `github.com/xunit/xunit` | Apache-2.0 / MIT (xUnit family; see NOTICE) | `net8.0` → net10 compatible | Stable 2026-10-09 |
+| `WPF-UI.DependencyInjection` | 4.3.0 | DI page provider for NavigationView (ADR-0005; v4 has no `IPageService` impl) | `github.com/lepoco/wpfui` | MIT (same repo) | Ships `net10.0`; deps only DI.Abstractions + Abstractions | Stable 2026-05-04, same 4.3.0 line |
+| `Xunit.StaFact` | 4.0.24 | STA/Dispatcher test attributes, test-only (ADR-0004 update) | `github.com/AArnott/Xunit.StaFact` | MS-PL (test-only, never shipped) | `net8.0` → net10 compatible | Stable 2026-10-01; used by Avalonia/Roslyn/WPF repos |
 
 ## Notable transitive dependencies
 

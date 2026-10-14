@@ -10,9 +10,9 @@ A premium, Windows 11-first **WPF application template** and reusable **UI
 foundation** — Fluent design, MVVM, dependency injection, modular production
 services, and `dotnet new` scaffolding with clean / recommended / full presets.
 
-> **Status:** `0.1.0` — foundation + minimal runnable app. The template
-> grows milestone by milestone toward `1.0.0` (see
-> [Roadmap](#roadmap--milestones)).
+> **Status:** `0.2.0` — FluentWindow shell (rail + sidebar), theme/backdrop
+> switching, persisted settings. The template grows milestone by milestone
+> toward `1.0.0` (see [Roadmap](#roadmap--milestones)).
 
 ## ✨ Highlights
 
@@ -56,7 +56,7 @@ powershell -ExecutionPolicy Bypass -File eng/smoke.ps1
 | Version | Focus | Status |
 |---|---|---|
 | `0.1.0` | Foundation, ADRs, minimal app | ✅ Released |
-| `0.2.0` | Window experience, nav rail + sidebar | 🔜 Next |
+| `0.2.0` | Window experience, nav rail + sidebar | ✅ Released |
 | `0.3.0` | Design tokens & themes | ⬜ |
 | `0.4.0` | Essential controls & forms | ⬜ |
 | `0.5.0` | Motion system & optional effects | ⬜ |

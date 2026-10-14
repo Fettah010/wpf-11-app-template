@@ -24,3 +24,14 @@ per roadmap. Navigation/scroll/animation metrics: N/A (no such surface in
 
 Provisional hypotheses (to confirm/ratify by 0.4.0, not gates yet):
 cold start < 2s on modern HW; working set < 150 MB at idle.
+
+## 0.2.0 baseline (2026-10-14, `release/0.2.0`)
+
+| Metric | Median | Max | How |
+|---|---|---|---|
+| Cold start (launch → window) | 0.71s | 0.77s | `measure-startup.ps1 -Runs 5` (0.73/0.69/0.77/0.67/0.71) |
+| Working set after start | 130.4 MB | 130.5 MB | same runs, +2s idle sample |
+
+Delta vs 0.1.0: +0.10s start, +14 MB working set — the FluentWindow +
+NavigationView + DI pages cost. Inside provisional bounds; low-spec
+reference environment still outstanding (D10).

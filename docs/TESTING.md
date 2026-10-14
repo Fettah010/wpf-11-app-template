@@ -30,6 +30,13 @@ dotnet list package --include-transitive
 Expect **0 warnings** on both build configurations. Any warning must be
 triaged in the version completion report — never silenced without a record.
 
+## STA tests
+
+Tests that construct WPF controls (`NavigationViewItem`, pages) use
+`[WpfFact]`/`[WpfTheory]` from `Xunit.StaFact` (STA + Dispatcher) instead of
+`[Fact]`. Pure-logic tests stay on `[Fact]`. Fixture/test-class constructors
+run on worker threads — construct UI objects inside the test method.
+
 ## What is not covered yet
 
 - UI automation (FlaUI), visual regression, packaging/installer tests:
