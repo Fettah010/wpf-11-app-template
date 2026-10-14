@@ -36,6 +36,7 @@ public sealed class HostLifecycleTests
             Assert.NotNull(host.Services.GetRequiredService<Wpf.Ui.ISnackbarService>());
             Assert.NotNull(host.Services.GetRequiredService<Wpf.Ui.IContentDialogService>());
             Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.IMotionService>());
+            Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.SampleDataService>());
             Assert.NotNull(host.Services.GetRequiredService<HomeViewModel>());
             Assert.NotNull(host.Services.GetRequiredService<SettingsViewModel>());
 
@@ -44,17 +45,26 @@ public sealed class HostLifecycleTests
             var tokens = host.Services.GetRequiredService<TokensPage>();
             var controls = host.Services.GetRequiredService<ControlsPage>();
             var effects = host.Services.GetRequiredService<EffectsPage>();
+            var dashboard = host.Services.GetRequiredService<DashboardPage>();
             Assert.Same(home, home.DataContext);
             Assert.Same(settings, settings.DataContext);
             Assert.Same(tokens, tokens.DataContext);
             Assert.Same(controls, controls.DataContext);
             Assert.Same(effects, effects.DataContext);
+            Assert.Same(dashboard, dashboard.DataContext);
             Assert.NotNull(home.ViewModel);
             Assert.NotNull(settings.ViewModel);
             Assert.NotNull(tokens.ViewModel);
             Assert.NotNull(controls.ViewModel);
             Assert.NotNull(controls.ViewModel.Form);
             Assert.NotNull(effects.ViewModel);
+            Assert.NotNull(dashboard.ViewModel);
+
+            // The activity table must stay virtualized (never wrapped in a
+            // non-virtualizing scroller): 1500 rows depend on it.
+            var table = (System.Windows.Controls.ListView)dashboard.FindName("ActivityTable");
+            Assert.NotNull(table);
+            Assert.True(System.Windows.Controls.VirtualizingPanel.GetIsVirtualizing(table));
         }
         finally
         {

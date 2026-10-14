@@ -20,7 +20,9 @@ public static class AppComposition
 
         // Shell services (ADR-0006)
         builder.Services.AddSingleton<ISettingsService, SettingsService>();
-        builder.Services.AddSingleton<IBackdropService, BackdropService>();
+
+        // Dashboard sample data (ADR-0010; excluded from clean scaffolds)
+        builder.Services.AddSingleton<SampleDataService>();        builder.Services.AddSingleton<IBackdropService, BackdropService>();
         builder.Services.AddSingleton<IThemeApplier, WpfUiThemeApplier>();
         builder.Services.AddSingleton<IThemeService, ThemeService>();
         builder.Services.AddSingleton<IMotionService, MotionService>();
@@ -42,11 +44,13 @@ public static class AppComposition
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<TokensViewModel>();
         builder.Services.AddTransient<ControlsViewModel>();
+        builder.Services.AddTransient<DashboardViewModel>();
         builder.Services.AddTransient<EffectsViewModel>();
         builder.Services.AddTransient<FormViewModel>();
         builder.Services.AddTransient<HomePage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<TokensPage>();
+        builder.Services.AddTransient<DashboardPage>();
         builder.Services.AddTransient<EffectsPage>();
         builder.Services.AddTransient<ControlsPage>();
         return builder;

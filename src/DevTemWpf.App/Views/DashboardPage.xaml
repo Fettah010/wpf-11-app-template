@@ -1,0 +1,151 @@
+<Page x:Class="DevTemWpf.App.Views.DashboardPage"
+      x:Name="DashboardRoot"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+      mc:Ignorable="d"
+      d:DesignHeight="760" d:DesignWidth="1024"
+      Title="Dashboard">
+  <Grid Margin="{StaticResource AppPageMargin}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <!-- Stat cards -->
+    <ItemsControl Grid.Row="0" ItemsSource="{Binding ViewModel.Metrics}"
+                  AutomationProperties.Name="Key metrics" Margin="0,0,0,12">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <WrapPanel />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <ui:Card MinWidth="160" Margin="0,0,8,8" Padding="{StaticResource AppCardPadding}">
+            <StackPanel>
+              <TextBlock Text="{Binding Value}" Style="{StaticResource AppTitleText}" />
+              <TextBlock Text="{Binding Label}" Style="{StaticResource AppCaptionText}" />
+              <TextBlock Text="{Binding Delta}" Style="{StaticResource AppCaptionText}" Opacity="0.75" />
+            </StackPanel>
+          </ui:Card>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
+    <!-- Chart -->
+    <ui:Card Grid.Row="1" Margin="0,0,0,12" Padding="{StaticResource AppCardPadding}"
+             AutomationProperties.Name="Weekly activity chart card">
+      <StackPanel>
+        <TextBlock Text="Completed tasks, last 7 days" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,8" />
+        <lvc:CartesianChart Series="{Binding ViewModel.Series}" XAxes="{Binding ViewModel.XAxes}"
+                            Height="200" AutomationProperties.Name="Weekly activity chart" />
+      </StackPanel>
+    </ui:Card>
+
+    <!-- Table + detail -->
+    <Grid Grid.Row="2">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="2*" />
+        <ColumnDefinition Width="*" MinWidth="240" />
+      </Grid.ColumnDefinitions>
+
+      <Grid Grid.Column="0" Margin="0,0,12,0">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ui:TextBox Grid.Row="0" PlaceholderText="Filter by name, category, or status…"
+                    Text="{Binding ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    AutomationProperties.Name="Activity filter" Margin="0,0,0,8" />
+        <ListView Grid.Row="1" x:Name="ActivityTable" ItemsSource="{Binding ViewModel.Activities}"
+                  SelectedItem="{Binding ViewModel.SelectedActivity, Mode=TwoWay}"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                  AutomationProperties.Name="Activity table">
+          <ListView.View>
+            <GridView>
+              <GridViewColumn Width="130" DisplayMemberBinding="{Binding Timestamp, StringFormat={}{0:MM-dd HH:mm}}">
+                <GridViewColumn.Header>
+                  <Button Content="Time" Command="{Binding DataContext.ViewModel.SortByCommand, ElementName=DashboardRoot}"
+                          CommandParameter="Timestamp" AutomationProperties.Name="Sort by time" />
+                </GridViewColumn.Header>
+              </GridViewColumn>
+              <GridViewColumn Width="180" DisplayMemberBinding="{Binding Name}">
+                <GridViewColumn.Header>
+                  <Button Content="Name" Command="{Binding DataContext.ViewModel.SortByCommand, ElementName=DashboardRoot}"
+                          CommandParameter="Name" AutomationProperties.Name="Sort by name" />
+                </GridViewColumn.Header>
+              </GridViewColumn>
+              <GridViewColumn Width="100" DisplayMemberBinding="{Binding Category}">
+                <GridViewColumn.Header>
+                  <Button Content="Category" Command="{Binding DataContext.ViewModel.SortByCommand, ElementName=DashboardRoot}"
+                          CommandParameter="Category" AutomationProperties.Name="Sort by category" />
+                </GridViewColumn.Header>
+              </GridViewColumn>
+              <GridViewColumn Width="90" DisplayMemberBinding="{Binding Status}">
+                <GridViewColumn.Header>
+                  <Button Content="Status" Command="{Binding DataContext.ViewModel.SortByCommand, ElementName=DashboardRoot}"
+                          CommandParameter="Status" AutomationProperties.Name="Sort by status" />
+                </GridViewColumn.Header>
+              </GridViewColumn>
+              <GridViewColumn Width="70" DisplayMemberBinding="{Binding Value}">
+                <GridViewColumn.Header>
+                  <Button Content="Value" Command="{Binding DataContext.ViewModel.SortByCommand, ElementName=DashboardRoot}"
+                          CommandParameter="Value" AutomationProperties.Name="Sort by value" />
+                </GridViewColumn.Header>
+              </GridViewColumn>
+            </GridView>
+          </ListView.View>
+        </ListView>
+        <TextBlock Grid.Row="2" Text="{Binding ViewModel.SortStatusText}" Style="{StaticResource AppCaptionText}" Margin="0,4,0,0" />
+        <TextBlock Grid.Row="3" Text="{Binding ViewModel.NoResultsMessage, TargetNullValue=''}"
+                   Style="{StaticResource AppSecondaryBodyText}" Margin="0,4,0,0"
+                   AutomationProperties.Name="Empty results notice" />
+      </Grid>
+
+      <ui:Card Grid.Column="1" Padding="{StaticResource AppCardPadding}"
+               AutomationProperties.Name="Activity detail">
+        <StackPanel>
+          <TextBlock Text="Detail" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,8" />
+          <TextBlock Text="{Binding ViewModel.SelectedActivity.Name, FallbackValue=Select a row…, TargetNullValue=Select a row…}"
+                     Style="{StaticResource AppBodyText}" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding ViewModel.SelectedActivity.Category, StringFormat=Category: {0}, TargetNullValue=''}"
+                     Style="{StaticResource AppCaptionText}" Margin="0,4,0,0" />
+          <TextBlock Text="{Binding ViewModel.SelectedActivity.Status, StringFormat=Status: {0}, TargetNullValue=''}"
+                     Style="{StaticResource AppCaptionText}" />
+          <TextBlock Text="{Binding ViewModel.SelectedActivity.Value, StringFormat=Value: {0}, TargetNullValue=''}"
+                     Style="{StaticResource AppCaptionText}" />
+          <TextBlock Text="{Binding ViewModel.SelectedActivity.Timestamp, StringFormat={}{0:g}, TargetNullValue=''}"
+                     Style="{StaticResource AppCaptionText}" Margin="0,0,0,8" />
+          <ui:Button Content="Clear selection" Command="{Binding ViewModel.ClearSelectionCommand}"
+                     AutomationProperties.Name="Clear activity selection" />
+        </StackPanel>
+      </ui:Card>
+    </Grid>
+
+    <!-- Stepper -->
+    <ui:Card Grid.Row="3" Margin="0,12,0,0" Padding="{StaticResource AppCardPadding}"
+             AutomationProperties.Name="Setup stepper">
+      <StackPanel>
+        <TextBlock Text="{Binding ViewModel.StepTitle}" Style="{StaticResource AppSectionHeadingText}" />
+        <TextBlock Text="{Binding ViewModel.StepBody}" Style="{StaticResource AppSecondaryBodyText}"
+                   TextWrapping="Wrap" Margin="0,4,0,8" />
+        <ProgressBar Value="{Binding ViewModel.StepProgress, Mode=OneWay}" Minimum="0" Maximum="100" Height="6" Margin="0,0,0,8"
+                     AutomationProperties.Name="Setup progress" />
+        <StackPanel Orientation="Horizontal">
+          <ui:Button Content="Back" Command="{Binding ViewModel.PreviousStepCommand}"
+                     AutomationProperties.Name="Stepper back" Margin="0,0,8,0" />
+          <ui:Button Content="Next" Command="{Binding ViewModel.NextStepCommand}" Appearance="Primary"
+                     AutomationProperties.Name="Stepper next" />
+        </StackPanel>
+      </StackPanel>
+    </ui:Card>
+  </Grid>
+</Page>
