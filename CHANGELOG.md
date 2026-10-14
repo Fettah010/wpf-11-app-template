@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0 (2026-10-14)
+
+Stable release. No product changes since 1.0.0-rc.1 (freeze held).
+
+- Template package `DevTemWPF.Templates 1.0.0` (attached to the release).
+- Security policy (`SECURITY.md`): supported versions, private reporting,
+  7-day triage commitment.
+- Support commitments: semver, changelog discipline, migration guide
+  (`docs/migration.md`), troubleshooting (`docs/template/troubleshooting.md`).
+- Definition of done (roadmap): install → generate → customize → add pages
+  → test → ship, verified by the rc.1 + 1.0.0 gates.
+
 ## 1.0.0-rc.1 (2026-10-14)
 
 - Frozen surface (`docs/frozen-surface.md`) + machine guard test.
