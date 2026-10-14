@@ -1,0 +1,17 @@
+<Project>
+  <!-- Central package version management. All direct versions pinned here. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- UI foundation (ADR-0001) -->
+    <PackageVersion Include="WPF-UI" Version="4.3.0" />
+    <!-- MVVM + hosting (ADR-0002) -->
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+    <!-- Tests (verified 2026-10-14: xunit.v3 4.0.2 stable, Test.Sdk 18.10.1 proven; 18.11.0 released 10/13 with ~0 downloads, not taken) -->
+    <PackageVersion Include="xunit.v3" Version="4.0.2" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+  </ItemGroup>
+</Project>
