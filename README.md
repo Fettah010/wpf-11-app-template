@@ -4,13 +4,13 @@
 [![Windows 11](https://img.shields.io/badge/Windows-11-0078D4)](https://www.microsoft.com/windows/windows-11)
 [![WPF-UI 4.3.0](https://img.shields.io/badge/WPF--UI-4.3.0-8A2BE2)](https://github.com/lepoco/wpfui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![Stable 1.0.0](https://img.shields.io/badge/release-1.0.0-green)](https://github.com/Fettah010/wpf-11-app-template/releases)
+[![Stable 1.1.0](https://img.shields.io/badge/release-1.1.0-green)](https://github.com/Fettah010/wpf-11-app-template/releases)
 
 A premium, Windows 11-first **WPF application template** and reusable **UI
 foundation** — Fluent design, MVVM, dependency injection, modular production
 services, and `dotnet new` scaffolding with clean / recommended / full presets.
 
-> **Status:** `1.0.0` — stable. Install the template, generate your app,
+> **Status:** `1.1.0` — stable. Install the template, generate your app,
 > and ship it: `dotnet new install DevTemWPF.Templates` (see
 > [Roadmap](#roadmap--milestones) for what's next).
 >
@@ -75,6 +75,7 @@ when the shell changes; keep this provenance line accurate.
 | `0.9.0` | Beta hardening | ✅ Released |
 | `1.0.0-rc.1` | API freeze & candidate validation | ✅ Released |
 | `1.0.0` | Stable template and UI foundation | ✅ Released |
+| `1.1.0` | Stabilization and test truth | ✅ Released |
 
 Full product plan: [`WPF-11-App-Template-Roadmap-1.0-to-2.0.md`](WPF-11-App-Template-Roadmap-1.0-to-2.0.md) ·
 per-version plans/reports: [`docs/releases/`](docs/releases/) ·
