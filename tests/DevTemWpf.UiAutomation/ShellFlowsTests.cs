@@ -131,8 +131,18 @@ public sealed class ShellFlowsTests : IDisposable
         app = Application.Launch(FindAppExe());
         _apps.Add(app);
         automation = new UIA3Automation();
-        return app.GetMainWindow(automation, TimeSpan.FromSeconds(15))
+        var window = app.GetMainWindow(automation, TimeSpan.FromSeconds(15))
             ?? throw new InvalidOperationException("Main window never appeared.");
+        // Cover mitigation: maximize + foreground so coordinate clicks land
+        // on our window even when another maximized window (or a busy
+        // desktop) is present. Layout assertions are unaffected.
+        if (window.Patterns.Window.TryGetPattern(out var windowPattern))
+        {
+            windowPattern.SetWindowVisualState(FlaUI.Core.Definitions.WindowVisualState.Maximized);
+        }
+
+        window.Focus();
+        return window;
     }
 
     private static T WaitFor<T>(Func<T?> probe, TimeSpan timeout, string what) where T : class
