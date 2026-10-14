@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.1.0 (2026-10-14)
+
+Stabilization and test truth. No new features; no breaking changes.
+
+- Honest UI gate: skips use `Assert.Skip` (counted, never passes) and
+  `eng/check-ui-tests.ps1` fails the required job on any skip or zero
+  executed tests. Nav click flake fixed via foreground focus + waited lookup.
+- Template matrix: full Clean/Recommended/Full + `IncludeTests=false` + item
+  templates run from the source folder and the packed `.nupkg` (CI enforces
+  both on every PR/push). Per-run `DOTNET_CLI_HOME` isolation, per-run logs,
+  `finally` restore, long-path-safe cleanup.
+- `eng/measure-startup.ps1` resolves `*App.exe` dynamically (renames and
+  multi-project layouts keep working).
+- Docs: real screenshots (`docs/images/`, provenance noted), duplicate 1.0.0
+  roadmap row removed, canonical 1.0→2.0 roadmap links, `DEFERRED.md`
+  D21–D24, `docs/DEPENDENCIES.md` re-audit (0 vuln, 0 deprecated; Hosting
+  10.0.13 patch accepted-not-upgraded).
+- Fix: cancelled update check/download reports `Idle`, not `Failed`
+  (+ regression tests).
+- Template package `DevTemWPF.Templates 1.1.0` (attached to the release).
+- Perf (proxy hardware, not low-end evidence): cold-start median 0.75 s
+  (max 0.86 s), working set median 144.2 MB, idle 30 s CPU 0%.
+
 ## 1.0.0 (2026-10-14)
 
 Stable release. No product changes since 1.0.0-rc.1 (freeze held).

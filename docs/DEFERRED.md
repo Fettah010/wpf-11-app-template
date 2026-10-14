@@ -1,4 +1,4 @@
-# Deferred work backlog — 1.0 scope freeze (0.9.0)
+# Deferred work backlog — 1.0 scope freeze (0.9.0); 1.1.0 additions appended (D21–D24)
 
 Rule: 1.0-rc takes bug fixes + release mechanics only. Everything below is
 post-1.0 unless marked **1.0**.
@@ -21,6 +21,10 @@ post-1.0 unless marked **1.0**.
 | D18 | TreeView / full DataGrid / TimePicker sample | Post-1.0 — gaps catalogued. |
 | D19 | Per-service template flags | Post-1.0 candidate — bundles proven. |
 | D20 | Template NuGet package publishing | **1.0** — release mechanics (documented path exists). |
+| D21 | UI-test skip visibility (ShellFlowsTests `return`-on-skip reported passes) | **1.1.0** — fixed by `RequireUiOrSkip` + `Assert.Skip` and `eng/check-ui-tests.ps1` required gate (T04). |
+| D22 | Template-test isolation (global `dotnet new` hive, shared TEMP logs) | **1.1.0** — in progress (T06: per-run `DOTNET_CLI_HOME`, per-run logs, `finally` restore). |
+| D23 | Fixed exe path in `eng/measure-startup.ps1` | **1.1.0** — in progress (T08: dynamic `*App.exe` resolution like `smoke.ps1`). |
+| D24 | Stale README (screenshot placeholder, duplicate 1.0.0 row, legacy roadmap links) + stale in-app Home subline | **1.1.0** — fixed (T02/T03: real screenshots in `docs/images/`, version-agnostic copy). |
 
 Done: D02 (0.2.0), D03 (0.3.0), D04 (0.4.0), D05 (0.5.0), D06 dashboard+charts (0.6.0),
 D07 core services/CI (0.7.0), D08 templates/generators (0.8.0), D09 CI+FlaUI (0.7.0/0.9.0),

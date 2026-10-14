@@ -1,8 +1,8 @@
 # AGENTS — DevTemWpf entry point
 
-Before any implementation work, read `WPF-AGENT-EXECUTION-PROTOCOL.md` and `WPF-Template-Roadmap.md`. Follow the per-version planning, research, testing, and release gates.
+Before any implementation work, read `WPF-AGENT-EXECUTION-PROTOCOL.md` and `WPF-11-App-Template-Roadmap-1.0-to-2.0.md`. Follow the per-version planning, research, testing, and release gates.
 
 - Protocol: `WPF-AGENT-EXECUTION-PROTOCOL.md` (canonical process contract; no duplicate under a different name).
-- Roadmap: `WPF-Template-Roadmap.md` (product goals + milestone boundaries 0.1.0 → 1.0.0).
+- Roadmap: `WPF-11-App-Template-Roadmap-1.0-to-2.0.md` (canonical product goals + milestone boundaries 1.0.0 → 2.0.0; legacy `WPF-Template-Roadmap.md` is historical reference only).
 - Per-version plans/reports: `docs/releases/<version>-plan.md`, `docs/releases/<version>-report.md`.
-- Current milestone: `0.1.0` — plan at `docs/releases/0.1.0-plan.md` (status: Ready). Do not implement later milestones.
+- Current milestone: `1.1.0` — plan at `docs/releases/1.1.0-plan.md` (status: Ready). Baseline `1.0.0` stable (`v1.0.0`). Do not implement later milestones.

@@ -77,6 +77,11 @@ public sealed partial class UpdateService : ObservableObject, IUpdateService
                 Detail = $"Version {found.Version} available ({found.SizeBytes / 1024} KB).";
             }
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            Status = UpdateStatus.Idle;
+            Detail = "Check cancelled.";
+        }
         catch (Exception ex)
         {
             Status = UpdateStatus.Failed;
@@ -103,6 +108,11 @@ public sealed partial class UpdateService : ObservableObject, IUpdateService
             Status = UpdateStatus.ReadyToRestart;
             Detail = $"Version {_pending.Version} ready — restarting…";
             _engineFactory().ApplyAndRestart(feed, _pending);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            Status = UpdateStatus.Idle;
+            Detail = "Download cancelled.";
         }
         catch (Exception ex)
         {

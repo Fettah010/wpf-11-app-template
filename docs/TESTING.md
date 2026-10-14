@@ -41,8 +41,12 @@ the hard way:
 - Poll `HasExited` for exit; never read `ExitCode` off a FlaUI handle.
 - Retry-with-timeout everywhere; STA via `[WpfFact]`.
 - Headless environments: set `DEVTEM_RUN_UI_TESTS=0` (or non-interactive
-  sessions skip automatically). Skips print loudly and are recorded in the
-  release report — never fake-green.
+  sessions skip automatically). Skips use `Assert.Skip`, so they are counted
+  as `skipped` — never as passes. The required gate
+  (`eng/check-ui-tests.ps1`, wired into CI) fails on any skip or on zero
+  executed tests; a green required job always means the 4 ShellFlows cases
+  really ran. Record the `UI_TESTS total=/failed=/skipped=` line in the
+  version completion report.
 - Data-binding errors involving our views fail the integration suite
   (`TestResources` listener) — silent XAML bugs become test failures.
 - UI tests launch the app exe from `src/.../bin`; the test projects do NOT

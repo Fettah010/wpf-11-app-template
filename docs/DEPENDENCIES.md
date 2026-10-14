@@ -1,8 +1,22 @@
-# Dependencies (1.0.0-rc.1 inventory, verified 2026-10-14)
+# Dependencies (1.0.0-rc.1 inventory, verified 2026-10-14; 1.1.0 re-audit below)
 
 No package changes in rc.1 (packaging/tests/docs only). 0.9.0 inventory
 below stands; vuln scan re-run at gate. Nothing removable: every direct
 package has a live consumer (0.9.0 review).
+
+## 1.1.0 re-audit (2026-10-14, `work/1.1.0`, no pin changes)
+
+- `dotnet list package --vulnerable --include-transitive`: **0 vulnerable** (all 4 projects).
+- `dotnet list package --deprecated`: **0 deprecated** (all 4 projects).
+- `dotnet list package --outdated`: only `Microsoft.Extensions.Hosting` and
+  `Microsoft.Extensions.Http` `10.0.12` → `10.0.13` (patch band).
+  **Accepted, not upgraded**: stabilization milestone, no vulnerability, and
+  the Hosting train is the DI core of every generated app — a train bump
+  needs its own validation run (deferred, not silently dropped).
+- Transitive re-verified: `Microsoft.ApplicationInsights 2.23.0` remains
+  **test-projects-only** (Integration/UiAutomation/Unit; absent from
+  `DevTemWpf.App`); `SkiaSharp.* 3.119` app-only via LiveCharts;
+  `SQLitePCLRaw.* 2.1.13`; all direct pins unchanged from the table below.
 
 Single version source: `Directory.Packages.props` (CPM + transitive pinning).
 

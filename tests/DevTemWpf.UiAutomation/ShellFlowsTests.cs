@@ -9,8 +9,9 @@ namespace DevTemWpf.UiAutomation;
 /// <summary>
 /// Desktop UI automation (FlaUI + UIA3). Drives the built app exe; needs an
 /// interactive session. Set <c>DEVTEM_RUN_UI_TESTS=0</c> to skip loudly
-/// (headless CI); skips never pass silently — they print and are recorded in
-/// the release report.
+/// (headless CI). Skips use <c>Assert.Skip</c> so they are counted as skipped
+/// (never as passes); the required release gate fails on unexpected skips —
+/// see <c>eng/check-ui-tests.ps1</c>.
 /// </summary>
 public sealed class ShellFlowsTests : IDisposable
 {
@@ -57,6 +58,14 @@ public sealed class ShellFlowsTests : IDisposable
 
         reason = string.Empty;
         return true;
+    }
+
+    private static void RequireUiOrSkip()
+    {
+        if (!UiEnabled(out var reason))
+        {
+            Assert.Skip($"UI tests disabled ({reason}). Run on an interactive Windows session without DEVTEM_RUN_UI_TESTS=0.");
+        }
     }
 
     private static string AppRoot()
@@ -122,8 +131,18 @@ public sealed class ShellFlowsTests : IDisposable
         app = Application.Launch(FindAppExe());
         _apps.Add(app);
         automation = new UIA3Automation();
-        return app.GetMainWindow(automation, TimeSpan.FromSeconds(15))
+        var window = app.GetMainWindow(automation, TimeSpan.FromSeconds(15))
             ?? throw new InvalidOperationException("Main window never appeared.");
+        // Cover mitigation: maximize + foreground so coordinate clicks land
+        // on our window even when another maximized window (or a busy
+        // desktop) is present. Layout assertions are unaffected.
+        if (window.Patterns.Window.TryGetPattern(out var windowPattern))
+        {
+            windowPattern.SetWindowVisualState(FlaUI.Core.Definitions.WindowVisualState.Maximized);
+        }
+
+        window.Focus();
+        return window;
     }
 
     private static T WaitFor<T>(Func<T?> probe, TimeSpan timeout, string what) where T : class
@@ -176,11 +195,7 @@ public sealed class ShellFlowsTests : IDisposable
     [WpfFact]
     public void Launch_ShowsWindow_And_ClosesCleanly()
     {
-        if (!UiEnabled(out var reason))
-        {
-            Console.WriteLine($"SKIPPED UI test ({reason}).");
-            return;
-        }
+        RequireUiOrSkip();
 
         var window = Launch(out var app, out var automation);
         using (automation)
@@ -194,20 +209,22 @@ public sealed class ShellFlowsTests : IDisposable
     [WpfFact]
     public void Navigate_ViaMenu_And_KeyboardFocus_Moves()
     {
-        if (!UiEnabled(out var reason))
-        {
-            Console.WriteLine($"SKIPPED UI test ({reason}).");
-            return;
-        }
+        RequireUiOrSkip();
 
         var window = Launch(out var app, out var automation);
         try
         {
             // Menu navigation: Home -> Controls -> Settings.
-            window.FindFirstDescendant(cf => cf.ByName("Controls"))!.Click();
+            // Foreground first: coordinate clicks land reliably only when
+            // our window is frontmost (same mitigation as Visit_AllPages).
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                TimeSpan.FromSeconds(10), "nav item 'Controls'").Click();
             WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Gallery dialog demo")),
                 TimeSpan.FromSeconds(10), "Controls page content");
-            window.FindFirstDescendant(cf => cf.ByName("Settings"))!.Click();
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
+                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
             WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Theme selector")),
                 TimeSpan.FromSeconds(10), "Settings page content");
 
@@ -239,11 +256,7 @@ public sealed class ShellFlowsTests : IDisposable
     [WpfFact]
     public void Visit_AllPages_ShowsExpectedContent()
     {
-        if (!UiEnabled(out var reason))
-        {
-            Console.WriteLine($"SKIPPED UI test ({reason}).");
-            return;
-        }
+        RequireUiOrSkip();
 
         var stops = new List<(string NavItem, string ContentName)>
         {
@@ -309,16 +322,14 @@ public sealed class ShellFlowsTests : IDisposable
     [WpfFact]
     public void Dialog_Confirm_RoundTrips_Result()
     {
-        if (!UiEnabled(out var reason))
-        {
-            Console.WriteLine($"SKIPPED UI test ({reason}).");
-            return;
-        }
+        RequireUiOrSkip();
 
         var window = Launch(out var app, out var automation);
         try
         {
-            window.FindFirstDescendant(cf => cf.ByName("Controls"))!.Click();
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                TimeSpan.FromSeconds(10), "nav item 'Controls'").Click();
             var demo = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Gallery dialog demo")),
                 TimeSpan.FromSeconds(10), "dialog demo button");
             demo.Patterns.ScrollItem.TryGetPattern(out var scrollPattern);
