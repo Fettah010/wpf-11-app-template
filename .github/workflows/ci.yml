@@ -48,7 +48,7 @@ jobs:
 
       - name: Full preset matrix (source folder)
         run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1
-        timeout-minutes: 45
+        timeout-minutes: 120
 
   template-package:
     runs-on: windows-latest
@@ -65,4 +65,4 @@ jobs:
 
       - name: Full preset matrix (packed .nupkg)
         run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -PackagePath (Get-ChildItem artifacts/packages/*.nupkg | Select-Object -First 1 -ExpandProperty FullName)
-        timeout-minutes: 45
+        timeout-minutes: 120

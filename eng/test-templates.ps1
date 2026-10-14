@@ -143,23 +143,23 @@ try {
   }
 }
 finally {
-  # Hive-scoped uninstall first (still under the per-run CLI home), then
-  # restore the caller's environment. Global registrations are never touched.
-  $env:DOTNET_CLI_HOME = $cliHome
-  $uninstallId = if ($PackagePath) { 'DevTemWPF.Templates' } else { $root }
-  try { & dotnet new uninstall $uninstallId 2>&1 | Out-Null } catch { }
-  try { & dotnet new uninstall (Join-Path $root 'templates\items\devtemwpf-page') 2>&1 | Out-Null } catch { }
-  try { & dotnet new uninstall (Join-Path $root 'templates\items\devtemwpf-service') 2>&1 | Out-Null } catch { }
+  # Everything (template hives, generated apps) lives under the per-run
+  # $work dir, so wholesale deletion is the cleanup — per-ID uninstalls are
+  # redundant inside a throwaway hive and only cost minutes on slow runners.
+  # Restore the caller's environment first; global state was never touched.
   if ($null -eq $oldCliHome) { [Environment]::SetEnvironmentVariable('DOTNET_CLI_HOME', $null, 'Process') }
   else { $env:DOTNET_CLI_HOME = $oldCliHome }
   if ($null -eq $oldNugetPackages) { [Environment]::SetEnvironmentVariable('NUGET_PACKAGES', $null, 'Process') }
   else { $env:NUGET_PACKAGES = $oldNugetPackages }
   if (($script:failures -eq 0) -and (Test-Path $work)) {
-    # Long-path-safe removal (per-run NuGet/template hives nest deeply).
-    try { Remove-Item -LiteralPath "\\?\$work" -Recurse -Force -ErrorAction Stop }
-    catch {
-      Write-Host "WARNING: work-dir cleanup failed, kept for manual removal: $work" -ForegroundColor Yellow
+    # Long-path-safe removal (generated bin/obj trees nest deeply); warn —
+    # never fail the product gate — with the cause when removal struggles.
+    $removed = $false
+    foreach ($target in @($work, "\\?\$work")) {
+      try { Remove-Item -LiteralPath $target -Recurse -Force -ErrorAction Stop; $removed = $true; break }
+      catch { Write-Host "cleanup retry ($target): $($_.Exception.Message)" -ForegroundColor Yellow }
     }
+    if (-not $removed) { Write-Host "WARNING: work-dir cleanup failed, kept for manual removal: $work" -ForegroundColor Yellow }
   }
   elseif (Test-Path $work) { Write-Host "Work dir kept for diagnosis: $work" -ForegroundColor Yellow }
 }

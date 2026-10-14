@@ -24,7 +24,9 @@ if ($env:DEVTEM_RUN_UI_TESTS -eq '0') {
 $csproj = Join-Path $root 'tests\DevTemWpf.UiAutomation\DevTemWpf.UiAutomation.csproj'
 $out = & dotnet test $csproj -c Release --no-build 2>&1
 $code = $LASTEXITCODE
-$text = ($out | Out-String)
+# Strip ANSI color escapes (CI logs carry them; local redirect usually not).
+# Note: backtick-e is not an escape in Windows PowerShell 5.1, hence [char]27.
+$text = (($out | Out-String) -replace "$([char]27)\[[0-9;]*m", "")
 
 function Get-Count([string]$Name) {
   $m = [regex]::Match($text, "(?m)^\s*$Name" + ':\s*(\d+)\s*$')
