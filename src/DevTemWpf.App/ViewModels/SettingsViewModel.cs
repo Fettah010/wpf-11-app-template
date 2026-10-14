@@ -17,6 +17,7 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
         ThemeOptions = [ThemeMode.System, ThemeMode.Light, ThemeMode.Dark];
         ShellOptions = [ShellMode.Sidebar, ShellMode.Rail];
         DensityOptions = [DensityMode.Comfortable, DensityMode.Compact];
+        MotionOptions = [MotionMode.Auto, MotionMode.Full, MotionMode.Reduced, MotionMode.Off];
         Reload();
     }
 
@@ -25,6 +26,8 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
     public IReadOnlyList<ShellMode> ShellOptions { get; }
 
     public IReadOnlyList<DensityMode> DensityOptions { get; }
+
+    public IReadOnlyList<MotionMode> MotionOptions { get; }
 
     [ObservableProperty]
     private ThemeMode selectedTheme = ThemeMode.System;
@@ -37,6 +40,12 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
 
     [ObservableProperty]
     private DensityMode selectedDensity = DensityMode.Comfortable;
+
+    [ObservableProperty]
+    private MotionMode selectedMotion = MotionMode.Auto;
+
+    [ObservableProperty]
+    private bool effectsEnabled = true;
 
     [ObservableProperty]
     private bool useCustomAccent;
@@ -65,6 +74,8 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
             BackdropEnabled = s.BackdropEnabled;
             SelectedShell = s.Shell;
             SelectedDensity = s.Density;
+            SelectedMotion = s.Motion;
+            EffectsEnabled = s.EffectsEnabled;
             UseCustomAccent = s.AccentOverride is not null;
             AccentHex = s.AccentOverride ?? string.Empty;
             ErrorMessage = null;
@@ -97,6 +108,16 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
     partial void OnSelectedDensityChanged(DensityMode value)
     {
         if (!PersistGuard()) _ = PersistAsync(s => s with { Density = value });
+    }
+
+    partial void OnSelectedMotionChanged(MotionMode value)
+    {
+        if (!PersistGuard()) _ = PersistAsync(s => s with { Motion = value });
+    }
+
+    partial void OnEffectsEnabledChanged(bool value)
+    {
+        if (!PersistGuard()) _ = PersistAsync(s => s with { EffectsEnabled = value });
     }
 
     partial void OnUseCustomAccentChanged(bool value)

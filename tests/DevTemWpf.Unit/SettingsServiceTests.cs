@@ -25,6 +25,8 @@ public sealed class SettingsServiceTests : IDisposable
                 Shell = ShellMode.Rail,
                 Density = DensityMode.Compact,
                 AccentOverride = "#4CC2FF",
+                Motion = MotionMode.Reduced,
+                EffectsEnabled = false,
             },
             TestContext.Current.CancellationToken);
 
@@ -36,6 +38,8 @@ public sealed class SettingsServiceTests : IDisposable
         Assert.Equal(ShellMode.Rail, reloaded.Current.Shell);
         Assert.Equal(DensityMode.Compact, reloaded.Current.Density);
         Assert.Equal("#4CC2FF", reloaded.Current.AccentOverride);
+        Assert.Equal(MotionMode.Reduced, reloaded.Current.Motion);
+        Assert.False(reloaded.Current.EffectsEnabled);
     }
 
     [Fact]

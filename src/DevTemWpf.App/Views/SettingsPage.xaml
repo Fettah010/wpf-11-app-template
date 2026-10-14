@@ -40,6 +40,15 @@
                 SelectedItem="{Binding ViewModel.SelectedDensity, Mode=TwoWay}"
                 AutomationProperties.Name="Density selector" Margin="0,0,0,12" />
 
+      <TextBlock Text="Motion" Style="{StaticResource AppBodyText}" Margin="0,0,0,4" />
+      <ComboBox ItemsSource="{Binding ViewModel.MotionOptions}"
+                SelectedItem="{Binding ViewModel.SelectedMotion, Mode=TwoWay}"
+                AutomationProperties.Name="Motion selector" Margin="0,0,0,12" />
+
+      <CheckBox Content="Enable premium effects (ripple, animated surfaces)"
+                IsChecked="{Binding ViewModel.EffectsEnabled, Mode=TwoWay}"
+                AutomationProperties.Name="Effects toggle" Margin="0,0,0,12" />
+
       <TextBlock Text="{Binding ViewModel.ErrorMessage, TargetNullValue=''}"
                  Style="{StaticResource AppErrorText}" TextWrapping="Wrap" />
     </StackPanel>

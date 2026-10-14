@@ -23,6 +23,7 @@ public static class AppComposition
         builder.Services.AddSingleton<IBackdropService, BackdropService>();
         builder.Services.AddSingleton<IThemeApplier, WpfUiThemeApplier>();
         builder.Services.AddSingleton<IThemeService, ThemeService>();
+        builder.Services.AddSingleton<IMotionService, MotionService>();
 
         // WPF-UI navigation (ADR-0005): v4 resolves pages through
         // INavigationViewPageProvider; no IPageService/ PageService types ship
@@ -41,10 +42,12 @@ public static class AppComposition
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<TokensViewModel>();
         builder.Services.AddTransient<ControlsViewModel>();
+        builder.Services.AddTransient<EffectsViewModel>();
         builder.Services.AddTransient<FormViewModel>();
         builder.Services.AddTransient<HomePage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<TokensPage>();
+        builder.Services.AddTransient<EffectsPage>();
         builder.Services.AddTransient<ControlsPage>();
         return builder;
     }

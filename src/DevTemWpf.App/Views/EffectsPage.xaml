@@ -1,0 +1,67 @@
+<Page x:Class="DevTemWpf.App.Views.EffectsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      mc:Ignorable="d"
+      d:DesignHeight="900" d:DesignWidth="720"
+      Title="Effects">
+  <ScrollViewer Padding="{StaticResource AppPageMargin}"
+                AutomationProperties.Name="Effects showcase">
+    <StackPanel MaxWidth="{StaticResource AppContentMaxWidth}">
+      <TextBlock Text="Effects" Style="{StaticResource AppSubtitleText}" Margin="0,0,0,4" />
+      <TextBlock Text="Bounded, switchable demos. Nothing here is required to use the app; reduced motion skips all of it."
+                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="0,0,0,8" />
+      <TextBlock Text="{Binding ViewModel.PolicyText}" Style="{StaticResource AppBodyText}" />
+      <TextBlock Text="{Binding ViewModel.EnvironmentText}" Style="{StaticResource AppCaptionText}"
+                 TextWrapping="Wrap" Margin="0,0,0,16" />
+
+      <TextBlock Text="Motion presets" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,4" />
+      <TextBlock Text="Plays the entrance on the preview card at each speed."
+                 Style="{StaticResource AppCaptionText}" Margin="0,0,0,8" />
+      <WrapPanel Margin="0,0,0,8">
+        <ui:Button Content="Subtle (120ms)" Click="OnPresetClick" Tag="Subtle"
+                   AutomationProperties.Name="Play subtle preset" Margin="0,0,8,8" />
+        <ui:Button Content="Standard (220ms)" Click="OnPresetClick" Tag="Standard"
+                   AutomationProperties.Name="Play standard preset" Margin="0,0,8,8" />
+        <ui:Button Content="Expressive (380ms + slide)" Click="OnPresetClick" Tag="Expressive"
+                   AutomationProperties.Name="Play expressive preset" Margin="0,0,8,8" />
+      </WrapPanel>
+      <Border x:Name="PresetPreview" Background="{DynamicResource AppCardBackgroundBrush}"
+              BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="{StaticResource AppBorderThickness}"
+              CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}"
+              Margin="0,0,0,16" AutomationProperties.Name="Motion preset preview">
+        <TextBlock Text="The entrance plays here." Style="{StaticResource AppBodyText}" />
+      </Border>
+
+      <TextBlock Text="Ripple" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,4" />
+      <TextBlock Text="Click inside the surface. Storyboard-only, decorative, skipped unless motion is Full and effects are on."
+                 Style="{StaticResource AppCaptionText}" Margin="0,0,0,8" />
+      <Border Background="{DynamicResource AppSubtleBackgroundBrush}"
+              BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="{StaticResource AppBorderThickness}"
+              CornerRadius="{StaticResource AppCornerRadiusMedium}" Height="160" Margin="0,0,0,16">
+        <Canvas x:Name="RippleHost" Background="Transparent" ClipToBounds="True"
+                MouseLeftButtonDown="OnRippleSurfaceDown"
+                AutomationProperties.Name="Ripple demo surface" />
+      </Border>
+
+      <TextBlock Text="Animated surface" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,4" />
+      <TextBlock Text="Opt-in ambient gradient. Off by default; stops when you leave the page."
+                 Style="{StaticResource AppCaptionText}" Margin="0,0,0,8" />
+      <Border Height="96" CornerRadius="{StaticResource AppCornerRadiusMedium}"
+              BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="{StaticResource AppBorderThickness}"
+              Margin="0,0,0,8" AutomationProperties.Name="Animated gradient surface">
+        <Border.Background>
+          <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+            <GradientStop x:Name="GradientStopA" Offset="0" Color="{DynamicResource SystemAccentColorSecondary}" />
+            <GradientStop x:Name="GradientStopB" Offset="1" Color="{DynamicResource SolidBackgroundFillColorTertiary}" />
+          </LinearGradientBrush>
+        </Border.Background>
+      </Border>
+      <CheckBox x:Name="GradientToggle" Content="Animate the gradient"
+                Checked="OnGradientToggled" Unchecked="OnGradientToggled"
+                AutomationProperties.Name="Animated gradient toggle" />
+    </StackPanel>
+  </ScrollViewer>
+</Page>

@@ -34,4 +34,9 @@ public sealed record ShellSettings
 
     /// <summary>Custom accent as <c>#RRGGBB</c> or <c>#AARRGGBB</c>; null = system accent.</summary>
     public string? AccentOverride { get; init; }
+
+    public MotionMode Motion { get; init; } = MotionMode.Auto;
+
+    /// <summary>Master switch for premium effects (ripple, animated surfaces).</summary>
+    public bool EffectsEnabled { get; init; } = true;
 }

@@ -1,0 +1,26 @@
+using System.Windows;
+
+namespace DevTemWpf.App.Services;
+
+/// <summary>Storyboard-based motion honoring the resolved policy (ADR-0009).</summary>
+public interface IMotionService
+{
+    EffectiveMotion CurrentPolicy { get; }
+
+    bool OsReducedMotion { get; }
+
+    int RenderTier { get; }
+
+    /// <summary>
+    /// Page/content entrance. Off policy (or any failure) snaps the final
+    /// state and returns a completed task — callers never wait on animation.
+    /// <paramref name="durationOverride"/> demonstrates a preset speed;
+    /// policy gating (instant/slide rules) still applies.
+    /// </summary>
+    Task PlayEntranceAsync(FrameworkElement element, TimeSpan? durationOverride = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Decorative click ripple. No-op unless policy is Full and effects are on.
+    /// </summary>
+    void PlayRipple(System.Windows.Controls.Panel host, Point origin);
+}

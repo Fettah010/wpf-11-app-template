@@ -35,6 +35,7 @@ public sealed class HostLifecycleTests
             Assert.NotNull(host.Services.GetRequiredService<INavigationViewPageProvider>());
             Assert.NotNull(host.Services.GetRequiredService<Wpf.Ui.ISnackbarService>());
             Assert.NotNull(host.Services.GetRequiredService<Wpf.Ui.IContentDialogService>());
+            Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.IMotionService>());
             Assert.NotNull(host.Services.GetRequiredService<HomeViewModel>());
             Assert.NotNull(host.Services.GetRequiredService<SettingsViewModel>());
 
@@ -42,15 +43,18 @@ public sealed class HostLifecycleTests
             var settings = host.Services.GetRequiredService<SettingsPage>();
             var tokens = host.Services.GetRequiredService<TokensPage>();
             var controls = host.Services.GetRequiredService<ControlsPage>();
+            var effects = host.Services.GetRequiredService<EffectsPage>();
             Assert.Same(home, home.DataContext);
             Assert.Same(settings, settings.DataContext);
             Assert.Same(tokens, tokens.DataContext);
             Assert.Same(controls, controls.DataContext);
+            Assert.Same(effects, effects.DataContext);
             Assert.NotNull(home.ViewModel);
             Assert.NotNull(settings.ViewModel);
             Assert.NotNull(tokens.ViewModel);
             Assert.NotNull(controls.ViewModel);
             Assert.NotNull(controls.ViewModel.Form);
+            Assert.NotNull(effects.ViewModel);
         }
         finally
         {
