@@ -1,8 +1,8 @@
-# Dependencies (0.9.0 inventory, verified 2026-10-14)
+# Dependencies (1.0.0-rc.1 inventory, verified 2026-10-14)
 
-Two test-only additions (rows). Prior inventories otherwise current.
-Nothing was removable in the 0.9.0 review: every direct package has a live
-consumer (audited below); transitive notes follow.
+No package changes in rc.1 (packaging/tests/docs only). 0.9.0 inventory
+below stands; vuln scan re-run at gate. Nothing removable: every direct
+package has a live consumer (0.9.0 review).
 
 Single version source: `Directory.Packages.props` (CPM + transitive pinning).
 

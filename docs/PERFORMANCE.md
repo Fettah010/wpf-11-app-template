@@ -113,3 +113,12 @@ Inside ratified budgets (≤1.0s, ≤150 MB). Serilog init + SQLite open add
 Inside ratified budgets (≤1.0s, ≤150 MB) with shrinking headroom on memory:
 0.7.0→0.9.0 set grew 135.7→142.5 MB (Serilog + SQLite + Velopack natives).
 1.0-rc must not add resident weight without a matching cut.
+
+## 1.0.0-rc.1 baseline (2026-10-14, `release/1.0.0-rc.1`)
+
+| Metric | Median | Max | How |
+|---|---|---|---|
+| Cold start (launch → window) | 0.77s | 0.83s | `measure-startup.ps1 -Runs 5` |
+| Working set after start | 144.1 MB | 145.4 MB | same runs, +2s idle sample |
+
+Inside budgets. No resident additions in rc.1 (packaging/tests/docs only).
