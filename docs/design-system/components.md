@@ -43,3 +43,22 @@ information channel), `ui:BreadcrumbBar` (shell header, auto-syncs).
 - **Loading skeleton:** compose from shimmer-free placeholders (0.6.0).
 - **DataGrid/table/tree:** 0.6.0 data milestone.
 - `ui:TimePicker` sample outstanding (first-use rule).
+
+## Data (0.6.0)
+
+Dashboard (`Views/DashboardPage`, nav item "Dashboard") demonstrates the data
+patterns; `SampleDataService` is the only data source (deterministic seed).
+
+| Pattern | Implementation |
+|---|---|
+| Stat cards | `ItemsControl` + `WrapPanel` (wraps on narrow), `MetricItem` template. |
+| Chart | `lvc:CartesianChart` + VM-built `LineSeries<double>` (LiveCharts2, library-default theme for now). |
+| Table | `ListView` + `GridView`; header buttons sort (direction in status line); `ICollectionView` filter; virtualized (asserted). |
+| Master/detail | Table (2*) + detail card (1*, min 220); selection drives detail; clear button. |
+| Empty state | `NoResultsMessage` text (not color-only). |
+| Stepper | Index-bounded Next/Back + progress + summary, all in VM. |
+
+Exclusion: dashboard file set + registrations + nav item + chart package ref
+drop as one unit (`docs/template/scaffold-contract.md`). Gaps carried:
+TreeView, full DataGrid, drag-and-drop, chart theming, top-nav/tabbed shells
+(0.8.0).

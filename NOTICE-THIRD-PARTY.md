@@ -1,4 +1,4 @@
-# Third-party notices (0.2.0)
+# Third-party notices (0.6.0)
 
 This project is MIT-licensed (`LICENSE`). It references these third-party
 packages, each under its own license:
@@ -17,6 +17,8 @@ packages, each under its own license:
   and WPF UI Contributors (same repo as WPF-UI).
 - **Xunit.StaFact 4.0.24** (test use only, never shipped) — Microsoft Public
   License (MS-PL), © Andrew Arnott and contributors.
+- **LiveCharts2 2.0.5** (`LiveChartsCore.SkiaSharpView.WPF` + SkiaSharp,
+  dashboard use) — MIT, © Beto Rodriguez and contributors.
 
 Full license texts ship inside the referenced NuGet packages.
 No vendored third-party source is included in this repository.

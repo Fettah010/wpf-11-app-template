@@ -80,3 +80,13 @@ unaffected by gallery size (design validated by measurement).
 
 Inside ratified budgets (≤1.0s, ≤150 MB). Entrance storyboards play
 post-load and do not move startup; no perpetual animation by default.
+
+## 0.6.0 baseline (2026-10-14, `release/0.6.0`)
+
+| Metric | Median | Max | How |
+|---|---|---|---|
+| Cold start (launch → window) | 0.77s | 0.81s | `measure-startup.ps1 -Runs 5` (0.81/0.71/0.79/0.77/0.70) |
+| Working set after start | 132.2 MB | 132.3 MB | same runs, +2s idle sample |
+
+Inside ratified budgets. Dashboard (incl. Skia natives + 1500-row source)
+resolves on first navigation — startup unaffected (design re-validated).

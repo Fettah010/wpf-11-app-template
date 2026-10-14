@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (2026-10-14)
+
+- Premium dashboard: stat cards, LiveCharts2 line chart, sortable/filterable
+  virtualized activity table (1500 rows), master/detail, empty states, setup
+  stepper — all on deterministic sample data, isolated for template exclusion.
+- LiveCharts2 2.0.5 (MIT, app-only). Master/detail + settings-section page
+  patterns; top-nav/tabbed shells deferred to 0.8.0 with reasons.
+- Tests: 56 passing (data, filter/sort/select/stepper, virtualization assert).
+- Zero other packages. Startup 0.77s / working set 132.2 MB (budgets hold).
+
 ## 0.5.0 (2026-10-14)
 
 - Motion system: tokenized durations/easings, Auto/Full/Reduced/Off profiles

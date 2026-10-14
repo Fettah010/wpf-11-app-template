@@ -1,7 +1,6 @@
-# Dependencies (0.5.0 inventory, verified 2026-10-14)
+# Dependencies (0.6.0 inventory, verified 2026-10-14)
 
-No package changes in 0.5.0 (storyboards, P/Invoke, and render-tier reads
-use BCL + WPF-UI only). 0.2.0 inventory below still current.
+One addition (see row). 0.2.0 inventory below otherwise current.
 
 Single version source: `Directory.Packages.props` (CPM + transitive pinning).
 
@@ -15,6 +14,7 @@ Single version source: `Directory.Packages.props` (CPM + transitive pinning).
 | `xunit.v3.mtp-v2` | 4.0.2 | Test framework, MTP runner (ADR-0004) | `github.com/xunit/xunit` | Apache-2.0 / MIT (xUnit family; see NOTICE) | `net8.0` → net10 compatible | Stable 2026-10-09 |
 | `WPF-UI.DependencyInjection` | 4.3.0 | DI page provider for NavigationView (ADR-0005; v4 has no `IPageService` impl) | `github.com/lepoco/wpfui` | MIT (same repo) | Ships `net10.0`; deps only DI.Abstractions + Abstractions | Stable 2026-05-04, same 4.3.0 line |
 | `Xunit.StaFact` | 4.0.24 | STA/Dispatcher test attributes, test-only (ADR-0004 update) | `github.com/AArnott/Xunit.StaFact` | MS-PL (test-only, never shipped) | `net8.0` → net10 compatible | Stable 2026-10-01; used by Avalonia/Roslyn/WPF repos |
+| `LiveChartsCore.SkiaSharpView.WPF` | 2.0.5 | Dashboard charting, app-only/isolated (ADR-0010) | `github.com/Live-Charts/LiveCharts2` | MIT | `net8.0-windows` → net10 compatible; SkiaSharp 3.119 natives (win-x64 covered) | Stable 2026-06-18; 2.0.0 stable since 3/2026; 5.5k stars |
 
 ## Notable transitive dependencies
 

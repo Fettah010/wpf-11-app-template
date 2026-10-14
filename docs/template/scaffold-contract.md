@@ -1,4 +1,4 @@
-# Scaffold contract (0.1.0 baseline)
+# Scaffold contract (0.6.0 baseline)
 
 Defines what each preset promises so later milestones cannot silently
 redefine them. The generator itself is built in 0.8.0; until then this is
@@ -18,3 +18,18 @@ the contract to implement against.
 The 0.1.0 minimal app (`src/DevTemWpf.App`) is the embryo of the **clean**
 preset. Rule: new features must not turn the clean scaffold into an all-on
 application (verified per milestone by building the clean output).
+
+## Dashboard exclusion set (0.6.0, enforced by the 0.8.0 generator)
+
+Removing the dashboard from a scaffold deletes exactly:
+
+- `src/.../Views/DashboardPage.xaml(.cs)`, `ViewModels/DashboardViewModel.cs`,
+  `Services/SampleDataService.cs`
+- `AppComposition` lines: `SampleDataService`, `DashboardViewModel`,
+  `DashboardPage` registrations
+- `MainViewModel` "Dashboard" nav item
+- `LiveChartsCore.SkiaSharpView.WPF` package reference (+ CPM entry if unused
+  elsewhere)
+
+Nothing outside this set may reference dashboard types (verified by review;
+a compile check after deletion is the 0.8.0 acceptance test).
