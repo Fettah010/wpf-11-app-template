@@ -19,6 +19,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         MainViewModel viewModel,
         IOptions<AppOptions> options,
         INavigationViewPageProvider pageProvider,
+        Wpf.Ui.ISnackbarService snackbar,
+        Wpf.Ui.IContentDialogService dialogs,
         ISettingsService settings,
         IBackdropService backdrop)
     {
@@ -42,6 +44,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         Height = options.Value.Height;
 
         RootNavigation.SetPageProviderService(pageProvider);
+        snackbar.SetSnackbarPresenter(RootSnackbar);
+        dialogs.SetDialogHost(RootDialogHost);
 
         SizeChanged += (_, e) => ViewModel.ApplyResponsiveWidth(e.NewSize.Width);
         Loaded += (_, _) => OnFirstLoaded();

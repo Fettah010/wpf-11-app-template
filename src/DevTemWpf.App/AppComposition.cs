@@ -30,15 +30,22 @@ public static class AppComposition
         // (item clicks + back button are automatic, initial nav is code-behind).
         _ = builder.Services.AddNavigationViewPageProvider();
 
+        // Feedback services (ADR-0008)
+        builder.Services.AddSingleton<Wpf.Ui.ISnackbarService, Wpf.Ui.SnackbarService>();
+        builder.Services.AddSingleton<Wpf.Ui.IContentDialogService, Wpf.Ui.ContentDialogService>();
+
         // Shell + pages
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddTransient<MainWindow>();
         builder.Services.AddTransient<HomeViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<TokensViewModel>();
+        builder.Services.AddTransient<ControlsViewModel>();
+        builder.Services.AddTransient<FormViewModel>();
         builder.Services.AddTransient<HomePage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<TokensPage>();
+        builder.Services.AddTransient<ControlsPage>();
         return builder;
     }
 }
