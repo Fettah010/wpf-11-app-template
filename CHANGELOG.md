@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 (2026-10-14)
+
+- Token layer (`DesignTokens/`): semantic color aliases, type ramp, comfortable/
+  compact spacing, radii; add-only over WPF-UI, documented override rules.
+- Density selector + custom accent override (`#RRGGBB/#AARRGGBB`, system restore),
+  live-applied and persisted; HC-compatible by alias design.
+- Tokens preview page (colors/type/spacing/shapes/states); all app XAML off
+  hard-coded style values; `docs/design-system/` standards.
+- Tests: 25 passing (accent ordering, hex validation, page-XAML guards).
+- Zero new packages. Startup 0.73s / working set 131.4 MB (vs 0.71s / 130.4 MB).
+
 ## 0.2.0 (2026-10-14)
 
 - Application shell: `FluentWindow` + `TitleBar` + adaptive `NavigationView`

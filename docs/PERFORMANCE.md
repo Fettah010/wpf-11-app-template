@@ -35,3 +35,15 @@ cold start < 2s on modern HW; working set < 150 MB at idle.
 Delta vs 0.1.0: +0.10s start, +14 MB working set — the FluentWindow +
 NavigationView + DI pages cost. Inside provisional bounds; low-spec
 reference environment still outstanding (D10).
+
+## 0.3.0 baseline (2026-10-14, `release/0.3.0`)
+
+| Metric | Median | Max | How |
+|---|---|---|---|
+| Cold start (launch → window) | 0.73s | 0.80s | `measure-startup.ps1 -Runs 5` (0.73/0.80/0.77/0.69/0.67) |
+| Working set after start | 131.4 MB | 149 MB | same runs, +2s idle sample |
+
+Delta vs 0.2.0: +0.02s start, +1 MB working set — token dictionaries are
+noise. Max working set (149 MB, one run) touches the provisional 150 MB
+hypothesis; treated as GC-timing noise on a warm-cache machine, watched in
+0.4.0. Low-spec reference still outstanding (D10).

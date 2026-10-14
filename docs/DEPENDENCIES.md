@@ -1,4 +1,7 @@
-# Dependencies (0.2.0 inventory, verified 2026-10-14)
+# Dependencies (0.3.0 inventory, verified 2026-10-14)
+
+No package changes in 0.3.0 (accent/density/typography use WPF-UI statics +
+BCL only). 0.2.0 inventory below still current.
 
 Single version source: `Directory.Packages.props` (CPM + transitive pinning).
 
