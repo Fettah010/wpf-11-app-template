@@ -48,6 +48,17 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task LoadAsync_ReportsWhetherPersistIsNeeded()
+    {
+        var missing = new SettingsService(_path);
+        Assert.True(await missing.LoadAsync(TestContext.Current.CancellationToken));
+
+        var present = new SettingsService(_path);
+        await present.UpdateAsync(static s => s, TestContext.Current.CancellationToken);
+        Assert.False(await present.LoadAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task MissingFile_YieldsDefaults()
     {
         var service = new SettingsService(_path);

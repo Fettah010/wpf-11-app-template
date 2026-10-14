@@ -7,7 +7,11 @@ public interface ISettingsService
 
     event EventHandler<ShellSettings>? Updated;
 
-    Task LoadAsync(CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Loads persisted settings. Returns true when the file was missing or
+    /// corrupt (caller should persist to repair); false when loaded cleanly.
+    /// </summary>
+    Task<bool> LoadAsync(CancellationToken cancellationToken = default);
 
     Task UpdateAsync(Func<ShellSettings, ShellSettings> mutate, CancellationToken cancellationToken = default);
 }

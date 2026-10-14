@@ -85,6 +85,8 @@ public sealed class HostLifecycleTests
             var table = (System.Windows.Controls.ListView)dashboard.FindName("ActivityTable");
             Assert.NotNull(table);
             Assert.True(System.Windows.Controls.VirtualizingPanel.GetIsVirtualizing(table));
+
+            TestResources.AssertNoBindingErrors();
             //#endif
             //#if (IncludeDiagnostics)
             Assert.NotNull(diagnostics.ViewModel);

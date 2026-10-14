@@ -25,17 +25,23 @@ public sealed class SettingsService : ISettingsService
 
     public static string DefaultPath() => AppPaths.SettingsPath;
 
-    public async Task LoadAsync(CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Loads persisted settings. Returns true when the file was missing or
+    /// corrupt (caller should persist to repair); false when loaded cleanly.
+    /// </summary>
+    public async Task<bool> LoadAsync(CancellationToken cancellationToken = default)
     {
         try
         {
             var json = await File.ReadAllTextAsync(_filePath, cancellationToken).ConfigureAwait(false);
             Current = JsonSerializer.Deserialize<ShellSettings>(json, JsonOptions) ?? new ShellSettings();
+            return false;
         }
         catch
         {
             // Missing, unreadable, or corrupt → safe defaults (resilience rule).
             Current = new ShellSettings();
+            return true;
         }
     }
 
