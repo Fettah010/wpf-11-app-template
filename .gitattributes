@@ -1,0 +1,25 @@
+# Auto detect text files and normalize to LF on commit
+* text=auto
+
+# Explicitly text
+*.cs text diff=csharp
+*.xaml text
+*.axaml text
+*.csproj text
+*.sln text
+*.props text
+*.targets text
+*.md text
+*.json text
+*.xml text
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.dll binary
+*.exe binary
+*.pdb binary
