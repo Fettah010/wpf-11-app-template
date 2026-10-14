@@ -122,3 +122,14 @@ Inside ratified budgets (≤1.0s, ≤150 MB) with shrinking headroom on memory:
 | Working set after start | 144.1 MB | 145.4 MB | same runs, +2s idle sample |
 
 Inside budgets. No resident additions in rc.1 (packaging/tests/docs only).
+
+## 1.0.0 baseline (2026-10-14, `release/1.0.0`)
+
+| Metric | Median | Max | How |
+|---|---|---|---|
+| Cold start (launch → window) | 0.81s | 0.85s | `measure-startup.ps1 -Runs 5` |
+| Working set after start | 146.6 MB | 148.2 MB | same runs, +2s idle sample |
+
+Inside ratified budgets (≤1.0s, ≤150 MB) but memory headroom is thin —
+first post-1.0 perf work should reclaim working set before adding resident
+features.
