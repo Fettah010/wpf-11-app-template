@@ -9,6 +9,11 @@
         <!-- Opaque default theme; no backdrop/transparency APIs (ADR-0001). -->
         <ui:ThemesDictionary Theme="Dark" />
         <ui:ControlsDictionary />
+        <!-- Token layer (ADR-0007): add-only, ordered after upstream. -->
+        <ResourceDictionary Source="DesignTokens/SemanticColors.xaml" />
+        <ResourceDictionary Source="DesignTokens/Typography.xaml" />
+        <ResourceDictionary Source="DesignTokens/Spacing.Comfortable.xaml" />
+        <ResourceDictionary Source="DesignTokens/Shapes.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>

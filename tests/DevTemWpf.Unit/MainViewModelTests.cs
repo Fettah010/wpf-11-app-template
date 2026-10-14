@@ -32,7 +32,16 @@ public sealed class MainViewModelTests : IDisposable
         var vm = Create();
 
         Assert.Contains(vm.MenuItems.OfType<NavigationViewItem>(), i => i.TargetPageType == typeof(HomePage));
+        Assert.Contains(vm.MenuItems.OfType<NavigationViewItem>(), i => i.TargetPageType == typeof(TokensPage));
         Assert.Contains(vm.FooterMenuItems.OfType<NavigationViewItem>(), i => i.TargetPageType == typeof(SettingsPage));
+    }
+
+    [WpfFact]
+    public void Constructor_ExposesConfiguredAppTitle()
+    {
+        var vm = Create();
+
+        Assert.Equal(new AppOptions().Title, vm.AppTitle);
     }
 
     [WpfFact]

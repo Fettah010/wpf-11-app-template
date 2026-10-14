@@ -24,6 +24,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     {
         _settings = settings;
 
+        // Density before init so first layout uses the persisted value.
+        DesignTokenBootstrap.ApplyDensity(settings.Current.Density);
+
         // Set before InitializeComponent so FluentWindow picks it up at
         // OnSourceInitialized (its own timing). Never re-set afterwards:
         // re-setting the DP post-init crashes in SetWindowChrome on .NET 10.
@@ -42,6 +45,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
         SizeChanged += (_, e) => ViewModel.ApplyResponsiveWidth(e.NewSize.Width);
         Loaded += (_, _) => OnFirstLoaded();
+        _settings.Updated += (_, s) => DesignTokenBootstrap.ApplyDensity(s.Density);
     }
 
     public MainViewModel ViewModel { get; }

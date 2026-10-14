@@ -16,9 +16,11 @@ public sealed class ThemeServiceTests : IDisposable
     private sealed class FakeApplier : IThemeApplier
     {
         public List<(ApplicationTheme Theme, WindowBackdropType Backdrop)> Applied { get; } = [];
+        public List<(string? Hex, ApplicationTheme Theme)> Accents { get; } = [];
 
         public void Apply(ApplicationTheme theme, WindowBackdropType backdrop) => Applied.Add((theme, backdrop));
         public ApplicationTheme GetSystemApplicationTheme() => ApplicationTheme.Dark;
+        public void ApplyAccentOverride(string? hex, ApplicationTheme theme) => Accents.Add((hex, theme));
         public bool IsHighContrast() => false;
     }
 
@@ -73,5 +75,30 @@ public sealed class ThemeServiceTests : IDisposable
         var call = Assert.Single(applier.Applied);
         Assert.Equal(ApplicationTheme.Dark, call.Theme);
         Assert.Equal(WindowBackdropType.Mica, call.Backdrop);
+    }
+
+    [Fact]
+    public async Task AccentOverride_AppliedAfterTheme_WithResolvedTheme()
+    {
+        var (service, applier) = await CreateAsync(new ShellSettings { Theme = ThemeMode.Dark, AccentOverride = "#4CC2FF" });
+
+        await service.ApplyCurrentAsync(TestContext.Current.CancellationToken);
+
+        Assert.Single(applier.Applied);
+        var accent = Assert.Single(applier.Accents);
+        Assert.Equal("#4CC2FF", accent.Hex);
+        Assert.Equal(ApplicationTheme.Dark, accent.Theme);
+    }
+
+    [Fact]
+    public async Task NoAccentOverride_RestoresSystemAccent()
+    {
+        var (service, applier) = await CreateAsync(new ShellSettings { Theme = ThemeMode.Light });
+
+        await service.ApplyCurrentAsync(TestContext.Current.CancellationToken);
+
+        var accent = Assert.Single(applier.Accents);
+        Assert.Null(accent.Hex);
+        Assert.Equal(ApplicationTheme.Light, accent.Theme);
     }
 }

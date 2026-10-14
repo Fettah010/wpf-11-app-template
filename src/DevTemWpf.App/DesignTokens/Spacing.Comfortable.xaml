@@ -1,0 +1,13 @@
+<!-- Comfortable density spacing. Swapped whole-file for Compact (see DesignTokenBootstrap). -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+  <Thickness x:Key="AppPageMargin">24</Thickness>
+  <Thickness x:Key="AppCardPadding">16</Thickness>
+  <system:Double x:Key="AppSectionSpacing">24</system:Double>
+  <system:Double x:Key="AppItemSpacing">12</system:Double>
+  <system:Double x:Key="AppControlSpacing">8</system:Double>
+  <system:Double x:Key="AppContentMaxWidth">640</system:Double>
+
+</ResourceDictionary>

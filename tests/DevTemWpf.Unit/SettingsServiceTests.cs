@@ -18,7 +18,14 @@ public sealed class SettingsServiceTests : IDisposable
         await service.LoadAsync(TestContext.Current.CancellationToken);
 
         await service.UpdateAsync(
-            _ => new ShellSettings { Theme = ThemeMode.Dark, BackdropEnabled = false, Shell = ShellMode.Rail },
+            _ => new ShellSettings
+            {
+                Theme = ThemeMode.Dark,
+                BackdropEnabled = false,
+                Shell = ShellMode.Rail,
+                Density = DensityMode.Compact,
+                AccentOverride = "#4CC2FF",
+            },
             TestContext.Current.CancellationToken);
 
         var reloaded = new SettingsService(_path);
@@ -27,6 +34,8 @@ public sealed class SettingsServiceTests : IDisposable
         Assert.Equal(ThemeMode.Dark, reloaded.Current.Theme);
         Assert.False(reloaded.Current.BackdropEnabled);
         Assert.Equal(ShellMode.Rail, reloaded.Current.Shell);
+        Assert.Equal(DensityMode.Compact, reloaded.Current.Density);
+        Assert.Equal("#4CC2FF", reloaded.Current.AccentOverride);
     }
 
     [Fact]

@@ -7,11 +7,14 @@
       mc:Ignorable="d"
       d:DesignHeight="480" d:DesignWidth="720"
       Title="Home">
-  <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="520">
-    <ui:SymbolIcon Symbol="Home24" FontSize="56" HorizontalAlignment="Center" Margin="0,0,0,16" />
-    <TextBlock Text="{Binding ViewModel.Headline}" FontSize="22" FontWeight="SemiBold"
+  <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+              MaxWidth="{StaticResource AppContentMaxWidth}"
+              Margin="{StaticResource AppPageMargin}">
+    <ui:SymbolIcon Symbol="Home24" FontSize="{StaticResource AppIconXLarge}"
+                   HorizontalAlignment="Center" Margin="0,0,0,16" />
+    <TextBlock Text="{Binding ViewModel.Headline}" Style="{StaticResource AppTitleText}"
                TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,8" />
-    <TextBlock Text="{Binding ViewModel.Subline}" TextAlignment="Center"
-               TextWrapping="Wrap" Opacity="0.75" />
+    <TextBlock Text="{Binding ViewModel.Subline}" Style="{StaticResource AppSecondaryBodyText}"
+               TextAlignment="Center" TextWrapping="Wrap" />
   </StackPanel>
 </Page>

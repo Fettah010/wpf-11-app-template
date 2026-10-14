@@ -21,6 +21,7 @@ public sealed partial class MainViewModel : ObservableObject
         MenuItems = new ObservableCollection<object>
         {
             new NavigationViewItem("Home", SymbolRegular.Home24, typeof(HomePage)),
+            new NavigationViewItem("Tokens", SymbolRegular.PaintBrush24, typeof(TokensPage)),
         };
         FooterMenuItems = new ObservableCollection<object>
         {

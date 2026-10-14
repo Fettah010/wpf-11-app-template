@@ -1,0 +1,80 @@
+<Page x:Class="DevTemWpf.App.Views.TokensPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      mc:Ignorable="d"
+      d:DesignHeight="900" d:DesignWidth="720"
+      Title="Design Tokens">
+  <ScrollViewer Padding="{StaticResource AppPageMargin}"
+                AutomationProperties.Name="Design token preview">
+    <StackPanel MaxWidth="{StaticResource AppContentMaxWidth}">
+      <TextBlock Text="Design tokens" Style="{StaticResource AppSubtitleText}" Margin="0,0,0,4" />
+      <TextBlock Text="Live preview of the App* token layer. Switch theme, density, or accent in Settings to see every swatch follow."
+                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="0,0,0,16" />
+
+      <TextBlock Text="Colors" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,8" />
+      <UniformGrid Columns="2" Margin="0,0,0,16">
+        <Border Background="{DynamicResource AppTextPrimaryBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="0,0,8,8">
+          <TextBlock Text="Text / Primary" Style="{StaticResource AppCaptionText}" />
+        </Border>
+        <Border Background="{DynamicResource AppTextSecondaryBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="0,0,0,8">
+          <TextBlock Text="Text / Secondary" Style="{StaticResource AppCaptionText}" />
+        </Border>
+        <Border Background="{DynamicResource AppAccentBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="0,0,8,8">
+          <TextBlock Text="Accent" Style="{StaticResource AppCaptionText}" />
+        </Border>
+        <Border Background="{DynamicResource AppCardBackgroundBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="{StaticResource AppBorderThickness}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="0,0,0,8">
+          <TextBlock Text="Card / Border" Style="{StaticResource AppBodyText}" />
+        </Border>
+        <Border Background="{DynamicResource AppSuccessBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="0,0,8,8">
+          <TextBlock Text="Status / Success" Style="{StaticResource AppCaptionText}" />
+        </Border>
+        <Border Background="{DynamicResource AppCautionBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="0,0,0,8">
+          <TextBlock Text="Status / Caution" Style="{StaticResource AppCaptionText}" />
+        </Border>
+        <Border Background="{DynamicResource AppErrorBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="0,0,8,0">
+          <TextBlock Text="Status / Error" Style="{StaticResource AppCaptionText}" />
+        </Border>
+        <Border Background="{DynamicResource AppSubtleBackgroundBrush}" BorderBrush="{DynamicResource AppDividerBrush}" BorderThickness="{StaticResource AppBorderThickness}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}">
+          <TextBlock Text="Subtle / Divider" Style="{StaticResource AppBodyText}" />
+        </Border>
+      </UniformGrid>
+
+      <TextBlock Text="Typography" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,8" />
+      <StackPanel Margin="0,0,0,16">
+        <TextBlock Text="Display 32" Style="{StaticResource AppDisplayText}" />
+        <TextBlock Text="Title 22" Style="{StaticResource AppTitleText}" />
+        <TextBlock Text="Subtitle 18" Style="{StaticResource AppSubtitleText}" />
+        <TextBlock Text="Section heading 16" Style="{StaticResource AppSectionHeadingText}" />
+        <TextBlock Text="Body 14 — primary and secondary tones." Style="{StaticResource AppBodyText}" />
+        <TextBlock Text="Secondary body 14." Style="{StaticResource AppSecondaryBodyText}" />
+        <TextBlock Text="Caption 12." Style="{StaticResource AppCaptionText}" />
+      </StackPanel>
+
+      <TextBlock Text="Spacing &amp; shapes" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,8" />
+      <StackPanel Margin="0,0,0,16">
+        <Border Height="{StaticResource AppSectionSpacing}" Background="{DynamicResource AppAccentSecondaryBrush}"
+                CornerRadius="{StaticResource AppCornerRadiusSmall}" Margin="0,0,0,8"
+                AutomationProperties.Name="Section spacing visual" />
+        <Border Height="{StaticResource AppItemSpacing}" Background="{DynamicResource AppAccentSecondaryBrush}"
+                CornerRadius="{StaticResource AppCornerRadiusSmall}" Margin="0,0,0,8"
+                AutomationProperties.Name="Item spacing visual" />
+        <Border Height="48" CornerRadius="{StaticResource AppCornerRadiusLarge}"
+                Background="{DynamicResource AppCardBackgroundBrush}"
+                BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="{StaticResource AppBorderThickness}"
+                AutomationProperties.Name="Large radius sample" />
+      </StackPanel>
+
+      <TextBlock Text="States" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,8" />
+      <StackPanel>
+        <ui:Button Content="Standard button" AutomationProperties.Name="Preview standard button" Margin="0,0,0,8" />
+        <ui:Button Content="Disabled button" IsEnabled="False" AutomationProperties.Name="Preview disabled button" Margin="0,0,0,8" />
+        <CheckBox Content="Standard check box" AutomationProperties.Name="Preview check box" Margin="0,0,0,8" />
+        <TextBox Text="Editable text" AutomationProperties.Name="Preview text input" Margin="0,0,0,8" />
+        <TextBlock Text="Something needs attention." Style="{StaticResource AppErrorText}" />
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</Page>

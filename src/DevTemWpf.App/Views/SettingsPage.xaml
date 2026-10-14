@@ -5,28 +5,43 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       mc:Ignorable="d"
-      d:DesignHeight="480" d:DesignWidth="720"
+      d:DesignHeight="560" d:DesignWidth="720"
       Title="Settings">
-  <ScrollViewer Padding="24">
-    <StackPanel MaxWidth="520">
-      <TextBlock Text="Appearance" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12" />
+  <ScrollViewer Padding="{StaticResource AppPageMargin}">
+    <StackPanel MaxWidth="{StaticResource AppContentMaxWidth}">
+      <TextBlock Text="Appearance" Style="{StaticResource AppSubtitleText}" Margin="0,0,0,12" />
 
-      <TextBlock Text="Theme" Margin="0,0,0,4" />
+      <TextBlock Text="Theme" Style="{StaticResource AppBodyText}" Margin="0,0,0,4" />
       <ComboBox ItemsSource="{Binding ViewModel.ThemeOptions}"
                 SelectedItem="{Binding ViewModel.SelectedTheme, Mode=TwoWay}"
                 AutomationProperties.Name="Theme selector" Margin="0,0,0,12" />
+
+      <TextBlock Text="Accent" Style="{StaticResource AppBodyText}" Margin="0,0,0,4" />
+      <CheckBox Content="Use a custom accent color"
+                IsChecked="{Binding ViewModel.UseCustomAccent, Mode=TwoWay}"
+                AutomationProperties.Name="Custom accent toggle" Margin="0,0,0,4" />
+      <TextBox Text="{Binding ViewModel.AccentHex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+               IsEnabled="{Binding ViewModel.UseCustomAccent}"
+               AutomationProperties.Name="Custom accent hex value"
+               AutomationProperties.HelpText="Hex color like #4CC2FF"
+               Margin="0,0,0,12" />
 
       <CheckBox Content="Enable Mica backdrop (falls back to opaque when unsupported)"
                 IsChecked="{Binding ViewModel.BackdropEnabled, Mode=TwoWay}"
                 AutomationProperties.Name="Mica backdrop toggle" Margin="0,0,0,12" />
 
-      <TextBlock Text="Navigation style" Margin="0,0,0,4" />
+      <TextBlock Text="Navigation style" Style="{StaticResource AppBodyText}" Margin="0,0,0,4" />
       <ComboBox ItemsSource="{Binding ViewModel.ShellOptions}"
                 SelectedItem="{Binding ViewModel.SelectedShell, Mode=TwoWay}"
                 AutomationProperties.Name="Navigation style selector" Margin="0,0,0,12" />
 
-      <TextBlock Text="{Binding ViewModel.ErrorMessage, TargetNullValue=''}" Foreground="Tomato"
-                 TextWrapping="Wrap" />
+      <TextBlock Text="Density" Style="{StaticResource AppBodyText}" Margin="0,0,0,4" />
+      <ComboBox ItemsSource="{Binding ViewModel.DensityOptions}"
+                SelectedItem="{Binding ViewModel.SelectedDensity, Mode=TwoWay}"
+                AutomationProperties.Name="Density selector" Margin="0,0,0,12" />
+
+      <TextBlock Text="{Binding ViewModel.ErrorMessage, TargetNullValue=''}"
+                 Style="{StaticResource AppErrorText}" TextWrapping="Wrap" />
     </StackPanel>
   </ScrollViewer>
 </Page>

@@ -1,0 +1,38 @@
+<!--
+  Semantic color aliases (ADR-0007). Add-only layer over WPF-UI theme keys:
+  every brush here forwards via DynamicResource so light/dark/high-contrast
+  switches propagate automatically. NEVER redefine a WPF-UI key here.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Text -->
+  <SolidColorBrush x:Key="AppTextPrimaryBrush" Color="{DynamicResource TextFillColorPrimary}" />
+  <SolidColorBrush x:Key="AppTextSecondaryBrush" Color="{DynamicResource TextFillColorSecondary}" />
+  <SolidColorBrush x:Key="AppTextTertiaryBrush" Color="{DynamicResource TextFillColorTertiary}" />
+  <SolidColorBrush x:Key="AppTextDisabledBrush" Color="{DynamicResource TextFillColorDisabled}" />
+  <SolidColorBrush x:Key="AppTextOnAccentBrush" Color="{DynamicResource TextOnAccentFillColorPrimary}" />
+
+  <!-- Accent (follows ApplicationAccentColorManager, incl. overrides) -->
+  <SolidColorBrush x:Key="AppAccentBrush" Color="{DynamicResource SystemAccentColorPrimary}" />
+  <SolidColorBrush x:Key="AppAccentSecondaryBrush" Color="{DynamicResource SystemAccentColorSecondary}" />
+
+  <!-- Surfaces -->
+  <SolidColorBrush x:Key="AppCardBackgroundBrush" Color="{DynamicResource CardBackgroundFillColorDefault}" />
+  <SolidColorBrush x:Key="AppSubtleBackgroundBrush" Color="{DynamicResource SubtleFillColorSecondary}" />
+  <SolidColorBrush x:Key="AppSolidBackgroundBrush" Color="{DynamicResource SolidBackgroundFillColorBase}" />
+
+  <!-- Borders / dividers / focus -->
+  <SolidColorBrush x:Key="AppBorderBrush" Color="{DynamicResource CardStrokeColorDefault}" />
+  <SolidColorBrush x:Key="AppDividerBrush" Color="{DynamicResource DividerStrokeColorDefault}" />
+  <SolidColorBrush x:Key="AppFocusOuterBrush" Color="{DynamicResource FocusStrokeColorOuter}" />
+  <SolidColorBrush x:Key="AppFocusInnerBrush" Color="{DynamicResource FocusStrokeColorInner}" />
+
+  <!-- Status -->
+  <SolidColorBrush x:Key="AppSuccessBrush" Color="{DynamicResource SystemFillColorSuccess}" />
+  <SolidColorBrush x:Key="AppCautionBrush" Color="{DynamicResource SystemFillColorCaution}" />
+  <SolidColorBrush x:Key="AppErrorBrush" Color="{DynamicResource SystemFillColorCritical}" />
+  <SolidColorBrush x:Key="AppNeutralBrush" Color="{DynamicResource SystemFillColorNeutral}" />
+  <SolidColorBrush x:Key="AppErrorBackgroundBrush" Color="{DynamicResource SystemFillColorCriticalBackground}" />
+
+</ResourceDictionary>

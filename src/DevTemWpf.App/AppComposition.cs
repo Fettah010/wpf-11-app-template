@@ -35,8 +35,10 @@ public static class AppComposition
         builder.Services.AddTransient<MainWindow>();
         builder.Services.AddTransient<HomeViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
+        builder.Services.AddTransient<TokensViewModel>();
         builder.Services.AddTransient<HomePage>();
         builder.Services.AddTransient<SettingsPage>();
+        builder.Services.AddTransient<TokensPage>();
         return builder;
     }
 }

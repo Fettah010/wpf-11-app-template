@@ -14,5 +14,12 @@ public interface IThemeApplier
     /// <summary>Current OS theme mapped to Light/Dark/HighContrast.</summary>
     ApplicationTheme GetSystemApplicationTheme();
 
+    /// <summary>
+    /// Applies a custom accent (<c>#RRGGBB</c>/<c>#AARRGGBB</c>) or restores
+    /// the system accent when <paramref name="hex"/> is null. Unparsable
+    /// values fall back to the system accent (callers validate first).
+    /// </summary>
+    void ApplyAccentOverride(string? hex, ApplicationTheme theme);
+
     bool IsHighContrast();
 }

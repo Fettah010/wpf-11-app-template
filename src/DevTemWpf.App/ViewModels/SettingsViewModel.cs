@@ -16,12 +16,15 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
         _theme = theme;
         ThemeOptions = [ThemeMode.System, ThemeMode.Light, ThemeMode.Dark];
         ShellOptions = [ShellMode.Sidebar, ShellMode.Rail];
+        DensityOptions = [DensityMode.Comfortable, DensityMode.Compact];
         Reload();
     }
 
     public IReadOnlyList<ThemeMode> ThemeOptions { get; }
 
     public IReadOnlyList<ShellMode> ShellOptions { get; }
+
+    public IReadOnlyList<DensityMode> DensityOptions { get; }
 
     [ObservableProperty]
     private ThemeMode selectedTheme = ThemeMode.System;
@@ -31,6 +34,15 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
 
     [ObservableProperty]
     private ShellMode selectedShell = ShellMode.Sidebar;
+
+    [ObservableProperty]
+    private DensityMode selectedDensity = DensityMode.Comfortable;
+
+    [ObservableProperty]
+    private bool useCustomAccent;
+
+    [ObservableProperty]
+    private string accentHex = string.Empty;
 
     [ObservableProperty]
     private string? errorMessage;
@@ -45,18 +57,87 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
 
     private void Reload()
     {
-        var s = _settings.Current;
-        SelectedTheme = s.Theme;
-        BackdropEnabled = s.BackdropEnabled;
-        SelectedShell = s.Shell;
-        ErrorMessage = null;
+        _reloading = true;
+        try
+        {
+            var s = _settings.Current;
+            SelectedTheme = s.Theme;
+            BackdropEnabled = s.BackdropEnabled;
+            SelectedShell = s.Shell;
+            SelectedDensity = s.Density;
+            UseCustomAccent = s.AccentOverride is not null;
+            AccentHex = s.AccentOverride ?? string.Empty;
+            ErrorMessage = null;
+        }
+        finally
+        {
+            _reloading = false;
+        }
     }
 
-    partial void OnSelectedThemeChanged(ThemeMode value) => _ = PersistAsync(s => s with { Theme = value });
+    private bool _reloading;
 
-    partial void OnBackdropEnabledChanged(bool value) => _ = PersistAsync(s => s with { BackdropEnabled = value });
+    private bool PersistGuard() => _reloading;
 
-    partial void OnSelectedShellChanged(ShellMode value) => _ = PersistAsync(s => s with { Shell = value });
+    partial void OnSelectedThemeChanged(ThemeMode value)
+    {
+        if (!PersistGuard()) _ = PersistAsync(s => s with { Theme = value });
+    }
+
+    partial void OnBackdropEnabledChanged(bool value)
+    {
+        if (!PersistGuard()) _ = PersistAsync(s => s with { BackdropEnabled = value });
+    }
+
+    partial void OnSelectedShellChanged(ShellMode value)
+    {
+        if (!PersistGuard()) _ = PersistAsync(s => s with { Shell = value });
+    }
+
+    partial void OnSelectedDensityChanged(DensityMode value)
+    {
+        if (!PersistGuard()) _ = PersistAsync(s => s with { Density = value });
+    }
+
+    partial void OnUseCustomAccentChanged(bool value)
+    {
+        if (!PersistGuard()) _ = PersistAccentAsync();
+    }
+
+    partial void OnAccentHexChanged(string value)
+    {
+        if (!PersistGuard()) _ = PersistAccentAsync();
+    }
+
+    private async Task PersistAccentAsync()
+    {
+        if (!UseCustomAccent)
+        {
+            await PersistAsync(s => s with { AccentOverride = (string?)null }).ConfigureAwait(true);
+            return;
+        }
+
+        if (!IsValidHex(AccentHex))
+        {
+            ErrorMessage = "Accent must be #RRGGBB or #AARRGGBB.";
+            return;
+        }
+
+        await PersistAsync(s => s with { AccentOverride = AccentHex.Trim() }).ConfigureAwait(true);
+    }
+
+    /// <summary>Hex validation shared with tests (VM surface stays UI-free).</summary>
+    public static bool IsValidHex(string hex)
+    {
+        if (string.IsNullOrWhiteSpace(hex))
+        {
+            return false;
+        }
+
+        hex = hex.Trim().TrimStart('#');
+        return (hex.Length == 6 || hex.Length == 8)
+            && uint.TryParse(hex, System.Globalization.NumberStyles.HexNumber, null, out _);
+    }
 
     private async Task PersistAsync(Func<ShellSettings, ShellSettings> mutate)
     {

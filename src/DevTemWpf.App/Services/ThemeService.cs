@@ -25,20 +25,18 @@ public sealed class ThemeService : IThemeService
         var current = _settings.Current;
         var effective = _backdrop.Current(current.BackdropEnabled);
 
-        switch (current.Theme)
+        ApplicationTheme theme = current.Theme switch
         {
-            case ThemeMode.Light:
-                _applier.Apply(ApplicationTheme.Light, effective);
-                break;
-            case ThemeMode.Dark:
-                _applier.Apply(ApplicationTheme.Dark, effective);
-                break;
-            default:
-                // System mode resolves explicitly so the persisted backdrop
-                // choice is honored (ApplySystemTheme would force Mica).
-                _applier.Apply(_applier.GetSystemApplicationTheme(), effective);
-                break;
-        }
+            ThemeMode.Light => ApplicationTheme.Light,
+            ThemeMode.Dark => ApplicationTheme.Dark,
+            // System mode resolves explicitly so the persisted backdrop
+            // choice is honored (ApplySystemTheme would force Mica).
+            _ => _applier.GetSystemApplicationTheme(),
+        };
+
+        _applier.Apply(theme, effective);
+        // Accent after theme: Apply resets accents to the OS color.
+        _applier.ApplyAccentOverride(current.AccentOverride, theme);
 
         return Task.CompletedTask;
     }

@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Wpf.Ui.Appearance;
 
 namespace DevTemWpf.App;
 
@@ -31,6 +32,17 @@ public partial class App : Application
             await settings.UpdateAsync(static s => s).ConfigureAwait(true);
             var theme = _host.Services.GetRequiredService<DevTemWpf.App.Services.IThemeService>();
             await theme.ApplyCurrentAsync().ConfigureAwait(true);
+
+            // OS theme switches reset accents to the OS color inside WPF-UI;
+            // re-apply only the accent override (accent updates raise no
+            // Changed event, so this cannot recurse).
+            var host = _host;
+            ApplicationThemeManager.Changed += (_, _) =>
+            {
+                var current = host.Services.GetRequiredService<DevTemWpf.App.Services.ISettingsService>().Current;
+                host.Services.GetRequiredService<DevTemWpf.App.Services.IThemeApplier>()
+                    .ApplyAccentOverride(current.AccentOverride, ApplicationThemeManager.GetAppTheme());
+            };
 
             ThemeBootstrap.EnsureLoaded(this);
 

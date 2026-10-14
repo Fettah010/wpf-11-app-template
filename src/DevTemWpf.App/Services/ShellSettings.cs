@@ -11,10 +11,17 @@ public enum ThemeMode
 /// <summary>Shell layout preference (ADR-0005).</summary>
 public enum ShellMode
 {
-    /// <summary>Compact icon rail (<c>LeftCompact</c>).</summary>
+    /// <summary>Compact icon rail (<c>LeftMinimal</c>).</summary>
     Rail = 0,
     /// <summary>Full expandable sidebar (<c>Left</c>).</summary>
     Sidebar = 1,
+}
+
+/// <summary>Spacing density preference (ADR-0007).</summary>
+public enum DensityMode
+{
+    Comfortable = 0,
+    Compact = 1,
 }
 
 /// <summary>Persisted shell preferences (DataContract-free JSON record).</summary>
@@ -23,4 +30,8 @@ public sealed record ShellSettings
     public ThemeMode Theme { get; init; } = ThemeMode.System;
     public bool BackdropEnabled { get; init; } = true;
     public ShellMode Shell { get; init; } = ShellMode.Sidebar;
+    public DensityMode Density { get; init; } = DensityMode.Comfortable;
+
+    /// <summary>Custom accent as <c>#RRGGBB</c> or <c>#AARRGGBB</c>; null = system accent.</summary>
+    public string? AccentOverride { get; init; }
 }
