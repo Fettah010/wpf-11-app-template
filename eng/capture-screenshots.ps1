@@ -3,17 +3,27 @@
 .SYNOPSIS
   Captures real README/docs screenshots of the reference app (dev-only).
 .DESCRIPTION
-  Launches the Release app, maximizes its window, captures the Home page and
-  the Controls gallery page via window-rect screen capture, and saves PNGs to
-  docs/images/. Prints the environment provenance (OS build, theme) that the
-  README caption must record. Not part of any release gate.
+  Launches the Release app, maximizes its window, navigates each requested
+  page, and saves PNGs to the output dir as gallery-<page>.png. Prints the
+  environment provenance (OS build, display) that README captions must
+  record. Not part of any release gate (see eng/compare-screenshots.ps1 for
+  the advisory visual-regression spike).
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File eng/capture-screenshots.ps1
+  powershell -ExecutionPolicy Bypass -File eng/capture-screenshots.ps1 -Pages Home,Controls,Settings -OutDir docs/images/baselines
 #>
+param(
+  # Comma-separated page names (single string: arrays do not survive
+  # powershell -File argument passing).
+  [string]$Pages = 'Home,Controls',
+  [string]$OutDir = ''
+)
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$imgDir = Join-Path $root 'docs\images'
+if ([string]::IsNullOrWhiteSpace($OutDir)) { $imgDir = Join-Path $root 'docs\images' }
+elseif ([IO.Path]::IsPathRooted($OutDir)) { $imgDir = $OutDir }
+else { $imgDir = Join-Path $root $OutDir }
 New-Item -ItemType Directory -Path $imgDir -Force | Out-Null
 
 Add-Type -AssemblyName System.Drawing
@@ -63,6 +73,42 @@ function Capture-Window([string]$Path) {
   }
 }
 
+function Navigate-ToPage([string]$Page) {
+  $root_el = [System.Windows.Automation.AutomationElement]::FromHandle($proc.MainWindowHandle)
+  $typeCond = New-Object System.Windows.Automation.PropertyCondition(
+    [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
+    [System.Windows.Automation.ControlType]::DataItem)
+  $nameCond = New-Object System.Windows.Automation.PropertyCondition(
+    [System.Windows.Automation.AutomationElement]::NameProperty, $Page)
+  $nav = $root_el.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
+    (New-Object System.Windows.Automation.AndCondition($typeCond, $nameCond)))
+  if ($nav -eq $null) { throw "$Page nav DataItem not found." }
+  $activated = $false
+  foreach ($patternId in @(
+    [System.Windows.Automation.InvokePattern]::Pattern,
+    [System.Windows.Automation.SelectionItemPattern]::Pattern)) {
+    try {
+      $pattern = $nav.GetCurrentPattern($patternId)
+      if ($patternId -eq [System.Windows.Automation.InvokePattern]::Pattern) { $pattern.Invoke() }
+      else { $pattern.Select() }
+      $activated = $true
+      break
+    } catch { }
+  }
+  if (-not $activated) {
+    # Fallback: click the center of the item's bounding rectangle
+    # (mirrors FlaUI Click()).
+    $r = $nav.Current.BoundingRectangle
+    if ($r.Width -le 0 -or $r.Height -le 0) { throw "$Page nav item has an empty bounding rectangle." }
+    [void][DevTem.Win32]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
+    Start-Sleep -Milliseconds 200
+    [void][DevTem.Win32]::SetForegroundWindow($proc.MainWindowHandle)
+    [DevTem.Win32]::mouse_event(0x0002, 0, 0, 0, [System.UIntPtr]::Zero)  # LEFTDOWN
+    [DevTem.Win32]::mouse_event(0x0004, 0, 0, 0, [System.UIntPtr]::Zero)  # LEFTUP
+    $activated = $true
+  }
+}
+
 $proc = Start-Process -FilePath $exe -PassThru
 try {
   $deadline = (Get-Date).AddSeconds(20)
@@ -81,41 +127,12 @@ try {
 
   Capture-Window (Join-Path $imgDir 'gallery-home.png')
 
-  $root_el = [System.Windows.Automation.AutomationElement]::FromHandle($proc.MainWindowHandle)
-  $typeCond = New-Object System.Windows.Automation.PropertyCondition(
-    [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
-    [System.Windows.Automation.ControlType]::DataItem)
-  $nameCond = New-Object System.Windows.Automation.PropertyCondition(
-    [System.Windows.Automation.AutomationElement]::NameProperty, 'Controls')
-  $nav = $root_el.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
-    (New-Object System.Windows.Automation.AndCondition($typeCond, $nameCond)))
-  if ($nav -eq $null) { throw 'Controls nav DataItem not found.' }
-  $activated = $false
-  foreach ($patternId in @(
-    [System.Windows.Automation.InvokePattern]::Pattern,
-    [System.Windows.Automation.SelectionItemPattern]::Pattern)) {
-    try {
-      $pattern = $nav.GetCurrentPattern($patternId)
-      if ($patternId -eq [System.Windows.Automation.InvokePattern]::Pattern) { $pattern.Invoke() }
-      else { $pattern.Select() }
-      $activated = $true
-      break
-    } catch { }
+  foreach ($page in ($Pages -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })) {
+    if ($page -eq 'Home') { continue }
+    Navigate-ToPage $page
+    Start-Sleep -Seconds 2
+    Capture-Window (Join-Path $imgDir ("gallery-$($page.ToLowerInvariant()).png"))
   }
-  if (-not $activated) {
-    # Fallback: click the center of the item's bounding rectangle
-    # (mirrors FlaUI Click()).
-    $r = $nav.Current.BoundingRectangle
-    if ($r.Width -le 0 -or $r.Height -le 0) { throw 'Controls nav item has an empty bounding rectangle.' }
-    [void][DevTem.Win32]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + $r.Height / 2))
-    Start-Sleep -Milliseconds 200
-    [void][DevTem.Win32]::SetForegroundWindow($proc.MainWindowHandle)
-    [DevTem.Win32]::mouse_event(0x0002, 0, 0, 0, [System.UIntPtr]::Zero)  # LEFTDOWN
-    [DevTem.Win32]::mouse_event(0x0004, 0, 0, 0, [System.UIntPtr]::Zero)  # LEFTUP
-    $activated = $true
-  }
-  Start-Sleep -Seconds 2
-  Capture-Window (Join-Path $imgDir 'gallery-controls.png')
 }
 finally {
   if (-not $proc.HasExited) { $proc.Kill(); $proc.WaitForExit(5000) | Out-Null }
