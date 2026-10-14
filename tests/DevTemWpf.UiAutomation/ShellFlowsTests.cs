@@ -25,6 +25,11 @@ public sealed class ShellFlowsTests : IDisposable
                 if (!app.HasExited)
                 {
                     app.Kill();
+                    var deadline = DateTime.UtcNow.AddSeconds(5);
+                    while (!app.HasExited && DateTime.UtcNow < deadline)
+                    {
+                        Thread.Sleep(100);
+                    }
                 }
 
                 app.Dispose();
@@ -265,6 +270,9 @@ public sealed class ShellFlowsTests : IDisposable
         {
             foreach (var (navItem, contentName) in stops)
             {
+                // Foreground first: coordinate clicks land reliably only when
+                // our window is frontmost (parallel runs steal focus otherwise).
+                window.Focus();
                 try
                 {
                     // Coordinate click: proven path for nav items (all visible).
