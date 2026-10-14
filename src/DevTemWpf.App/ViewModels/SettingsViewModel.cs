@@ -6,8 +6,7 @@ namespace DevTemWpf.App.ViewModels;
 
 /// <summary>Settings page ViewModel: live-apply + persist shell preferences.</summary>
 public sealed partial class SettingsViewModel : ObservableObject, INavigationAware
-{
-    private readonly ISettingsService _settings;
+{    private readonly ISettingsService _settings;
     private readonly IThemeService _theme;
 
     public SettingsViewModel(ISettingsService settings, IThemeService theme)
@@ -29,6 +28,13 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
 
     public IReadOnlyList<MotionMode> MotionOptions { get; }
 
+    public IReadOnlyList<CultureOption> CultureOptions { get; } =
+    [
+        new(string.Empty, "System"),
+        new("en", "English"),
+        new("de", "Deutsch"),
+    ];
+
     [ObservableProperty]
     private ThemeMode selectedTheme = ThemeMode.System;
 
@@ -46,6 +52,12 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
 
     [ObservableProperty]
     private bool effectsEnabled = true;
+
+    [ObservableProperty]
+    private bool minimizeToTray;
+
+    [ObservableProperty]
+    private string selectedCulture = string.Empty;
 
     [ObservableProperty]
     private bool useCustomAccent;
@@ -76,6 +88,8 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
             SelectedDensity = s.Density;
             SelectedMotion = s.Motion;
             EffectsEnabled = s.EffectsEnabled;
+            MinimizeToTray = s.MinimizeToTray;
+            SelectedCulture = s.Culture;
             UseCustomAccent = s.AccentOverride is not null;
             AccentHex = s.AccentOverride ?? string.Empty;
             ErrorMessage = null;
@@ -118,6 +132,16 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
     partial void OnEffectsEnabledChanged(bool value)
     {
         if (!PersistGuard()) _ = PersistAsync(s => s with { EffectsEnabled = value });
+    }
+
+    partial void OnMinimizeToTrayChanged(bool value)
+    {
+        if (!PersistGuard()) _ = PersistAsync(s => s with { MinimizeToTray = value });
+    }
+
+    partial void OnSelectedCultureChanged(string value)
+    {
+        if (!PersistGuard()) _ = PersistAsync(s => s with { Culture = value });
     }
 
     partial void OnUseCustomAccentChanged(bool value)
@@ -174,3 +198,6 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
         }
     }
 }
+
+/// <summary>Culture selector entry (code = BCP-47 or empty for system).</summary>
+public sealed record CultureOption(string Code, string Display);

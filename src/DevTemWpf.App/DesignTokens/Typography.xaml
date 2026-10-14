@@ -4,6 +4,7 @@
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
 
   <FontFamily x:Key="AppFontFamily">Segoe UI Variable, Segoe UI</FontFamily>
+  <FontFamily x:Key="AppMonoFontFamily">Cascadia Mono, Consolas</FontFamily>
 
   <Style x:Key="AppDisplayText" TargetType="TextBlock">
     <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />

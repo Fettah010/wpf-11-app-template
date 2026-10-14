@@ -27,6 +27,9 @@ public sealed class SettingsServiceTests : IDisposable
                 AccentOverride = "#4CC2FF",
                 Motion = MotionMode.Reduced,
                 EffectsEnabled = false,
+                UpdateChannel = UpdateChannel.Beta,
+                MinimizeToTray = true,
+                Culture = "de",
             },
             TestContext.Current.CancellationToken);
 
@@ -38,6 +41,8 @@ public sealed class SettingsServiceTests : IDisposable
         Assert.Equal(ShellMode.Rail, reloaded.Current.Shell);
         Assert.Equal(DensityMode.Compact, reloaded.Current.Density);
         Assert.Equal("#4CC2FF", reloaded.Current.AccentOverride);
+        Assert.Equal(MotionMode.Reduced, reloaded.Current.Motion);
+        Assert.False(reloaded.Current.EffectsEnabled);
         Assert.Equal(MotionMode.Reduced, reloaded.Current.Motion);
         Assert.False(reloaded.Current.EffectsEnabled);
     }

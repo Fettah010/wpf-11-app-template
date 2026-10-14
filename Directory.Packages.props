@@ -20,6 +20,7 @@
     <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.12" />
     <PackageVersion Include="Velopack" Version="1.2.161" />
     <PackageVersion Include="WPF-UI.Tray" Version="4.3.0" />
     <!-- Charts (ADR-0010): optional dashboard module only. Audited 2026-10-14:

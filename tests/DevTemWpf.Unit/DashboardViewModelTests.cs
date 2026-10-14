@@ -3,9 +3,19 @@ using DevTemWpf.App.ViewModels;
 
 namespace DevTemWpf.Unit;
 
-public sealed class DashboardViewModelTests
+public sealed class DashboardViewModelTests : IDisposable
 {
-    private static DashboardViewModel Create() => new(new SampleDataService());
+    private readonly string _db = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".db");
+
+    public void Dispose()
+    {
+        foreach (var suffix in new[] { "", "-wal", "-shm", "-journal" })
+        {
+            try { File.Delete(_db + suffix); } catch { /* best effort */ }
+        }
+    }
+
+    private DashboardViewModel Create() => new(new SampleDataService(), new FavoritesStore(_db));
 
     [Fact]
     public void Filter_NoMatch_ReportsEmptyState()
@@ -80,6 +90,19 @@ public sealed class DashboardViewModelTests
         Assert.Same(row, vm.SelectedActivity);
         vm.ClearSelectionCommand.Execute(null);
         Assert.Null(vm.SelectedActivity);
+    }
+
+    [Fact]
+    public void Favorite_TogglesAndPersists()
+    {
+        var vm = Create();
+        var row = vm.Activities.Cast<ActivityItem>().First();
+        vm.SelectedActivity = row;
+
+        vm.ToggleFavoriteCommand.Execute(null);
+
+        Assert.Contains("★", vm.FavoriteGlyph);
+        Assert.True(new FavoritesStore(_db).IsFavorite(row.Id));
     }
 
     [Fact]

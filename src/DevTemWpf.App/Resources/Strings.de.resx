@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="Nav_Home" xml:space="preserve"><value>Start</value></data>
+  <data name="Nav_Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="Nav_Controls" xml:space="preserve"><value>Steuerelemente</value></data>
+  <data name="Nav_Tokens" xml:space="preserve"><value>Design-Tokens</value></data>
+  <data name="Nav_Effects" xml:space="preserve"><value>Effekte</value></data>
+  <data name="Nav_Settings" xml:space="preserve"><value>Einstellungen</value></data>
+  <data name="Nav_Diagnostics" xml:space="preserve"><value>Diagnose</value></data>
+  <data name="Settings_Appearance" xml:space="preserve"><value>Darstellung</value></data>
+  <data name="Settings_Theme" xml:space="preserve"><value>Design</value></data>
+  <data name="Settings_Accent" xml:space="preserve"><value>Akzentfarbe</value></data>
+  <data name="Settings_NavigationStyle" xml:space="preserve"><value>Navigation</value></data>
+  <data name="Settings_Density" xml:space="preserve"><value>Dichte</value></data>
+  <data name="Settings_Motion" xml:space="preserve"><value>Bewegung</value></data>
+  <data name="Settings_Language" xml:space="preserve"><value>Sprache</value></data>
+  <data name="Settings_LanguageNote" xml:space="preserve"><value>Die Sprache wird nach einem Neustart übernommen.</value></data>
+  <data name="Settings_RestartNow" xml:space="preserve"><value>Jetzt neu starten</value></data>
+</root>

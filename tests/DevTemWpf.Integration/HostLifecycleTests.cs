@@ -37,6 +37,11 @@ public sealed class HostLifecycleTests
             Assert.NotNull(host.Services.GetRequiredService<Wpf.Ui.IContentDialogService>());
             Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.IMotionService>());
             Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.SampleDataService>());
+            Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.FavoritesStore>());
+            Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.IBackupService>());
+            Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.IUpdateService>());
+            Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.StatusClient>());
+            Assert.NotNull(host.Services.GetRequiredService<Wpf.Ui.Tray.INotifyIconService>());
             Assert.NotNull(host.Services.GetRequiredService<HomeViewModel>());
             Assert.NotNull(host.Services.GetRequiredService<SettingsViewModel>());
 
@@ -46,12 +51,14 @@ public sealed class HostLifecycleTests
             var controls = host.Services.GetRequiredService<ControlsPage>();
             var effects = host.Services.GetRequiredService<EffectsPage>();
             var dashboard = host.Services.GetRequiredService<DashboardPage>();
+            var diagnostics = host.Services.GetRequiredService<DiagnosticsPage>();
             Assert.Same(home, home.DataContext);
             Assert.Same(settings, settings.DataContext);
             Assert.Same(tokens, tokens.DataContext);
             Assert.Same(controls, controls.DataContext);
             Assert.Same(effects, effects.DataContext);
             Assert.Same(dashboard, dashboard.DataContext);
+            Assert.Same(diagnostics, diagnostics.DataContext);
             Assert.NotNull(home.ViewModel);
             Assert.NotNull(settings.ViewModel);
             Assert.NotNull(tokens.ViewModel);
@@ -59,6 +66,7 @@ public sealed class HostLifecycleTests
             Assert.NotNull(controls.ViewModel.Form);
             Assert.NotNull(effects.ViewModel);
             Assert.NotNull(dashboard.ViewModel);
+            Assert.NotNull(diagnostics.ViewModel);
 
             // The activity table must stay virtualized (never wrapped in a
             // non-virtualizing scroller): 1500 rows depend on it.

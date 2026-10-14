@@ -22,7 +22,9 @@ public static class AppComposition
         builder.Services.AddSingleton<ISettingsService, SettingsService>();
 
         // Dashboard sample data (ADR-0010; excluded from clean scaffolds)
-        builder.Services.AddSingleton<SampleDataService>();        builder.Services.AddSingleton<IBackdropService, BackdropService>();
+        builder.Services.AddSingleton<SampleDataService>();
+
+        builder.Services.AddSingleton<IBackdropService, BackdropService>();
         builder.Services.AddSingleton<IThemeApplier, WpfUiThemeApplier>();
         builder.Services.AddSingleton<IThemeService, ThemeService>();
         builder.Services.AddSingleton<IMotionService, MotionService>();
@@ -37,6 +39,25 @@ public static class AppComposition
         builder.Services.AddSingleton<Wpf.Ui.ISnackbarService, Wpf.Ui.SnackbarService>();
         builder.Services.AddSingleton<Wpf.Ui.IContentDialogService, Wpf.Ui.ContentDialogService>();
 
+        // Production services (ADR-0011). Each is inert without configuration;
+        // the 0.8.0 template drops the matching file set + lines + packages.
+        builder.Services.Configure<HttpOptions>(
+            builder.Configuration.GetSection(HttpOptions.SectionName));
+        builder.Services.Configure<UpdateOptions>(
+            builder.Configuration.GetSection(UpdateOptions.SectionName));
+        builder.Services.AddSingleton<FavoritesStore>();
+        builder.Services.AddSingleton<IBackupService, BackupService>();
+        builder.Services.AddSingleton<IUpdateService, UpdateService>();
+        builder.Services.AddSingleton<Wpf.Ui.Tray.INotifyIconService, Wpf.Ui.Tray.NotifyIconService>();
+        builder.Services.AddHttpClient<StatusClient>((sp, client) =>
+        {
+            var baseUrl = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<HttpOptions>>().Value.BaseUrl;
+            if (Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri))
+            {
+                client.BaseAddress = uri;
+            }
+        });
+
         // Shell + pages
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddTransient<MainWindow>();
@@ -45,12 +66,14 @@ public static class AppComposition
         builder.Services.AddTransient<TokensViewModel>();
         builder.Services.AddTransient<ControlsViewModel>();
         builder.Services.AddTransient<DashboardViewModel>();
+        builder.Services.AddTransient<DiagnosticsViewModel>();
         builder.Services.AddTransient<EffectsViewModel>();
         builder.Services.AddTransient<FormViewModel>();
         builder.Services.AddTransient<HomePage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<TokensPage>();
         builder.Services.AddTransient<DashboardPage>();
+        builder.Services.AddTransient<DiagnosticsPage>();
         builder.Services.AddTransient<EffectsPage>();
         builder.Services.AddTransient<ControlsPage>();
         return builder;

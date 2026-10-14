@@ -36,6 +36,7 @@ public sealed class MainViewModelTests : IDisposable
         Assert.Contains(vm.MenuItems.OfType<NavigationViewItem>(), i => i.TargetPageType == typeof(ControlsPage));
         Assert.Contains(vm.MenuItems.OfType<NavigationViewItem>(), i => i.TargetPageType == typeof(TokensPage));
         Assert.Contains(vm.MenuItems.OfType<NavigationViewItem>(), i => i.TargetPageType == typeof(EffectsPage));
+        Assert.Contains(vm.MenuItems.OfType<NavigationViewItem>(), i => i.TargetPageType == typeof(DiagnosticsPage));
         Assert.Contains(vm.FooterMenuItems.OfType<NavigationViewItem>(), i => i.TargetPageType == typeof(SettingsPage));
     }
 

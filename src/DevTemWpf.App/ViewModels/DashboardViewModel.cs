@@ -21,11 +21,13 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
     ];
 
     private readonly List<ActivityItem> _all;
+    private readonly FavoritesStore _favorites;
     private string _sortColumn = nameof(ActivityItem.Timestamp);
     private ListSortDirection _sortDirection = ListSortDirection.Descending;
 
-    public DashboardViewModel(SampleDataService data)
+    public DashboardViewModel(SampleDataService data, FavoritesStore favorites)
     {
+        _favorites = favorites;
         Metrics = data.GetMetrics();
         _all = data.GetActivities().ToList();
         Activities = CollectionViewSource.GetDefaultView(_all);
@@ -61,6 +63,9 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
     private ActivityItem? selectedActivity;
 
     [ObservableProperty]
+    private string favoriteGlyph = "☆ Mark favorite";
+
+    [ObservableProperty]
     private string sortStatusText = string.Empty;
 
     [ObservableProperty]
@@ -94,6 +99,27 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
 
     [RelayCommand]
     private void ClearSelection() => SelectedActivity = null;
+
+    [RelayCommand]
+    private void ToggleFavorite()
+    {
+        if (SelectedActivity is null)
+        {
+            return;
+        }
+
+        _favorites.ToggleFavorite(SelectedActivity.Id);
+        UpdateFavoriteGlyph();
+    }
+
+    partial void OnSelectedActivityChanged(ActivityItem? value) => UpdateFavoriteGlyph();
+
+    private void UpdateFavoriteGlyph()
+    {
+        FavoriteGlyph = SelectedActivity is not null && _favorites.IsFavorite(SelectedActivity.Id)
+            ? "★ Favorited — tap to remove"
+            : "☆ Mark favorite";
+    }
 
     [RelayCommand]
     private void SortBy(string column)

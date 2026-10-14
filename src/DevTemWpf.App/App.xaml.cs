@@ -43,6 +43,10 @@ public partial class App : Application
             await settings.LoadAsync().ConfigureAwait(true);
             // Persist (creates the file on first run, repairs corrupt files).
             await settings.UpdateAsync(static s => s).ConfigureAwait(true);
+            if (!DevTemWpf.App.Services.CultureService.ApplyCulture(settings.Current.Culture))
+            {
+                startupLog.LogWarning("Unknown culture '{Culture}'; using system culture.", settings.Current.Culture);
+            }
             var theme = _host.Services.GetRequiredService<DevTemWpf.App.Services.IThemeService>();
             await theme.ApplyCurrentAsync().ConfigureAwait(true);
 

@@ -39,4 +39,11 @@ public sealed record ShellSettings
 
     /// <summary>Master switch for premium effects (ripple, animated surfaces).</summary>
     public bool EffectsEnabled { get; init; } = true;
+
+    public UpdateChannel UpdateChannel { get; init; } = UpdateChannel.Stable;
+
+    public bool MinimizeToTray { get; init; }
+
+    /// <summary>UI culture name (e.g. "de"); empty = system culture.</summary>
+    public string Culture { get; init; } = string.Empty;
 }

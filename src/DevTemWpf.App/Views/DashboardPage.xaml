@@ -125,7 +125,9 @@
           <TextBlock Text="{Binding ViewModel.SelectedActivity.Timestamp, StringFormat={}{0:g}, TargetNullValue=''}"
                      Style="{StaticResource AppCaptionText}" Margin="0,0,0,8" />
           <ui:Button Content="Clear selection" Command="{Binding ViewModel.ClearSelectionCommand}"
-                     AutomationProperties.Name="Clear activity selection" />
+                     AutomationProperties.Name="Clear activity selection" Margin="0,0,0,8" />
+          <ui:Button Content="{Binding ViewModel.FavoriteGlyph}" Command="{Binding ViewModel.ToggleFavoriteCommand}"
+                     AutomationProperties.Name="Toggle favorite" />
         </StackPanel>
       </ui:Card>
     </Grid>

@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Windows;
 using System.Windows.Controls;
 using DevTemWpf.App.Services;
 using DevTemWpf.App.ViewModels;
@@ -17,4 +19,15 @@ public partial class SettingsPage : Page, INavigableView<SettingsViewModel>
     }
 
     public SettingsViewModel ViewModel { get; }
+
+    private void OnRestartClick(object sender, RoutedEventArgs e)
+    {
+        var exe = Environment.ProcessPath;
+        if (!string.IsNullOrEmpty(exe))
+        {
+            _ = Process.Start(new ProcessStartInfo(exe) { UseShellExecute = true });
+        }
+
+        Application.Current.Shutdown();
+    }
 }
