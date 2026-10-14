@@ -10,31 +10,31 @@
   <ScrollViewer Padding="{StaticResource AppPageMargin}"
                 AutomationProperties.Name="Design token preview">
     <StackPanel MaxWidth="{StaticResource AppContentMaxWidth}">
-      <TextBlock Text="Design tokens" Style="{StaticResource AppSubtitleText}" Margin="0,0,0,4" />
+      <TextBlock Text="Design tokens" Style="{StaticResource AppSubtitleText}" Margin="{StaticResource AppGapTitle}" />
       <TextBlock Text="Live preview of the App* token layer. Switch theme, density, or accent in Settings to see every swatch follow."
-                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="0,0,0,16" />
+                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapSection}" />
 
-      <TextBlock Text="Colors" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,8" />
-      <UniformGrid Columns="2" Margin="0,0,0,16">
-        <Border Background="{DynamicResource AppTextPrimaryBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="0,0,8,8">
+      <TextBlock Text="Colors" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapItem}" />
+      <UniformGrid Columns="2" Margin="{StaticResource AppGapSection}">
+        <Border Background="{DynamicResource AppTextPrimaryBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="{StaticResource AppGapFlow}">
           <TextBlock Text="Text / Primary" Style="{StaticResource AppCaptionText}" />
         </Border>
-        <Border Background="{DynamicResource AppTextSecondaryBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="0,0,0,8">
+        <Border Background="{DynamicResource AppTextSecondaryBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="{StaticResource AppGapItem}">
           <TextBlock Text="Text / Secondary" Style="{StaticResource AppCaptionText}" />
         </Border>
-        <Border Background="{DynamicResource AppAccentBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="0,0,8,8">
+        <Border Background="{DynamicResource AppAccentBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="{StaticResource AppGapFlow}">
           <TextBlock Text="Accent" Style="{StaticResource AppCaptionText}" />
         </Border>
-        <Border Background="{DynamicResource AppCardBackgroundBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="{StaticResource AppBorderThickness}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="0,0,0,8">
+        <Border Background="{DynamicResource AppCardBackgroundBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="{StaticResource AppBorderThickness}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="{StaticResource AppGapItem}">
           <TextBlock Text="Card / Border" Style="{StaticResource AppBodyText}" />
         </Border>
-        <Border Background="{DynamicResource AppSuccessBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="0,0,8,8">
+        <Border Background="{DynamicResource AppSuccessBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="{StaticResource AppGapFlow}">
           <TextBlock Text="Status / Success" Style="{StaticResource AppCaptionText}" />
         </Border>
-        <Border Background="{DynamicResource AppCautionBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="0,0,0,8">
+        <Border Background="{DynamicResource AppCautionBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="{StaticResource AppGapItem}">
           <TextBlock Text="Status / Caution" Style="{StaticResource AppCaptionText}" />
         </Border>
-        <Border Background="{DynamicResource AppErrorBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="0,0,8,0">
+        <Border Background="{DynamicResource AppErrorBrush}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}" Margin="{StaticResource AppGapFlow}">
           <TextBlock Text="Status / Error" Style="{StaticResource AppCaptionText}" />
         </Border>
         <Border Background="{DynamicResource AppSubtleBackgroundBrush}" BorderBrush="{DynamicResource AppDividerBrush}" BorderThickness="{StaticResource AppBorderThickness}" CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}">
@@ -42,8 +42,8 @@
         </Border>
       </UniformGrid>
 
-      <TextBlock Text="Typography" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,8" />
-      <StackPanel Margin="0,0,0,16">
+      <TextBlock Text="Typography" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapItem}" />
+      <StackPanel Margin="{StaticResource AppGapSection}">
         <TextBlock Text="Display 32" Style="{StaticResource AppDisplayText}" />
         <TextBlock Text="Title 22" Style="{StaticResource AppTitleText}" />
         <TextBlock Text="Subtitle 18" Style="{StaticResource AppSubtitleText}" />
@@ -53,13 +53,13 @@
         <TextBlock Text="Caption 12." Style="{StaticResource AppCaptionText}" />
       </StackPanel>
 
-      <TextBlock Text="Spacing &amp; shapes" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,8" />
-      <StackPanel Margin="0,0,0,16">
+      <TextBlock Text="Spacing &amp; shapes" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapItem}" />
+      <StackPanel Margin="{StaticResource AppGapSection}">
         <Border Height="{StaticResource AppSectionSpacing}" Background="{DynamicResource AppAccentSecondaryBrush}"
-                CornerRadius="{StaticResource AppCornerRadiusSmall}" Margin="0,0,0,8"
+                CornerRadius="{StaticResource AppCornerRadiusSmall}" Margin="{StaticResource AppGapItem}"
                 AutomationProperties.Name="Section spacing visual" />
         <Border Height="{StaticResource AppItemSpacing}" Background="{DynamicResource AppAccentSecondaryBrush}"
-                CornerRadius="{StaticResource AppCornerRadiusSmall}" Margin="0,0,0,8"
+                CornerRadius="{StaticResource AppCornerRadiusSmall}" Margin="{StaticResource AppGapItem}"
                 AutomationProperties.Name="Item spacing visual" />
         <Border Height="48" CornerRadius="{StaticResource AppCornerRadiusLarge}"
                 Background="{DynamicResource AppCardBackgroundBrush}"
@@ -67,12 +67,12 @@
                 AutomationProperties.Name="Large radius sample" />
       </StackPanel>
 
-      <TextBlock Text="States" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,8" />
+      <TextBlock Text="States" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapItem}" />
       <StackPanel>
-        <ui:Button Content="Standard button" AutomationProperties.Name="Preview standard button" Margin="0,0,0,8" />
-        <ui:Button Content="Disabled button" IsEnabled="False" AutomationProperties.Name="Preview disabled button" Margin="0,0,0,8" />
-        <CheckBox Content="Standard check box" AutomationProperties.Name="Preview check box" Margin="0,0,0,8" />
-        <TextBox Text="Editable text" AutomationProperties.Name="Preview text input" Margin="0,0,0,8" />
+        <ui:Button Content="Standard button" AutomationProperties.Name="Preview standard button" Margin="{StaticResource AppGapItem}" />
+        <ui:Button Content="Disabled button" IsEnabled="False" AutomationProperties.Name="Preview disabled button" Margin="{StaticResource AppGapItem}" />
+        <CheckBox Content="Standard check box" AutomationProperties.Name="Preview check box" Margin="{StaticResource AppGapItem}" />
+        <TextBox Text="Editable text" AutomationProperties.Name="Preview text input" Margin="{StaticResource AppGapItem}" />
         <TextBlock Text="Something needs attention." Style="{StaticResource AppErrorText}" />
       </StackPanel>
     </StackPanel>

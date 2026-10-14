@@ -19,7 +19,7 @@
 
     <!-- Stat cards -->
     <ItemsControl Grid.Row="0" ItemsSource="{Binding ViewModel.Metrics}"
-                  AutomationProperties.Name="Key metrics" Margin="0,0,0,12">
+                  AutomationProperties.Name="Key metrics" Margin="{StaticResource AppGapGroup}">
       <ItemsControl.ItemsPanel>
         <ItemsPanelTemplate>
           <WrapPanel />
@@ -27,7 +27,7 @@
       </ItemsControl.ItemsPanel>
       <ItemsControl.ItemTemplate>
         <DataTemplate>
-          <ui:Card MinWidth="160" Margin="0,0,8,8" Padding="{StaticResource AppCardPadding}">
+          <ui:Card MinWidth="160" Margin="{StaticResource AppGapFlow}" Padding="{StaticResource AppCardPadding}">
             <StackPanel>
               <TextBlock Text="{Binding Value}" Style="{StaticResource AppTitleText}" />
               <TextBlock Text="{Binding Label}" Style="{StaticResource AppCaptionText}" />
@@ -39,23 +39,23 @@
     </ItemsControl>
 
     <!-- Chart -->
-    <ui:Card Grid.Row="1" Margin="0,0,0,12" Padding="{StaticResource AppCardPadding}"
+    <ui:Card Grid.Row="1" Margin="{StaticResource AppGapGroup}" Padding="{StaticResource AppCardPadding}"
              AutomationProperties.Name="Weekly activity chart card">
       <StackPanel>
-        <TextBlock Text="Completed tasks, last 7 days" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,8" />
+        <TextBlock Text="Completed tasks, last 7 days" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapItem}" />
         <lvc:CartesianChart Series="{Binding ViewModel.Series}" XAxes="{Binding ViewModel.XAxes}"
                             Height="200" AutomationProperties.Name="Weekly activity chart" />
       </StackPanel>
     </ui:Card>
 
     <!-- Table + detail -->
-    <Grid Grid.Row="2">
+    <Grid Grid.Row="2" Margin="{StaticResource AppGapGroup}">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="2*" />
         <ColumnDefinition Width="*" MinWidth="240" />
       </Grid.ColumnDefinitions>
 
-      <Grid Grid.Column="0" Margin="0,0,12,0">
+      <Grid Grid.Column="0" Margin="{StaticResource AppGapGutter}">
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto" />
           <RowDefinition Height="*" />
@@ -64,7 +64,7 @@
         </Grid.RowDefinitions>
         <ui:TextBox Grid.Row="0" PlaceholderText="Filter by name, category, or status…"
                     Text="{Binding ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    AutomationProperties.Name="Activity filter" Margin="0,0,0,8" />
+                    AutomationProperties.Name="Activity filter" Margin="{StaticResource AppGapItem}" />
         <ListView Grid.Row="1" x:Name="ActivityTable" ItemsSource="{Binding ViewModel.Activities}"
                   SelectedItem="{Binding ViewModel.SelectedActivity, Mode=TwoWay}"
                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
@@ -113,7 +113,7 @@
       <ui:Card Grid.Column="1" Padding="{StaticResource AppCardPadding}"
                AutomationProperties.Name="Activity detail">
         <StackPanel>
-          <TextBlock Text="Detail" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,8" />
+          <TextBlock Text="Detail" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapItem}" />
           <TextBlock Text="{Binding ViewModel.SelectedActivity.Name, FallbackValue=Select a row…, TargetNullValue=Select a row…}"
                      Style="{StaticResource AppBodyText}" TextWrapping="Wrap" />
           <TextBlock Text="{Binding ViewModel.SelectedActivity.Category, StringFormat=Category: {0}, TargetNullValue=''}"
@@ -123,9 +123,9 @@
           <TextBlock Text="{Binding ViewModel.SelectedActivity.Value, StringFormat=Value: {0}, TargetNullValue=''}"
                      Style="{StaticResource AppCaptionText}" />
           <TextBlock Text="{Binding ViewModel.SelectedActivity.Timestamp, StringFormat={}{0:g}, TargetNullValue=''}"
-                     Style="{StaticResource AppCaptionText}" Margin="0,0,0,8" />
+                     Style="{StaticResource AppCaptionText}" Margin="{StaticResource AppGapItem}" />
           <ui:Button Content="Clear selection" Command="{Binding ViewModel.ClearSelectionCommand}"
-                     AutomationProperties.Name="Clear activity selection" Margin="0,0,0,8" />
+                     AutomationProperties.Name="Clear activity selection" Margin="{StaticResource AppGapItem}" />
           <ui:Button Content="{Binding ViewModel.FavoriteGlyph}" Command="{Binding ViewModel.ToggleFavoriteCommand}"
                      AutomationProperties.Name="Toggle favorite" />
         </StackPanel>
@@ -133,17 +133,17 @@
     </Grid>
 
     <!-- Stepper -->
-    <ui:Card Grid.Row="3" Margin="0,12,0,0" Padding="{StaticResource AppCardPadding}"
+    <ui:Card Grid.Row="3" Padding="{StaticResource AppCardPadding}"
              AutomationProperties.Name="Setup stepper">
       <StackPanel>
         <TextBlock Text="{Binding ViewModel.StepTitle}" Style="{StaticResource AppSectionHeadingText}" />
         <TextBlock Text="{Binding ViewModel.StepBody}" Style="{StaticResource AppSecondaryBodyText}"
                    TextWrapping="Wrap" Margin="0,4,0,8" />
-        <ProgressBar Value="{Binding ViewModel.StepProgress, Mode=OneWay}" Minimum="0" Maximum="100" Height="6" Margin="0,0,0,8"
+        <ProgressBar Value="{Binding ViewModel.StepProgress, Mode=OneWay}" Minimum="0" Maximum="100" Height="6" Margin="{StaticResource AppGapItem}"
                      AutomationProperties.Name="Setup progress" />
         <StackPanel Orientation="Horizontal">
           <ui:Button Content="Back" Command="{Binding ViewModel.PreviousStepCommand}"
-                     AutomationProperties.Name="Stepper back" Margin="0,0,8,0" />
+                     AutomationProperties.Name="Stepper back" Margin="{StaticResource AppGapFlow}" />
           <ui:Button Content="Next" Command="{Binding ViewModel.NextStepCommand}" Appearance="Primary"
                      AutomationProperties.Name="Stepper next" />
         </StackPanel>

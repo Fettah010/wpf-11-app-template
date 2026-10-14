@@ -11,57 +11,57 @@
   <ScrollViewer Padding="{StaticResource AppPageMargin}"
                 AutomationProperties.Name="Application settings">
     <StackPanel MaxWidth="{StaticResource AppContentMaxWidth}">
-      <TextBlock Text="{x:Static res:Strings.Settings_Appearance}" Style="{StaticResource AppSubtitleText}" Margin="0,0,0,12" />
+      <TextBlock Text="{x:Static res:Strings.Settings_Appearance}" Style="{StaticResource AppSubtitleText}" Margin="{StaticResource AppGapGroup}" />
 
-      <TextBlock Text="{x:Static res:Strings.Settings_Theme}" Style="{StaticResource AppBodyText}" Margin="0,0,0,4" />
+      <TextBlock Text="{x:Static res:Strings.Settings_Theme}" Style="{StaticResource AppBodyText}" Margin="{StaticResource AppGapTitle}" />
       <ComboBox ItemsSource="{Binding ViewModel.ThemeOptions}"
                 SelectedItem="{Binding ViewModel.SelectedTheme, Mode=TwoWay}"
-                AutomationProperties.Name="Theme selector" Margin="0,0,0,12" />
+                AutomationProperties.Name="Theme selector" Margin="{StaticResource AppGapGroup}" />
 
-      <TextBlock Text="{x:Static res:Strings.Settings_Accent}" Style="{StaticResource AppBodyText}" Margin="0,0,0,4" />
+      <TextBlock Text="{x:Static res:Strings.Settings_Accent}" Style="{StaticResource AppBodyText}" Margin="{StaticResource AppGapTitle}" />
       <CheckBox Content="Use a custom accent color"
                 IsChecked="{Binding ViewModel.UseCustomAccent, Mode=TwoWay}"
-                AutomationProperties.Name="Custom accent toggle" Margin="0,0,0,4" />
+                AutomationProperties.Name="Custom accent toggle" Margin="{StaticResource AppGapTitle}" />
       <TextBox Text="{Binding ViewModel.AccentHex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                IsEnabled="{Binding ViewModel.UseCustomAccent}"
                AutomationProperties.Name="Custom accent hex value"
                AutomationProperties.HelpText="Hex color like #4CC2FF"
-               Margin="0,0,0,12" />
+               Margin="{StaticResource AppGapGroup}" />
 
       <CheckBox Content="Enable Mica backdrop (falls back to opaque when unsupported)"
                 IsChecked="{Binding ViewModel.BackdropEnabled, Mode=TwoWay}"
-                AutomationProperties.Name="Mica backdrop toggle" Margin="0,0,0,12" />
+                AutomationProperties.Name="Mica backdrop toggle" Margin="{StaticResource AppGapGroup}" />
 
-      <TextBlock Text="{x:Static res:Strings.Settings_NavigationStyle}" Style="{StaticResource AppBodyText}" Margin="0,0,0,4" />
+      <TextBlock Text="{x:Static res:Strings.Settings_NavigationStyle}" Style="{StaticResource AppBodyText}" Margin="{StaticResource AppGapTitle}" />
       <ComboBox ItemsSource="{Binding ViewModel.ShellOptions}"
                 SelectedItem="{Binding ViewModel.SelectedShell, Mode=TwoWay}"
-                AutomationProperties.Name="Navigation style selector" Margin="0,0,0,12" />
+                AutomationProperties.Name="Navigation style selector" Margin="{StaticResource AppGapGroup}" />
 
-      <TextBlock Text="{x:Static res:Strings.Settings_Density}" Style="{StaticResource AppBodyText}" Margin="0,0,0,4" />
+      <TextBlock Text="{x:Static res:Strings.Settings_Density}" Style="{StaticResource AppBodyText}" Margin="{StaticResource AppGapTitle}" />
       <ComboBox ItemsSource="{Binding ViewModel.DensityOptions}"
                 SelectedItem="{Binding ViewModel.SelectedDensity, Mode=TwoWay}"
-                AutomationProperties.Name="Density selector" Margin="0,0,0,12" />
+                AutomationProperties.Name="Density selector" Margin="{StaticResource AppGapGroup}" />
 
-      <TextBlock Text="{x:Static res:Strings.Settings_Motion}" Style="{StaticResource AppBodyText}" Margin="0,0,0,4" />
+      <TextBlock Text="{x:Static res:Strings.Settings_Motion}" Style="{StaticResource AppBodyText}" Margin="{StaticResource AppGapTitle}" />
       <ComboBox ItemsSource="{Binding ViewModel.MotionOptions}"
                 SelectedItem="{Binding ViewModel.SelectedMotion, Mode=TwoWay}"
-                AutomationProperties.Name="Motion selector" Margin="0,0,0,12" />
+                AutomationProperties.Name="Motion selector" Margin="{StaticResource AppGapGroup}" />
 
       <CheckBox Content="Enable premium effects (ripple, animated surfaces)"
                 IsChecked="{Binding ViewModel.EffectsEnabled, Mode=TwoWay}"
-                AutomationProperties.Name="Effects toggle" Margin="0,0,0,12" />
+                AutomationProperties.Name="Effects toggle" Margin="{StaticResource AppGapGroup}" />
 
       <CheckBox Content="Minimize to tray instead of the taskbar"
                 IsChecked="{Binding ViewModel.MinimizeToTray, Mode=TwoWay}"
-                AutomationProperties.Name="Minimize to tray toggle" Margin="0,0,0,12" />
+                AutomationProperties.Name="Minimize to tray toggle" Margin="{StaticResource AppGapGroup}" />
 
-      <TextBlock Text="{x:Static res:Strings.Settings_Language}" Style="{StaticResource AppBodyText}" Margin="0,0,0,4" />
+      <TextBlock Text="{x:Static res:Strings.Settings_Language}" Style="{StaticResource AppBodyText}" Margin="{StaticResource AppGapTitle}" />
       <ComboBox ItemsSource="{Binding ViewModel.CultureOptions}" DisplayMemberPath="Display"
                 SelectedValuePath="Code" SelectedValue="{Binding ViewModel.SelectedCulture, Mode=TwoWay}"
-                AutomationProperties.Name="Language selector" Margin="0,0,0,4" />
-      <TextBlock Text="{x:Static res:Strings.Settings_LanguageNote}" Style="{StaticResource AppCaptionText}" Margin="0,0,0,4" />
+                AutomationProperties.Name="Language selector" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{x:Static res:Strings.Settings_LanguageNote}" Style="{StaticResource AppCaptionText}" Margin="{StaticResource AppGapTitle}" />
       <ui:Button Content="{x:Static res:Strings.Settings_RestartNow}" Click="OnRestartClick"
-                 AutomationProperties.Name="Restart application" Margin="0,0,0,12" />
+                 AutomationProperties.Name="Restart application" Margin="{StaticResource AppGapGroup}" />
 
       <TextBlock Text="{Binding ViewModel.ErrorMessage, TargetNullValue=''}" Style="{StaticResource AppErrorText}" TextWrapping="Wrap" />
     </StackPanel>

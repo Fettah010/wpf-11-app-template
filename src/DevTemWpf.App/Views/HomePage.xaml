@@ -11,9 +11,9 @@
               MaxWidth="{StaticResource AppContentMaxWidth}"
               Margin="{StaticResource AppPageMargin}">
     <ui:SymbolIcon Symbol="Home24" FontSize="{StaticResource AppIconXLarge}"
-                   HorizontalAlignment="Center" Margin="0,0,0,16" />
+                   HorizontalAlignment="Center" Margin="{StaticResource AppGapSection}" />
     <TextBlock Text="{Binding ViewModel.Headline}" Style="{StaticResource AppTitleText}"
-               TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,8"
+               TextAlignment="Center" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}"
                AutomationProperties.Name="Home headline" />
     <TextBlock Text="{Binding ViewModel.Subline}" Style="{StaticResource AppSecondaryBodyText}"
                TextAlignment="Center" TextWrapping="Wrap" />

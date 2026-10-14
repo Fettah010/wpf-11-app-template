@@ -5,6 +5,14 @@
 
   <Thickness x:Key="AppPageMargin">16</Thickness>
   <Thickness x:Key="AppCardPadding">12</Thickness>
+  <!-- Same keys as Comfortable; tightened rhythm (Title stays tight). -->
+  <Thickness x:Key="AppGapTitle">0,0,0,4</Thickness>
+  <Thickness x:Key="AppGapItem">0,0,0,6</Thickness>
+  <Thickness x:Key="AppGapGroup">0,0,0,8</Thickness>
+  <Thickness x:Key="AppGapSection">0,0,0,12</Thickness>
+  <Thickness x:Key="AppGapFlow">0,0,6,6</Thickness>
+  <Thickness x:Key="AppGapInline">0,0,12,6</Thickness>
+  <Thickness x:Key="AppGapGutter">0,0,8,0</Thickness>
   <system:Double x:Key="AppSectionSpacing">16</system:Double>
   <system:Double x:Key="AppItemSpacing">8</system:Double>
   <system:Double x:Key="AppControlSpacing">6</system:Double>
