@@ -30,6 +30,22 @@ dotnet list package --include-transitive
 Expect **0 warnings** on both build configurations. Any warning must be
 triaged in the version completion report — never silenced without a record.
 
+## UI automation (FlaUI)
+
+`tests/DevTemWpf.UiAutomation` drives the built app (launch/close,
+menu-navigate + keyboard walk, dialog round-trip) via UIA3. Rules learned
+the hard way:
+
+- Use `InvokePattern` for activation, not coordinate clicks (scrolled
+  content misses).
+- Poll `HasExited` for exit; never read `ExitCode` off a FlaUI handle.
+- Retry-with-timeout everywhere; STA via `[WpfFact]`.
+- Headless environments: set `DEVTEM_RUN_UI_TESTS=0` (or non-interactive
+  sessions skip automatically). Skips print loudly and are recorded in the
+  release report — never fake-green.
+- Data-binding errors involving our views fail the integration suite
+  (`TestResources` listener) — silent XAML bugs become test failures.
+
 ## STA tests
 
 Tests that construct WPF controls (`NavigationViewItem`, pages) use

@@ -100,3 +100,16 @@ resolves on first navigation — startup unaffected (design re-validated).
 
 Inside ratified budgets (≤1.0s, ≤150 MB). Serilog init + SQLite open add
 ~0.03s / ~3 MB — lazy-init backstop documented if budgets ever tighten.
+
+## 0.9.0 baseline (2026-10-14, `release/0.9.0`)
+
+| Metric | Median | Max | How |
+|---|---|---|---|
+| Cold start (launch → window) | 0.80s | 0.82s | `measure-startup.ps1 -Runs 5` (0.82/0.79/0.78/0.81/0.80) |
+| Working set after start | 142.5 MB | 146.3 MB | same runs, +2s idle sample |
+| Idle 20s CPU | 0% | 0% | `measure-idle.ps1 -IdleSeconds 20` (observational) |
+| Working set after idle | 142.1 MB | — | same run (GC settles higher; under budget) |
+
+Inside ratified budgets (≤1.0s, ≤150 MB) with shrinking headroom on memory:
+0.7.0→0.9.0 set grew 135.7→142.5 MB (Serilog + SQLite + Velopack natives).
+1.0-rc must not add resident weight without a matching cut.

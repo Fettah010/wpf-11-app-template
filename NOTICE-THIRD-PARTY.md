@@ -1,4 +1,4 @@
-# Third-party notices (0.7.0)
+# Third-party notices (0.9.0)
 
 This project is MIT-licensed (`LICENSE`). It references these third-party
 packages, each under its own license:
@@ -26,6 +26,8 @@ packages, each under its own license:
 - **Velopack 1.2.161** — MIT, © Velopack contributors.
 - **WPF-UI.Tray 4.3.0** — MIT, © 2021–2026 Leszek Pomianowski and WPF UI
   Contributors (same repo as WPF-UI).
+- **FlaUI.Core / FlaUI.UIA3 5.0.0** (test use only, never shipped) — MIT,
+  © FlaUI contributors.
 
 Full license texts ship inside the referenced NuGet packages.
 No vendored third-party source is included in this repository.

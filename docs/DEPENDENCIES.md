@@ -1,6 +1,8 @@
-# Dependencies (0.7.0 inventory, verified 2026-10-14)
+# Dependencies (0.9.0 inventory, verified 2026-10-14)
 
-Six additions (rows). 0.2.0 inventory below otherwise current.
+Two test-only additions (rows). Prior inventories otherwise current.
+Nothing was removable in the 0.9.0 review: every direct package has a live
+consumer (audited below); transitive notes follow.
 
 Single version source: `Directory.Packages.props` (CPM + transitive pinning).
 
@@ -22,6 +24,8 @@ Single version source: `Directory.Packages.props` (CPM + transitive pinning).
 | `Microsoft.Extensions.Http` | 10.0.12 | Typed `HttpClient` factory | `github.com/dotnet/runtime` | MIT | Matches Hosting 10.x | Same release train |
 | `Velopack` | 1.2.161 | Installer/update engine (explicit flow) | `github.com/velopack/velopack` | MIT | `net10.0` asset, zero net10 deps | Stable 2026-09-29; heavy WPF adoption |
 | `WPF-UI.Tray` | 4.3.0 | Tray icon + menu (same vendor) | `github.com/lepoco/wpfui` | MIT (same repo) | `net10.0-windows7.0` asset | Stable 2026-05-04, same 4.3.0 line |
+| `FlaUI.Core` | 5.0.0 | UI automation driver, test-only (ADR-0013) | `github.com/FlaUI/FlaUI` | MIT (verified in nupkg LICENSE.txt) | `net8.0-windows` → net10 compatible | Stable; version parity with UIA3 |
+| `FlaUI.UIA3` | 5.0.0 | UIA3 automation backend, test-only (ADR-0013) | `github.com/FlaUI/FlaUI` | MIT (same repo) | Inbox Windows UIA, no driver install | Stable |
 
 ## Notable transitive dependencies
 
@@ -34,17 +38,24 @@ Single version source: `Directory.Packages.props` (CPM + transitive pinning).
 - `Microsoft.ApplicationInsights 2.23.0` — pulled by MTP telemetry extension,
   **test projects only**, never shipped in the app. Revisit if it leaks into
   app output or raises telemetry concerns.
+- `SkiaSharp.* 3.119` (+ HarfBuzz, Views.WPF) — chart rendering + win-x64
+  natives, app-only via LiveCharts. Accepted: isolated module.
+- `System.Drawing.Common` (via Tray on older TFMs; inbox on net10-windows) —
+  no action.
+
+## 0.9.0 removal review
+
+Every direct package has a live consumer; nothing removed: WPF-UI (+DI,
++Tray) shells; Mvvm all VMs; Hosting/Config/Options/Binder DI graph; Http
+factory; Serilog×3 logging; Sqlite favorites; Velopack updates; LiveCharts
+dashboard; xunit/MTP/StaFact/FlaUI test tiers. No duplicate UI suites, no
+telemetry packages, no secrets in tree (grep-verified), no bin/obj tracked.
 
 ## Deferred candidates (not referenced)
 
 | Package | Future candidate | First need |
 |---|---|---|
-| `Microsoft.Xaml.Behaviors.Wpf` | 1.1.161 (2026-09-15; roadmap snapshot 1.1.142 is stale) | 0.4.0/0.5.0 |
-| Serilog (+ hosting/file sinks) | fresh audit | 0.7.0 |
-| `Microsoft.Data.Sqlite` | fresh audit | 0.7.0 |
-| Velopack | fresh audit (license/compat) | 0.7.0 |
-| LiveCharts2 | fresh audit | 0.6.0 (optional module) |
-| FlaUI | fresh audit (health/reliability) | 0.7.0–0.9.0 |
+| `Microsoft.Xaml.Behaviors.Wpf` | 1.1.161 (2026-09-15; roadmap snapshot 1.1.142 is stale) | only if a concrete behavior need appears (none through 0.9.0) |
 
 No overlapping UI suite (ModernWPF/MahApps/Material) is referenced.
 Any addition requires PoC + conflict review + license check + ADR.

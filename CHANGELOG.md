@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.0 (2026-10-14)
+
+- Beta hardening: FlaUI UI-automation suite (launch, navigate + keyboard,
+  dialog), WPF binding-error test guard, startup write-avoidance, idle
+  numbers (0% CPU), fresh-clone quickstart proof, full audits, frozen scope.
+- Tests: 81 passing. Startup 0.80s / working set 142.5 MB (budgets hold).
+
 ## 0.8.0 (2026-10-14)
 
 - `dotnet new` scaffolding from a single template tree: Clean/Recommended/
