@@ -8,7 +8,10 @@
   powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1
   powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Presets Clean
 #>
-param([string[]]$Presets = @('Clean', 'Recommended', 'Full'))
+param(
+  [string[]]$Presets = @('Clean', 'Recommended', 'Full'),
+  [string]$PackagePath = ''
+)
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
@@ -87,8 +90,10 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
 
 try {
   New-Item -ItemType Directory -Path $work -Force | Out-Null
-  try { & dotnet new uninstall $root 2>&1 | Out-Null } catch { }
-  if (-not (Invoke-Native 'dotnet' @('new', 'install', $root) $root)) { throw 'template install failed' }
+  $installSource = if ($PackagePath) { $PackagePath } else { $root }
+  $uninstallId = if ($PackagePath) { 'DevTemWPF.Templates' } else { $root }
+  try { & dotnet new uninstall $uninstallId 2>&1 | Out-Null } catch { }
+  if (-not (Invoke-Native 'dotnet' @('new', 'install', $installSource) $root)) { throw 'template install failed' }
 
   if ($Presets -contains 'Clean') {
     Test-Combo 'Clean' '' $true 'Clean'
@@ -123,7 +128,8 @@ try {
   }
 }
 finally {
-  try { & dotnet new uninstall $root 2>&1 | Out-Null } catch { }
+  $uninstallId = if ($PackagePath) { 'DevTemWPF.Templates' } else { $root }
+  try { & dotnet new uninstall $uninstallId 2>&1 | Out-Null } catch { }
   try { & dotnet new uninstall (Join-Path $root 'templates\items\devtemwpf-page') 2>&1 | Out-Null } catch { }
   try { & dotnet new uninstall (Join-Path $root 'templates\items\devtemwpf-service') 2>&1 | Out-Null } catch { }
   if (Test-Path $work) { Remove-Item -Recurse -Force $work }

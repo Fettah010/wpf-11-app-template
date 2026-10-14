@@ -13,7 +13,8 @@
     <ui:SymbolIcon Symbol="Home24" FontSize="{StaticResource AppIconXLarge}"
                    HorizontalAlignment="Center" Margin="0,0,0,16" />
     <TextBlock Text="{Binding ViewModel.Headline}" Style="{StaticResource AppTitleText}"
-               TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,8" />
+               TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,8"
+               AutomationProperties.Name="Home headline" />
     <TextBlock Text="{Binding ViewModel.Subline}" Style="{StaticResource AppSecondaryBodyText}"
                TextAlignment="Center" TextWrapping="Wrap" />
   </StackPanel>

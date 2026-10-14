@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Template packaging (1.0.0-rc.1). Content mirrors template.json sources;
+       verify with eng/test-templates.ps1 -PackagePath after every change. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <PackageType>Template</PackageType>
+    <PackageId>DevTemWPF.Templates</PackageId>
+    <Version>1.0.0-rc.1</Version>
+    <Authors>DevTemWpf Contributors</Authors>
+    <Description>Windows 11-first WPF application template (Clean/Recommended/Full) + page/service generators.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <!-- NU5110/5111 (.ps1 content is template payload, never auto-executed)
+         and NU5128 (no lib by design) are benign for template packages. -->
+    <NoWarn>$(NoWarn);NU5110;NU5111;NU5128</NoWarn>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\.template.config\**" PackagePath="content\.template.config\" />
+    <Content Include="..\..\src\**" PackagePath="content\src\" Exclude="..\..\src\**\bin\**;..\..\src\**\obj\**" />
+    <Content Include="..\..\tests\**" PackagePath="content\tests\" Exclude="..\..\tests\**\bin\**;..\..\tests\**\obj\**" />
+    <Content Include="..\..\eng\smoke.ps1;..\..\eng\measure-startup.ps1" PackagePath="content\eng\" />
+    <Content Include="..\..\templates\support\**" PackagePath="content\templates\support\" />
+    <Content Include="..\..\templates\items\**" PackagePath="content\templates\items\" />
+    <Content Include="..\..\global.json;..\..\Directory.Build.props;..\..\Directory.Packages.props;..\..\.editorconfig;..\..\.gitignore;..\..\.gitattributes;..\..\LICENSE;..\..\NOTICE-THIRD-PARTY.md;..\..\AGENTS.md;..\..\DevTemWpf.slnx" PackagePath="content\" />
+  </ItemGroup>
+
+</Project>

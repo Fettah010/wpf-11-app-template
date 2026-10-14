@@ -198,6 +198,52 @@ public sealed class ShellFlowsTests : IDisposable
     }
 
     [WpfFact]
+    public void Visit_AllPages_ShowsExpectedContent()
+    {
+        if (!UiEnabled(out var reason))
+        {
+            Console.WriteLine($"SKIPPED UI test ({reason}).");
+            return;
+        }
+
+        var stops = new (string NavItem, string ContentName)[]
+        {
+            // Home is the startup page: assert by its content text (TextBlock
+            // UIA names expose text content, verified by probe).
+            ("Home", "Welcome to WPF 11 App Template"),
+            ("Dashboard", "Activity filter"),
+            ("Controls", "Gallery dialog demo"),
+            ("Design Tokens", "Design token preview"),
+            ("Effects", "Play standard preset"),
+            ("Diagnostics", "Log viewer"),
+            ("Settings", "Theme selector"),
+        };
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            foreach (var (navItem, contentName) in stops)
+            {
+                // Coordinate click: proven path for nav items (all visible).
+                // Both lookups retry: the tree rebuilds on every navigation.
+                var item = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(navItem)),
+                    TimeSpan.FromSeconds(10), $"nav item '{navItem}'");
+                item.Click();
+                WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(contentName)),
+                    TimeSpan.FromSeconds(10), $"{navItem} page content '{contentName}'");
+            }
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    [WpfFact]
     public void Dialog_Confirm_RoundTrips_Result()
     {
         if (!UiEnabled(out var reason))
