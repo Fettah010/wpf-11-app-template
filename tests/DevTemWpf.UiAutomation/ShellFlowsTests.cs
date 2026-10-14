@@ -353,4 +353,55 @@ public sealed class ShellFlowsTests : IDisposable
             }
         }
     }
+
+    [WpfFact]
+    public void GalleryIndex_JumpsToSection_AndMovesFocus()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                TimeSpan.FromSeconds(10), "nav item 'Controls'").Click();
+            var index = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Go to Inputs section")),
+                TimeSpan.FromSeconds(10), "gallery index button");
+            index.Patterns.Invoke.Pattern.Invoke();
+
+            var heading = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Inputs section heading")),
+                TimeSpan.FromSeconds(10), "inputs section heading");
+            Assert.NotNull(heading);
+
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+            string? focused = null;
+            while (DateTime.UtcNow < deadline)
+            {
+                try
+                {
+                    focused = automation.FocusedElement()?.Name;
+                    if (focused == "Inputs section heading")
+                    {
+                        break;
+                    }
+                }
+                catch
+                {
+                    // Focused element is transient; retry.
+                }
+
+                Thread.Sleep(150);
+            }
+
+            Assert.Equal("Inputs section heading", focused);
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
 }

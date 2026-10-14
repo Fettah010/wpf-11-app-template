@@ -7,15 +7,30 @@
       mc:Ignorable="d"
       d:DesignHeight="1400" d:DesignWidth="720"
       Title="Controls">
-  <ScrollViewer Padding="{StaticResource AppPageMargin}"
+  <ScrollViewer Padding="{StaticResource AppPageMargin}" x:Name="GalleryScroller"
                 AutomationProperties.Name="Controls gallery">
     <StackPanel MaxWidth="{StaticResource AppContentMaxWidth}">
       <TextBlock Text="Controls" Style="{StaticResource AppSubtitleText}" Margin="{StaticResource AppGapTitle}" />
-      <TextBlock Text="Everyday controls, their states, and the patterns to use them. Full catalog: docs/design-system/components.md"
-                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapSection}" />
+      <TextBlock Text="Everyday controls, their states, and the patterns to use them. Full catalog: docs/design-system/components.md. Tab reaches every control and section heading; the index below jumps between sections."
+                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
+
+      <!-- Category index (1.2.0): mouse and keyboard anchor navigation. -->
+      <WrapPanel Margin="{StaticResource AppGapSection}" AutomationProperties.Name="Gallery section index">
+        <ui:Button Content="Buttons" Click="OnIndexClick" Tag="ButtonsSection"
+                   AutomationProperties.Name="Go to Buttons section" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Inputs" Click="OnIndexClick" Tag="InputsSection"
+                   AutomationProperties.Name="Go to Inputs section" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Content" Click="OnIndexClick" Tag="ContentSection"
+                   AutomationProperties.Name="Go to Content section" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Feedback" Click="OnIndexClick" Tag="FeedbackSection"
+                   AutomationProperties.Name="Go to Feedback section" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Validated form" Click="OnIndexClick" Tag="FormSection"
+                   AutomationProperties.Name="Go to Validated form section" Margin="{StaticResource AppGapFlow}" />
+      </WrapPanel>
 
       <!-- Buttons -->
-      <TextBlock Text="Buttons" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock x:Name="ButtonsSection" Focusable="True" Text="Buttons" Style="{StaticResource AppSectionHeadingText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Buttons section heading" />
       <TextBlock Text="Appearance sets intent: Primary for the one main action, Danger for destructive, Secondary/Transparent otherwise."
                  Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
       <WrapPanel Margin="{StaticResource AppGapItem}">
@@ -45,7 +60,8 @@
       </WrapPanel>
 
       <!-- Inputs -->
-      <TextBlock Text="Inputs" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock x:Name="InputsSection" Focusable="True" Text="Inputs" Style="{StaticResource AppSectionHeadingText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Inputs section heading" />
       <TextBlock Text="Placeholder + automation name on every field. Validation states are demonstrated in the form below."
                  Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
       <Grid Margin="{StaticResource AppGapSection}">
@@ -82,7 +98,8 @@
       </StackPanel>
 
       <!-- Content -->
-      <TextBlock Text="Content" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock x:Name="ContentSection" Focusable="True" Text="Content" Style="{StaticResource AppSectionHeadingText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Content section heading" />
       <TextBlock Text="Cards group related content; expanders hide detail; badges annotate; tooltips explain."
                  Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
       <ui:Card Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Gallery card">
@@ -103,7 +120,8 @@
       </WrapPanel>
 
       <!-- Feedback -->
-      <TextBlock Text="Feedback" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock x:Name="FeedbackSection" Focusable="True" Text="Feedback" Style="{StaticResource AppSectionHeadingText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Feedback section heading" />
       <TextBlock Text="InfoBar for inline severity; snackbar for transient confirmation; dialog for decisions that need an explicit answer."
                  Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
       <ui:InfoBar Title="Informational" Message="Neutral context lives here." Severity="Informational" IsOpen="True"
@@ -126,7 +144,8 @@
                  TextWrapping="Wrap" Margin="{StaticResource AppGapSection}" AutomationProperties.Name="Demo status line" />
 
       <!-- Validated form -->
-      <TextBlock Text="Validated form" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock x:Name="FormSection" Focusable="True" Text="Validated form" Style="{StaticResource AppSectionHeadingText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Validated form section heading" />
       <TextBlock Text="DataAnnotations + ObservableValidator. Errors appear under fields and block saving — never color-only."
                  Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
       <TextBlock Text="Name" Style="{StaticResource AppBodyText}" Margin="{StaticResource AppGapTitle}" />

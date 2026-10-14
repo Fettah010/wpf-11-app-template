@@ -13,12 +13,20 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
+    <StackPanel Grid.Row="0" Margin="{StaticResource AppGapGroup}">
+      <TextBlock Text="Dashboard" Style="{StaticResource AppSubtitleText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Dashboard headline" />
+      <TextBlock Text="Sample business overview: metrics, trend, activity, and setup. Deterministic demo data."
+                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" />
+    </StackPanel>
+
     <!-- Stat cards -->
-    <ItemsControl Grid.Row="0" ItemsSource="{Binding ViewModel.Metrics}"
+    <ItemsControl Grid.Row="1" ItemsSource="{Binding ViewModel.Metrics}"
                   AutomationProperties.Name="Key metrics" Margin="{StaticResource AppGapGroup}">
       <ItemsControl.ItemsPanel>
         <ItemsPanelTemplate>
@@ -39,7 +47,7 @@
     </ItemsControl>
 
     <!-- Chart -->
-    <ui:Card Grid.Row="1" Margin="{StaticResource AppGapGroup}" Padding="{StaticResource AppCardPadding}"
+    <ui:Card Grid.Row="2" Margin="{StaticResource AppGapGroup}" Padding="{StaticResource AppCardPadding}"
              AutomationProperties.Name="Weekly activity chart card">
       <StackPanel>
         <TextBlock Text="Completed tasks, last 7 days" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapItem}" />
@@ -49,7 +57,7 @@
     </ui:Card>
 
     <!-- Table + detail -->
-    <Grid Grid.Row="2" Margin="{StaticResource AppGapGroup}">
+    <Grid Grid.Row="3" Margin="{StaticResource AppGapGroup}">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="2*" />
         <ColumnDefinition Width="*" MinWidth="240" />
@@ -133,7 +141,7 @@
     </Grid>
 
     <!-- Stepper -->
-    <ui:Card Grid.Row="3" Padding="{StaticResource AppCardPadding}"
+    <ui:Card Grid.Row="4" Padding="{StaticResource AppCardPadding}"
              AutomationProperties.Name="Setup stepper">
       <StackPanel>
         <TextBlock Text="{Binding ViewModel.StepTitle}" Style="{StaticResource AppSectionHeadingText}" />
