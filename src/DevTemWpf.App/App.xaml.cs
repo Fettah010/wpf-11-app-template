@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Windows;
+﻿using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -20,11 +19,7 @@ public partial class App : Application
         try
         {
             var builder = Host.CreateApplicationBuilder(e.Args);
-
-            builder.Services.Configure<AppOptions>(
-                builder.Configuration.GetSection(AppOptions.SectionName));
-            builder.Services.AddSingleton<MainViewModel>();
-            builder.Services.AddTransient<MainWindow>();
+            builder.ConfigureForApp();
 
             _host = builder.Build();
             await _host.StartAsync().ConfigureAwait(true);

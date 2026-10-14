@@ -10,8 +10,8 @@
     <!-- MVVM + hosting (ADR-0002) -->
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
-    <!-- Tests (verified 2026-10-14: xunit.v3 4.0.2 stable, Test.Sdk 18.10.1 proven; 18.11.0 released 10/13 with ~0 downloads, not taken) -->
-    <PackageVersion Include="xunit.v3" Version="4.0.2" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <!-- Tests: xUnit.net v3 on Microsoft Testing Platform (verified 2026-10-14:
+         xunit.v3.mtp-v2 4.0.2 stable; VSTest path is blocked on .NET 10 SDK) -->
+    <PackageVersion Include="xunit.v3.mtp-v2" Version="4.0.2" />
   </ItemGroup>
 </Project>

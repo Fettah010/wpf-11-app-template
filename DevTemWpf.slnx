@@ -2,4 +2,8 @@
   <Folder Name="/src/">
     <Project Path="src/DevTemWpf.App/DevTemWpf.App.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DevTemWpf.Integration/DevTemWpf.Integration.csproj" />
+    <Project Path="tests/DevTemWpf.Unit/DevTemWpf.Unit.csproj" />
+  </Folder>
 </Solution>
