@@ -1,9 +1,9 @@
 # Windows 11 WPF Template — Product and Release Roadmap
 
-> **Status:** Planning baseline  
+> **Status:** `1.0.0` stable — released 14 October 2026 ([release](https://github.com/Fettah010/wpf-11-app-template/releases/tag/v1.0.0))  
 > **Research snapshot:** 13 October 2026  
 > **Target:** Windows 11 desktop applications, initially on .NET 10, with future .NET upgrades designed in  
-> **Project identity:** To be named; this repository is independent of the existing DevTem WinUI 3 repository  
+> **Project identity:** wpf-11-app-template (`Fettah010/wpf-11-app-template`); independent of the existing DevTem WinUI 3 repository  
 > **Primary UI foundation:** WPF UI (`lepoco/wpfui`)  
 > **Architecture:** CommunityToolkit.Mvvm + Microsoft.Extensions.Hosting / dependency injection
 
