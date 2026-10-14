@@ -22,7 +22,9 @@ public static class AppComposition
         builder.Services.AddSingleton<ISettingsService, SettingsService>();
 
         // Dashboard sample data (ADR-0010; excluded from clean scaffolds)
+        //#if (IncludeDashboard)
         builder.Services.AddSingleton<SampleDataService>();
+        //#endif
 
         builder.Services.AddSingleton<IBackdropService, BackdropService>();
         builder.Services.AddSingleton<IThemeApplier, WpfUiThemeApplier>();
@@ -41,6 +43,7 @@ public static class AppComposition
 
         // Production services (ADR-0011). Each is inert without configuration;
         // the 0.8.0 template drops the matching file set + lines + packages.
+        //#if (IncludeServices)
         builder.Services.Configure<HttpOptions>(
             builder.Configuration.GetSection(HttpOptions.SectionName));
         builder.Services.Configure<UpdateOptions>(
@@ -57,6 +60,7 @@ public static class AppComposition
                 client.BaseAddress = uri;
             }
         });
+        //#endif
 
         // Shell + pages
         builder.Services.AddSingleton<MainViewModel>();
@@ -65,15 +69,23 @@ public static class AppComposition
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<TokensViewModel>();
         builder.Services.AddTransient<ControlsViewModel>();
+        //#if (IncludeDashboard)
         builder.Services.AddTransient<DashboardViewModel>();
+        //#endif
+        //#if (IncludeDiagnostics)
         builder.Services.AddTransient<DiagnosticsViewModel>();
+        //#endif
         builder.Services.AddTransient<EffectsViewModel>();
         builder.Services.AddTransient<FormViewModel>();
         builder.Services.AddTransient<HomePage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<TokensPage>();
+        //#if (IncludeDashboard)
         builder.Services.AddTransient<DashboardPage>();
+        //#endif
+        //#if (IncludeDiagnostics)
         builder.Services.AddTransient<DiagnosticsPage>();
+        //#endif
         builder.Services.AddTransient<EffectsPage>();
         builder.Services.AddTransient<ControlsPage>();
         return builder;

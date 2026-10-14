@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "DevTemWPF",
+  "classifications": ["Desktop", "WPF", "MVVM"],
+  "name": "DevTemWPF Page",
+  "description": "Adds a NavigationView page + ViewModel following project conventions. Register it in AppComposition and MainViewModel (see the checklist comment in the page code-behind).",
+  "identity": "DevTemWPF.Page.CSharp",
+  "shortName": "devtemwpf-page",
+  "tags": { "language": "C#", "type": "item" },
+  "symbols": {
+    "PageName": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "SamplePage",
+      "replaces": "SamplePage",
+      "fileRename": "SamplePage",
+      "description": "Page name without suffix (a Page, ViewModel, and XAML file are created)."
+    },
+    "Namespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "DevTemWpf.App",
+      "replaces": "DevTemWpf.App",
+      "description": "Root namespace of the target project."
+    }
+  },
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "exclude": [".template.config/**"]
+    }
+  ]
+}

@@ -66,7 +66,8 @@ public sealed class UpdateServiceTests : IDisposable
         Assert.True(engine.Restarted);
 
         // Progress<T> posts asynchronously: wait for the final report.
-        var deadline = DateTime.UtcNow.AddSeconds(2);
+        // Generous window: the MTP runner executes tests in parallel.
+        var deadline = DateTime.UtcNow.AddSeconds(10);
         while (service.Progress < 1.0 && DateTime.UtcNow < deadline)
         {
             await Task.Delay(25, TestContext.Current.CancellationToken);

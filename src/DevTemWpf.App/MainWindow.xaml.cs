@@ -15,7 +15,9 @@ namespace DevTemWpf.App;
 public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 {
     private readonly ISettingsService _settings;
+    //#if (IncludeServices)
     private readonly Wpf.Ui.Tray.INotifyIconService _tray;
+    //#endif
 
     public MainWindow(
         MainViewModel viewModel,
@@ -23,12 +25,16 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         INavigationViewPageProvider pageProvider,
         Wpf.Ui.ISnackbarService snackbar,
         Wpf.Ui.IContentDialogService dialogs,
+        //#if (IncludeServices)
         Wpf.Ui.Tray.INotifyIconService tray,
+        //#endif
         ISettingsService settings,
         IBackdropService backdrop)
     {
         _settings = settings;
+        //#if (IncludeServices)
         _tray = tray;
+        //#endif
 
         // Density before init so first layout uses the persisted value.
         DesignTokenBootstrap.ApplyDensity(settings.Current.Density);
@@ -50,7 +56,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         RootNavigation.SetPageProviderService(pageProvider);
         snackbar.SetSnackbarPresenter(RootSnackbar);
         dialogs.SetDialogHost(RootDialogHost);
+        //#if (IncludeServices)
         SetupTray(options.Value.Title);
+        //#endif
 
         SizeChanged += (_, e) => ViewModel.ApplyResponsiveWidth(e.NewSize.Width);
         Loaded += (_, _) => OnFirstLoaded();
@@ -59,6 +67,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
     public MainViewModel ViewModel { get; }
 
+    //#if (IncludeServices)
     /// <summary>Tray: icon exists only while minimize-to-tray is enabled.</summary>
     private void SetupTray(string title)
     {
@@ -123,6 +132,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         WindowState = WindowState.Normal;
         _ = Activate();
     }
+    //#endif
 
     private void OnFirstLoaded()
     {

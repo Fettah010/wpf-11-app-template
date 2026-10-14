@@ -1,11 +1,7 @@
 namespace DevTemWpf.App.Services;
 
-/// <summary>Update channel (feed selection).</summary>
-public enum UpdateChannel
-{
-    Stable = 0,
-    Beta = 1,
-}
+// NOTE: UpdateChannel lives in ShellSettings.cs: ShellSettings references it
+// and UpdateOptions.cs is excluded from service-less scaffolds.
 
 /// <summary>Update feed options (bound from the "Update" configuration section).</summary>
 public sealed record UpdateOptions

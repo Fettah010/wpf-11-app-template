@@ -22,11 +22,15 @@ public sealed partial class MainViewModel : ObservableObject
         MenuItems = new ObservableCollection<object>
         {
             new NavigationViewItem(Strings.Nav_Home, SymbolRegular.Home24, typeof(HomePage)),
+            //#if (IncludeDashboard)
             new NavigationViewItem(Strings.Nav_Dashboard, SymbolRegular.Board24, typeof(DashboardPage)),
+            //#endif
             new NavigationViewItem(Strings.Nav_Controls, SymbolRegular.DataHistogram24, typeof(ControlsPage)),
             new NavigationViewItem(Strings.Nav_Tokens, SymbolRegular.PaintBrush24, typeof(TokensPage)),
             new NavigationViewItem(Strings.Nav_Effects, SymbolRegular.Fluent24, typeof(EffectsPage)),
+            //#if (IncludeDiagnostics)
             new NavigationViewItem(Strings.Nav_Diagnostics, SymbolRegular.Shield24, typeof(DiagnosticsPage)),
+            //#endif
         };
         FooterMenuItems = new ObservableCollection<object>
         {

@@ -26,10 +26,12 @@ Invoke-Step 'build Release' { dotnet build -c Release --no-restore }
 Invoke-Step 'test Release' { dotnet test -c Release --no-build }
 
 # Launch check: start the app, verify it stays alive with a window, then close it.
+# The executable is located dynamically so renamed (generated) apps work too.
 Write-Host "`n== launch check ==" -ForegroundColor Cyan
-$exe = Join-Path $root 'src\DevTemWpf.App\bin\Release\net10.0-windows10.0.26100\DevTemWpf.App.exe'
-if (-not (Test-Path -LiteralPath $exe)) {
-  Write-Host "FAILED: executable not found at $exe" -ForegroundColor Red
+$exe = Get-ChildItem -LiteralPath (Join-Path $root 'src') -Recurse -Filter '*.App.exe' |
+  Where-Object { $_.FullName -like '*\Release\*' } | Select-Object -First 1 -ExpandProperty FullName
+if (-not $exe -or -not (Test-Path -LiteralPath $exe)) {
+  Write-Host 'FAILED: Release *App.exe not found under src/' -ForegroundColor Red
   exit 1
 }
 $proc = Start-Process -FilePath $exe -PassThru

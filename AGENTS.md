@@ -1,4 +1,4 @@
-# AGENTS — DevTemWPF entry point
+# AGENTS — DevTemWpf entry point
 
 Before any implementation work, read `WPF-AGENT-EXECUTION-PROTOCOL.md` and `WPF-Template-Roadmap.md`. Follow the per-version planning, research, testing, and release gates.
 

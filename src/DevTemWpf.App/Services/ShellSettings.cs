@@ -10,8 +10,7 @@ public enum ThemeMode
 
 /// <summary>Shell layout preference (ADR-0005).</summary>
 public enum ShellMode
-{
-    /// <summary>Compact icon rail (<c>LeftMinimal</c>).</summary>
+{    /// <summary>Compact icon rail (<c>LeftMinimal</c>).</summary>
     Rail = 0,
     /// <summary>Full expandable sidebar (<c>Left</c>).</summary>
     Sidebar = 1,
@@ -22,6 +21,14 @@ public enum DensityMode
 {
     Comfortable = 0,
     Compact = 1,
+}
+
+/// <summary>Update channel (feed selection). Lives here so ShellSettings
+/// never depends on the excludable UpdateOptions module.</summary>
+public enum UpdateChannel
+{
+    Stable = 0,
+    Beta = 1,
 }
 
 /// <summary>Persisted shell preferences (DataContract-free JSON record).</summary>

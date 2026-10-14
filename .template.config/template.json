@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "DevTemWPF",
+  "classifications": ["Desktop", "WPF", "Windows 11", "MVVM", "Fluent"],
+  "name": "WPF 11 App (DevTemWPF)",
+  "description": "Windows 11-first WPF application (MVVM + Generic Host + Fluent UI) with Clean, Recommended, and Full presets.",
+  "identity": "DevTemWPF.WpfApp.CSharp",
+  "shortName": "devtemwpf-app",
+  "sourceName": "DevTemWpf",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "symbols": {
+    "Preset": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        { "choice": "Clean", "description": "Minimal shell: no dashboard, diagnostics, or production services." },
+        { "choice": "Recommended", "description": "Shell + diagnostics + production services, no dashboard. (Default)" },
+        { "choice": "Full", "description": "Everything: services, diagnostics, dashboard, and charts." }
+      ],
+      "defaultValue": "Recommended",
+      "description": "Feature preset."
+    },
+    "IncludeDashboard": {
+      "type": "computed",
+      "value": "(Preset == \"Full\")"
+    },
+    "IncludeDiagnostics": {
+      "type": "computed",
+      "value": "(Preset != \"Clean\")"
+    },
+    "IncludeServices": {
+      "type": "computed",
+      "value": "(Preset != \"Clean\")"
+    },
+    "IncludeTests": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Include xUnit test projects."
+    }
+  },
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "exclude": [
+        ".template.config/**",
+        ".git/**",
+        ".github/**",
+        "**/.vs/**",
+        "docs/**",
+        "WPF-*.md",
+        "CHANGELOG.md",
+        "README.md",
+        "**/bin/**",
+        "**/obj/**",
+        "**/TestResults/**",
+        "templates/items/**",
+        "eng/test-templates.ps1",
+        "tmp/**",
+        "temp/**"
+      ],
+      "rename": {
+        "templates/support/APP-README.md": "README.md",
+        "templates/support/FEATURES.md": "FEATURES.md"
+      },
+      "modifiers": [
+        {
+          "condition": "(!IncludeDashboard)",
+          "exclude": [
+            "src/DevTemWpf.App/Views/DashboardPage.xaml",
+            "src/DevTemWpf.App/Views/DashboardPage.xaml.cs",
+            "src/DevTemWpf.App/ViewModels/DashboardViewModel.cs",
+            "src/DevTemWpf.App/Services/SampleDataService.cs",
+            "tests/DevTemWpf.Unit/DashboardViewModelTests.cs",
+            "tests/DevTemWpf.Unit/SampleDataTests.cs"
+          ]
+        },
+        {
+          "condition": "(!IncludeDiagnostics)",
+          "exclude": [
+            "src/DevTemWpf.App/Views/DiagnosticsPage.xaml",
+            "src/DevTemWpf.App/Views/DiagnosticsPage.xaml.cs",
+            "src/DevTemWpf.App/ViewModels/DiagnosticsViewModel.cs",
+            "tests/DevTemWpf.Unit/DiagnosticsViewModelTests.cs"
+          ]
+        },
+        {
+          "condition": "(!IncludeServices)",
+          "exclude": [
+            "src/DevTemWpf.App/Services/Logging.cs",
+            "src/DevTemWpf.App/Services/FavoritesStore.cs",
+            "src/DevTemWpf.App/Services/StatusClient.cs",
+            "src/DevTemWpf.App/Services/HttpOptions.cs",
+            "src/DevTemWpf.App/Services/BackupService.cs",
+            "src/DevTemWpf.App/Services/IBackupService.cs",
+            "src/DevTemWpf.App/Services/UpdateOptions.cs",
+            "src/DevTemWpf.App/Services/UpdateService.cs",
+            "src/DevTemWpf.App/Services/IUpdateService.cs",
+            "src/DevTemWpf.App/Services/VelopackUpdateEngine.cs",
+            "src/DevTemWpf.App/TrayGlyph.cs",
+            "tests/DevTemWpf.Unit/FavoritesStoreTests.cs",
+            "tests/DevTemWpf.Unit/StatusClientTests.cs",
+            "tests/DevTemWpf.Unit/BackupServiceTests.cs",
+            "tests/DevTemWpf.Unit/UpdateServiceTests.cs"
+          ]
+        },
+        {
+          "condition": "(!IncludeTests)",
+          "exclude": ["tests/**"]
+        }
+      ]
+    }
+  ]
+}

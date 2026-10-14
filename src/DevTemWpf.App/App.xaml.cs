@@ -23,10 +23,12 @@ public partial class App : Application
         {
             var builder = Host.CreateApplicationBuilder(e.Args);
             builder.ConfigureForApp();
+            //#if (IncludeServices)
             builder.AddAppLogging();
 
             // Velopack install/update hooks (safe when not installed).
             Velopack.VelopackApp.Build().Run();
+            //#endif
 
             _host = builder.Build();
             await _host.StartAsync().ConfigureAwait(true);
