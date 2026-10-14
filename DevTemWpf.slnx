@@ -1,2 +1,5 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DevTemWpf.App/DevTemWpf.App.csproj" />
+  </Folder>
 </Solution>
