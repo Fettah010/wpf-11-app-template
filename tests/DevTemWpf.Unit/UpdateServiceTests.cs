@@ -16,6 +16,7 @@ public sealed class UpdateServiceTests : IDisposable
     {
         public UpdateCheck? CheckResult { get; set; }
         public Exception? CheckError { get; set; }
+        public Exception? DownloadError { get; set; }
         public bool Restarted { get; private set; }
 
         public Task<UpdateCheck?> CheckAsync(string feedUrl, CancellationToken cancellationToken)
@@ -23,6 +24,11 @@ public sealed class UpdateServiceTests : IDisposable
 
         public Task DownloadAsync(string feedUrl, UpdateCheck update, IProgress<double> progress, CancellationToken cancellationToken)
         {
+            if (DownloadError is not null)
+            {
+                return Task.FromException(DownloadError);
+            }
+
             progress.Report(0.5);
             progress.Report(1.0);
             return Task.CompletedTask;
@@ -92,6 +98,39 @@ public sealed class UpdateServiceTests : IDisposable
         Assert.Contains("dns boom", service.Detail);
     }
 
+    [Fact]
+    public async Task CancelledCheck_ReportsIdleNotFailed()
+    {
+        var (service, engine) = await CreateAsync(
+            new UpdateOptions { StableFeedUrl = "https://example.test/feed" });
+        engine.CheckError = new OperationCanceledException();
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+
+        await service.CheckAsync(cts.Token);
+
+        Assert.Equal(UpdateStatus.Idle, service.Status);
+        Assert.Contains("cancelled", service.Detail, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task CancelledDownload_ReportsIdleNotFailed()
+    {
+        var (service, engine) = await CreateAsync(
+            new UpdateOptions { StableFeedUrl = "https://example.test/feed" });
+        engine.CheckResult = new UpdateCheck("9.9.9", 2048);
+        await service.CheckAsync(TestContext.Current.CancellationToken);
+        Assert.Equal(UpdateStatus.Available, service.Status);
+
+        engine.DownloadError = new OperationCanceledException();
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+        await service.DownloadAndRestartAsync(cts.Token);
+
+        Assert.Equal(UpdateStatus.Idle, service.Status);
+        Assert.Contains("cancelled", service.Detail, StringComparison.OrdinalIgnoreCase);
+        Assert.False(engine.Restarted);
+    }
     [Fact]
     public async Task BetaChannel_SelectsBetaFeed()
     {
