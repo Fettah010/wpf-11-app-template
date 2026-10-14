@@ -208,9 +208,9 @@ public sealed class ShellFlowsTests : IDisposable
 
         var stops = new (string NavItem, string ContentName)[]
         {
-            // Home is the startup page: assert by its content text (TextBlock
-            // UIA names expose text content, verified by probe).
-            ("Home", "Welcome to WPF 11 App Template"),
+            // Named elements (AutomationProperties.Name). Note: an explicit
+            // Name replaces the text content in UIA lookups (verified).
+            ("Home", "Home headline"),
             ("Dashboard", "Activity filter"),
             ("Controls", "Gallery dialog demo"),
             ("Design Tokens", "Design token preview"),

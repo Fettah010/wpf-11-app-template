@@ -45,6 +45,12 @@ the hard way:
   release report — never fake-green.
 - Data-binding errors involving our views fail the integration suite
   (`TestResources` listener) — silent XAML bugs become test failures.
+- UI tests launch the app exe from `src/.../bin`; the test projects do NOT
+  reference it, so always build the solution first (`dotnet build` /
+  `dotnet test` at root rebuilds everything). Project-only test runs reuse
+  the last app build.
+- TextBlock UIA names: an explicit `AutomationProperties.Name` replaces the
+  text content for `ByName` lookups (verified by probe).
 
 ## STA tests
 

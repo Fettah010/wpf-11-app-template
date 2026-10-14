@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-rc.1 (2026-10-14)
+
+- Frozen surface (`docs/frozen-surface.md`) + machine guard test.
+- Template NuGet package (`DevTemWPF.Templates 1.0.0-rc.1`) verified by
+  install-from-package generation.
+- Visit-all-pages UI automation; theme/mode launch matrix.
+- Migration policy + extension points (`docs/migration.md`).
+- Tests: 83 passing. No blocking defects.
+
 ## 0.9.0 (2026-10-14)
 
 - Beta hardening: FlaUI UI-automation suite (launch, navigate + keyboard,
