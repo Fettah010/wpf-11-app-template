@@ -48,12 +48,35 @@ preserve the pre-1.2.0 look; Compact tightens it (screenshot-visible):
 - `Thickness` gap tokens are for XAML margins; `Double` spacing tokens are
   for scalar/code use (demo bars, programmatic layout). Do not add a second
   unit for the same step.
-- Upstream key references (WPF-UI 4.3.0 `Resources/Theme/Dark.xaml`):
-  `TextFillColor*`, `ControlFillColor*`, `CardBackgroundFillColorDefault`,
-  `CardStrokeColorDefault`, `DividerStrokeColorDefault`,
-  `FocusStrokeColorOuter/Inner`, `SystemAccentColorPrimary/Secondary`,
-  `SystemFillColorSuccess/Caution/Critical/Neutral(+Background)`,
-  `SubtleFillColorSecondary`, `SolidBackgroundFillColorBase`.
+- Upstream key references (WPF-UI 4.3.0 `Resources/Theme/Dark.xaml`;
+  guarded by `ThemeTokenChainTests` — any addition needs review here):
+  `TextFillColorPrimary/Secondary/Tertiary/Disabled`,
+  `TextOnAccentFillColorPrimary`, `ControlFillColor*`,
+  `CardBackgroundFillColorDefault`, `CardStrokeColorDefault`,
+  `DividerStrokeColorDefault`, `FocusStrokeColorOuter/Inner`,
+  `SystemAccentColorPrimary/Secondary`,
+  `SystemFillColorSuccess/Caution/Critical/Neutral(+CriticalBackground)`,
+  `SubtleFillColorSecondary`, `SolidBackgroundFillColorBase/Tertiary`.
+
+## Contrast contract (1.2.0)
+
+Pairs that must stay legible in light, dark, and high-contrast themes:
+
+| Foreground | Background | Rule |
+|---|---|---|
+| `AppTextPrimaryBrush` | Card / subtle / solid surfaces | Body text, never below 4.5:1 intent |
+| `AppTextSecondaryBrush` | Same | Secondary text, never below 4.5:1 intent |
+| `AppErrorBrush` + error copy | Card surface | Errors are never color-only (icon/title/copy travel together) |
+| Status fills (`Success/Caution/Critical/Neutral`) | Their label text | InfoBars pair fill + title + message; never fill-alone meaning |
+| `AppFocusOuterBrush` / `AppFocusInnerBrush` | Any surface | Focus ring is a double stroke precisely so it survives themes |
+
+No state in this app is carried by color or animation alone: validation
+adds error copy, dialogs/snackbars add text, busy adds a ring + disabled
+state, selection adds content. When adding a color-coded state, add its
+text/icon partner in the same change. Numeric spot-checks are manual per
+release (upstream values resolve inside the theme dictionaries); the
+  `ThemeTokenChainTests` guard guarantees the pairs above cannot silently
+  re-point at unreviewed keys.
 
 ## Density
 
