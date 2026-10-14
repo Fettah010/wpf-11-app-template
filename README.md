@@ -4,15 +4,16 @@
 [![Windows 11](https://img.shields.io/badge/Windows-11-0078D4)](https://www.microsoft.com/windows/windows-11)
 [![WPF-UI 4.3.0](https://img.shields.io/badge/WPF--UI-4.3.0-8A2BE2)](https://github.com/lepoco/wpfui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![Release 0.3.0](https://img.shields.io/badge/release-0.3.0-blue)](https://github.com/Fettah010/wpf-11-app-template/releases)
+[![Release 0.4.0](https://img.shields.io/badge/release-0.4.0-blue)](https://github.com/Fettah010/wpf-11-app-template/releases)
 
 A premium, Windows 11-first **WPF application template** and reusable **UI
 foundation** — Fluent design, MVVM, dependency injection, modular production
 services, and `dotnet new` scaffolding with clean / recommended / full presets.
 
-> **Status:** `0.3.0` — token layer (colors/type/spacing/shapes), density,
-> accent override, Tokens preview page. The template grows milestone by
-> milestone toward `1.0.0` (see [Roadmap](#roadmap--milestones)).
+> **Status:** `0.4.0` — controls gallery (buttons/inputs/content/feedback),
+> validated forms, snackbar/dialog services, ratified perf budgets. The
+> template grows milestone by milestone toward `1.0.0` (see
+> [Roadmap](#roadmap--milestones)).
 
 ## ✨ Highlights
 
@@ -58,7 +59,7 @@ powershell -ExecutionPolicy Bypass -File eng/smoke.ps1
 | `0.1.0` | Foundation, ADRs, minimal app | ✅ Released |
 | `0.2.0` | Window experience, nav rail + sidebar | ✅ Released |
 | `0.3.0` | Design tokens & themes | ✅ Released |
-| `0.4.0` | Essential controls & forms | ⬜ |
+| `0.4.0` | Essential controls & forms | ✅ Released |
 | `0.5.0` | Motion system & optional effects | ⬜ |
 | `0.6.0` | Layouts, data controls, dashboard & gallery | ⬜ |
 | `0.7.0` | Production services & distribution | ⬜ |

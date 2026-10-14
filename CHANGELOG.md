@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0 (2026-10-14)
+
+- Controls gallery page (buttons, inputs, cards/expanders, InfoBar, progress,
+  validated sample form) with usage notes; `docs/design-system/components.md`.
+- Feedback services wired: snackbar + content-dialog singletons with shell
+  overlays; VM commands fake-tested (both dialog paths, busy single-flight).
+- Zero custom controls, zero new packages. Budgets ratified (start ≤1.0s,
+  working set ≤150 MB, modern HW). Tests: 34 passing.
+- Startup 0.68s / working set 131.7 MB (gallery resolves on navigation).
+
 ## 0.3.0 (2026-10-14)
 
 - Token layer (`DesignTokens/`): semantic color aliases, type ramp, comfortable/

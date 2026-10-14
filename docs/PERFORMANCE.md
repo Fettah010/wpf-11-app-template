@@ -47,3 +47,26 @@ Delta vs 0.2.0: +0.02s start, +1 MB working set — token dictionaries are
 noise. Max working set (149 MB, one run) touches the provisional 150 MB
 hypothesis; treated as GC-timing noise on a warm-cache machine, watched in
 0.4.0. Low-spec reference still outstanding (D10).
+
+## Ratified budgets (0.4.0, modern reference hardware)
+
+Data: start medians 0.61 / 0.61 / 0.71 / 0.73s; working-set medians
+116 / 116 / 130 / 131 MB (max 149). Growth is explained (shell + tokens);
+headroom is comfortable. Low-spec numbers remain outstanding (D10) — these
+budgets are modern-HW-only until measured there.
+
+| Budget | Gate |
+|---|---|
+| Cold start median ≤ 1.0s (Release, warm-cache) | Blocking |
+| Working set median ≤ 150 MB after start | Blocking |
+| Builds with 0 warnings; tests 100% passing | Blocking |
+
+## 0.4.0 baseline (2026-10-14, `release/0.4.0`)
+
+| Metric | Median | Max | How |
+|---|---|---|---|
+| Cold start (launch → window) | 0.68s | 0.72s | `measure-startup.ps1 -Runs 5` (0.72/0.68/0.68/0.68/0.67) |
+| Working set after start | 131.7 MB | 132.2 MB | same runs, +2s idle sample |
+
+Inside ratified budgets. Gallery pages resolve on navigation — startup is
+unaffected by gallery size (design validated by measurement).
