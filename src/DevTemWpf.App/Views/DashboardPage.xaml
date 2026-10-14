@@ -9,12 +9,16 @@
       mc:Ignorable="d"
       d:DesignHeight="760" d:DesignWidth="1024"
       Title="Dashboard">
+  <!-- Outer scroll is the short-window fallback (T05 audit): every block stays
+       reachable when the window cannot fit the full dashboard. The table keeps
+       a fixed height so its internal virtualization is preserved. -->
+  <ScrollViewer VerticalScrollBarVisibility="Auto" AutomationProperties.Name="Dashboard scroll">
   <Grid Margin="{StaticResource AppPageMargin}">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
@@ -74,7 +78,7 @@
                     Text="{Binding ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     AutomationProperties.Name="Activity filter" Margin="{StaticResource AppGapItem}" />
         <ListView Grid.Row="1" x:Name="ActivityTable" ItemsSource="{Binding ViewModel.Activities}"
-                  SelectedItem="{Binding ViewModel.SelectedActivity, Mode=TwoWay}"
+                  SelectedItem="{Binding ViewModel.SelectedActivity, Mode=TwoWay}" Height="360"
                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
                   AutomationProperties.Name="Activity table">
           <ListView.View>
@@ -158,4 +162,5 @@
       </StackPanel>
     </ui:Card>
   </Grid>
+  </ScrollViewer>
 </Page>
