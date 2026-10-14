@@ -1,7 +1,8 @@
 # Design tokens
 
-Single source of truth: `src/DevTemWpf.App/DesignTokens/` (moves to the UI
-library with its second consumer, per ADR-0003).
+Single source of truth: `src/DevTemWpf.App/DesignTokens/` for XAML resources
+plus `Services/MotionTokens.cs` for motion values (moves to the UI library
+with its second consumer, per ADR-0003).
 
 ## Layers (`App.xaml` order)
 

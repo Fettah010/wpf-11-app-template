@@ -10,7 +10,8 @@ milestone, risk.
 | D02 | ~~Shells, title-bar chrome, backdrop adapters~~ — done in 0.2.0 | — | — | 0.2.0 ✅ | — |
 | D03 | ~~Tokens/themes/density~~ — done in 0.3.0 | — | — | 0.3.0 ✅ | — |
 | D04 | ~~Gallery/forms/dialogs~~ — done in 0.4.0 | — | — | 0.4.0 ✅ | — |
-| D05 | Motion system + water-warp spike (optional, fallback-first) | Roadmap scope; WPF ≠ WinUI compositor | 0.5.0 feel | 0.5.0 | GPU/perf — measure |
+| D05 | ~~Motion system~~ — done in 0.5.0 (stagger/layout animation stay out) | — | — | 0.5.0 ✅ | — |
+| D13 | HLSL water-warp/distortion shader | Needs pinned shader toolchain + low-spec GPU validation + fallback proof (none available) | Signature backdrop effect | 0.5.0+ (unblocked by D10) | GPU/perf — measure before ship |
 | D06 | Dashboard/gallery content, charts (LiveCharts2 audit), drag-drop | Roadmap scope | 0.6.0 depth | 0.6.0 | — |
 | D07 | Serilog, SQLite, HTTP, tray/notifications, backup, auth sample, Velopack, MSIX/Store, release automation | Each needs fresh license/compat audit | 0.7.0 production | 0.7.0 | License/compat per package |
 | D08 | `dotnet new` templates, generators, VSIX, rebrand tooling | Roadmap scope | 0.8.0 DX | 0.8.0 | — |

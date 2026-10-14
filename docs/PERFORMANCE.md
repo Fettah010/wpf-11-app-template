@@ -70,3 +70,13 @@ budgets are modern-HW-only until measured there.
 
 Inside ratified budgets. Gallery pages resolve on navigation — startup is
 unaffected by gallery size (design validated by measurement).
+
+## 0.5.0 baseline (2026-10-14, `release/0.5.0`)
+
+| Metric | Median | Max | How |
+|---|---|---|---|
+| Cold start (launch → window) | 0.77s | 0.81s | `measure-startup.ps1 -Runs 5` (0.81/0.76/0.77/0.71/0.77) |
+| Working set after start | 131.8 MB | 132.2 MB | same runs, +2s idle sample |
+
+Inside ratified budgets (≤1.0s, ≤150 MB). Entrance storyboards play
+post-load and do not move startup; no perpetual animation by default.

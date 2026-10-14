@@ -1,7 +1,7 @@
-# Dependencies (0.4.0 inventory, verified 2026-10-14)
+# Dependencies (0.5.0 inventory, verified 2026-10-14)
 
-No package changes in 0.4.0 (feedback services + validator ship in approved
-packages). 0.2.0 inventory below still current.
+No package changes in 0.5.0 (storyboards, P/Invoke, and render-tier reads
+use BCL + WPF-UI only). 0.2.0 inventory below still current.
 
 Single version source: `Directory.Packages.props` (CPM + transitive pinning).
 

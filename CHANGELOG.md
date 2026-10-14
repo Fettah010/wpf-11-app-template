@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0 (2026-10-14)
+
+- Motion system: tokenized durations/easings, Auto/Full/Reduced/Off profiles
+  (OS animation setting + render tier), page entrances, reduced-motion and
+  failure fallbacks that snap final state.
+- Effects showcase page (presets, click ripple, opt-in animated gradient)
+  behind the effects switch; warp shader explicitly deferred (see motion.md).
+- Tests: 45 passing (policy matrix, instant path, ripple lifecycle).
+- Zero new packages. Startup 0.77s / working set 131.8 MB (budgets hold).
+
 ## 0.4.0 (2026-10-14)
 
 - Controls gallery page (buttons, inputs, cards/expanders, InfoBar, progress,
