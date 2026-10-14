@@ -8,10 +8,19 @@ param([int]$Runs = 5)
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$exe = Join-Path $root 'src\DevTemWpf.App\bin\Release\net10.0-windows10.0.26100\DevTemWpf.App.exe'
-if (-not (Test-Path -LiteralPath $exe)) {
-  Write-Host "Build Release first (exe missing): $exe" -ForegroundColor Red
+# Resolve dynamically (like smoke.ps1) so renamed projects and future
+# multi-project layouts keep working; fail clearly instead of measuring
+# the wrong (or no) binary.
+$candidates = @(Get-ChildItem -LiteralPath (Join-Path $root 'src') -Recurse -Filter '*.App.exe' |
+  Where-Object { $_.FullName -like '*\Release\*' } | Select-Object -ExpandProperty FullName)
+if ($candidates.Count -eq 0) {
+  Write-Host 'Build Release first (no *App.exe under src/).' -ForegroundColor Red
   exit 1
+}
+$exe = $candidates[0]
+if ($candidates.Count -gt 1) {
+  Write-Host "Multiple Release app exes; measuring the first:" -ForegroundColor Yellow
+  $candidates | ForEach-Object { Write-Host "  $_" }
 }
 
 $starts = @()

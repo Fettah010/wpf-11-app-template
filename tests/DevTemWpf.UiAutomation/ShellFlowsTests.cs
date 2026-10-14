@@ -205,10 +205,16 @@ public sealed class ShellFlowsTests : IDisposable
         try
         {
             // Menu navigation: Home -> Controls -> Settings.
-            window.FindFirstDescendant(cf => cf.ByName("Controls"))!.Click();
+            // Foreground first: coordinate clicks land reliably only when
+            // our window is frontmost (same mitigation as Visit_AllPages).
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                TimeSpan.FromSeconds(10), "nav item 'Controls'").Click();
             WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Gallery dialog demo")),
                 TimeSpan.FromSeconds(10), "Controls page content");
-            window.FindFirstDescendant(cf => cf.ByName("Settings"))!.Click();
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
+                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
             WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Theme selector")),
                 TimeSpan.FromSeconds(10), "Settings page content");
 
@@ -311,7 +317,9 @@ public sealed class ShellFlowsTests : IDisposable
         var window = Launch(out var app, out var automation);
         try
         {
-            window.FindFirstDescendant(cf => cf.ByName("Controls"))!.Click();
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                TimeSpan.FromSeconds(10), "nav item 'Controls'").Click();
             var demo = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Gallery dialog demo")),
                 TimeSpan.FromSeconds(10), "dialog demo button");
             demo.Patterns.ScrollItem.TryGetPattern(out var scrollPattern);

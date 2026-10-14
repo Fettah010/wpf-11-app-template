@@ -18,6 +18,17 @@ $root = Split-Path -Parent $PSScriptRoot
 $work = Join-Path ([IO.Path]::GetTempPath()) ('devtem-tmpl-' + [Guid]::NewGuid().ToString('N'))
 $failures = 0
 
+# Isolation (1.1.0): per-run CLI home (template hive) + per-run logs, so
+# concurrent runs never share state and the developer's global template
+# registrations are untouched. Restored/removed in the finally block below.
+# NUGET_PACKAGES keeps pointing at the user's cache (read-through reuse:
+# no per-run package re-download, and nothing hive-specific to clean).
+$cliHome = Join-Path $work 'cli-home'
+$logOut = Join-Path $work 'invoke.out.log'
+$logErr = Join-Path $work 'invoke.err.log'
+$oldCliHome = $env:DOTNET_CLI_HOME
+$oldNugetPackages = $env:NUGET_PACKAGES
+
 function Assert-True([bool]$Condition, [string]$Message) {
   if (-not $Condition) {
     Write-Host "ASSERT FAILED: $Message" -ForegroundColor Red
@@ -27,10 +38,10 @@ function Assert-True([bool]$Condition, [string]$Message) {
 
 function Invoke-Native([string]$Exe, [string[]]$Arguments, [string]$WorkDir) {
   $p = Start-Process -FilePath $Exe -ArgumentList $Arguments -WorkingDirectory $WorkDir `
-    -NoNewWindow -Wait -PassThru -RedirectStandardOutput "$env:TEMP\devtem-tmpl.out" -RedirectStandardError "$env:TEMP\devtem-tmpl.err"
+    -NoNewWindow -Wait -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
   if ($p.ExitCode -ne 0) {
     Write-Host "COMMAND FAILED ($($p.ExitCode)): $Exe $($Arguments -join ' ')" -ForegroundColor Red
-    Get-Content "$env:TEMP\devtem-tmpl.err" | Select-Object -First 15
+    Get-Content $logErr | Select-Object -First 15
     $script:failures++
     return $false
   }
@@ -90,6 +101,10 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
 
 try {
   New-Item -ItemType Directory -Path $work -Force | Out-Null
+  New-Item -ItemType Directory -Path $cliHome -Force | Out-Null
+  $env:DOTNET_CLI_HOME = $cliHome
+  $userPackages = Join-Path $env:USERPROFILE '.nuget\packages'
+  if (Test-Path -LiteralPath $userPackages) { $env:NUGET_PACKAGES = $userPackages }
   $installSource = if ($PackagePath) { $PackagePath } else { $root }
   $uninstallId = if ($PackagePath) { 'DevTemWPF.Templates' } else { $root }
   try { & dotnet new uninstall $uninstallId 2>&1 | Out-Null } catch { }
@@ -128,11 +143,25 @@ try {
   }
 }
 finally {
+  # Hive-scoped uninstall first (still under the per-run CLI home), then
+  # restore the caller's environment. Global registrations are never touched.
+  $env:DOTNET_CLI_HOME = $cliHome
   $uninstallId = if ($PackagePath) { 'DevTemWPF.Templates' } else { $root }
   try { & dotnet new uninstall $uninstallId 2>&1 | Out-Null } catch { }
   try { & dotnet new uninstall (Join-Path $root 'templates\items\devtemwpf-page') 2>&1 | Out-Null } catch { }
   try { & dotnet new uninstall (Join-Path $root 'templates\items\devtemwpf-service') 2>&1 | Out-Null } catch { }
-  if (Test-Path $work) { Remove-Item -Recurse -Force $work }
+  if ($null -eq $oldCliHome) { [Environment]::SetEnvironmentVariable('DOTNET_CLI_HOME', $null, 'Process') }
+  else { $env:DOTNET_CLI_HOME = $oldCliHome }
+  if ($null -eq $oldNugetPackages) { [Environment]::SetEnvironmentVariable('NUGET_PACKAGES', $null, 'Process') }
+  else { $env:NUGET_PACKAGES = $oldNugetPackages }
+  if (($script:failures -eq 0) -and (Test-Path $work)) {
+    # Long-path-safe removal (per-run NuGet/template hives nest deeply).
+    try { Remove-Item -LiteralPath "\\?\$work" -Recurse -Force -ErrorAction Stop }
+    catch {
+      Write-Host "WARNING: work-dir cleanup failed, kept for manual removal: $work" -ForegroundColor Yellow
+    }
+  }
+  elseif (Test-Path $work) { Write-Host "Work dir kept for diagnosis: $work" -ForegroundColor Yellow }
 }
 
 if ($failures -gt 0) { Write-Host "`nTEMPLATE MATRIX FAILED ($failures)" -ForegroundColor Red; exit 1 }
