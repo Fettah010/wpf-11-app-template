@@ -130,4 +130,4 @@ finally {
 }
 
 if ($failures -gt 0) { Write-Host "`nTEMPLATE MATRIX FAILED ($failures)" -ForegroundColor Red; exit 1 }
-Write-Host '`nTEMPLATE MATRIX PASSED' -ForegroundColor Green
+Write-Host "`nTEMPLATE MATRIX PASSED" -ForegroundColor Green
