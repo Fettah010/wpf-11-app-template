@@ -54,6 +54,40 @@ public sealed class ShellFlowsTests : IDisposable
         return true;
     }
 
+    private static string AppRoot()
+    {
+        // <root>/src/<App>.App/bin/<cfg>/<tfm>/ -> root is 5 levels up.
+        var dir = new DirectoryInfo(Path.GetDirectoryName(FindAppExe())!);
+        for (var i = 0; i < 5; i++)
+        {
+            dir = dir.Parent ?? throw new InvalidOperationException("Cannot locate app root.");
+        }
+
+        return dir.FullName;
+    }
+
+    /// <summary>
+    /// Preset-awareness: generated apps carry FEATURES.md with checked module
+    /// rows; the repo tree has none (default everything on).
+    /// </summary>
+    private static bool ModuleOn(string module)
+    {
+        try
+        {
+            var manifest = Path.Combine(AppRoot(), "FEATURES.md");
+            if (!File.Exists(manifest))
+            {
+                return true;
+            }
+
+            return File.ReadAllText(manifest).Contains($"- [x] {module}", StringComparison.Ordinal);
+        }
+        catch
+        {
+            return true;
+        }
+    }
+
     private static string FindAppExe()
     {
         // tests/DevTemWpf.UiAutomation/bin/<cfg>/<tfm>/ -> repo root is 5 levels up.
@@ -206,31 +240,52 @@ public sealed class ShellFlowsTests : IDisposable
             return;
         }
 
-        var stops = new (string NavItem, string ContentName)[]
+        var stops = new List<(string NavItem, string ContentName)>
         {
             // Named elements (AutomationProperties.Name). Note: an explicit
             // Name replaces the text content in UIA lookups (verified).
             ("Home", "Home headline"),
-            ("Dashboard", "Activity filter"),
             ("Controls", "Gallery dialog demo"),
             ("Design Tokens", "Design token preview"),
             ("Effects", "Play standard preset"),
-            ("Diagnostics", "Log viewer"),
             ("Settings", "Theme selector"),
         };
+        if (ModuleOn("Dashboard"))
+        {
+            stops.Insert(1, ("Dashboard", "Activity filter"));
+        }
+
+        if (ModuleOn("Diagnostics"))
+        {
+            stops.Insert(stops.Count - 1, ("Diagnostics", "Log viewer"));
+        }
 
         var window = Launch(out var app, out var automation);
         try
         {
             foreach (var (navItem, contentName) in stops)
             {
-                // Coordinate click: proven path for nav items (all visible).
-                // Both lookups retry: the tree rebuilds on every navigation.
-                var item = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(navItem)),
-                    TimeSpan.FromSeconds(10), $"nav item '{navItem}'");
-                item.Click();
-                WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(contentName)),
-                    TimeSpan.FromSeconds(10), $"{navItem} page content '{contentName}'");
+                try
+                {
+                    // Coordinate click: proven path for nav items (all visible).
+                    // Both lookups retry: the tree rebuilds on every navigation.
+                    var item = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(navItem)),
+                        TimeSpan.FromSeconds(10), $"nav item '{navItem}'");
+                    item.Click();
+                    WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(contentName)),
+                        TimeSpan.FromSeconds(10), $"{navItem} page content '{contentName}'");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    var names = window.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.ListItem))
+                        .Select(e => e.Name).ToList();
+                    var texts = window.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text))
+                        .Select(e => e.Name).Take(12).ToList();
+                    File.WriteAllLines(
+                        Path.Combine(Path.GetTempPath(), "uitreedump.txt"),
+                        [$"AFTER {navItem}: {ex.Message}", "ITEMS: " + string.Join(" || ", names), "TEXTS: " + string.Join(" || ", texts)]);
+                    throw;
+                }
             }
         }
         finally

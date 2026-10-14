@@ -38,7 +38,7 @@ public sealed class TemplateSurfaceTests
         Assert.True(symbols.TryGetProperty("IncludeTests", out _));
 
         var choices = preset.GetProperty("choices").EnumerateArray()
-            .Select(c => c.GetProperty("choice").GetString()).ToHashSet();
+            .Select(c => c.GetProperty("choice").GetString() ?? string.Empty).ToHashSet();
         Assert.Equal(new HashSet<string> { "Clean", "Recommended", "Full" }, choices);
         Assert.Equal("Recommended", preset.GetProperty("defaultValue").GetString());
 

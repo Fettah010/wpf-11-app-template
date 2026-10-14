@@ -62,7 +62,8 @@
         "templates/items/**",
         "eng/test-templates.ps1",
         "tmp/**",
-        "temp/**"
+        "temp/**",
+        "tests/DevTemWpf.Unit/TemplateSurfaceTests.cs"
       ],
       "rename": {
         "templates/support/APP-README.md": "README.md",
