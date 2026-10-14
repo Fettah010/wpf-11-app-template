@@ -99,6 +99,7 @@ public sealed partial class UpdateService : ObservableObject, IUpdateService
         {
             var progress = new Progress<double>(p => Progress = p);
             await _engineFactory().DownloadAsync(feed, _pending, progress, cancellationToken).ConfigureAwait(false);
+            Progress = 1.0;
             Status = UpdateStatus.ReadyToRestart;
             Detail = $"Version {_pending.Version} ready — restarting…";
             _engineFactory().ApplyAndRestart(feed, _pending);
