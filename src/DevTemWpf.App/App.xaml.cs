@@ -1,6 +1,8 @@
 ﻿using System.Windows;
+using DevTemWpf.App.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Wpf.Ui.Appearance;
 
 namespace DevTemWpf.App;
@@ -21,9 +23,20 @@ public partial class App : Application
         {
             var builder = Host.CreateApplicationBuilder(e.Args);
             builder.ConfigureForApp();
+            builder.AddAppLogging();
+
+            // Velopack install/update hooks (safe when not installed).
+            Velopack.VelopackApp.Build().Run();
 
             _host = builder.Build();
             await _host.StartAsync().ConfigureAwait(true);
+
+            var startupLog = _host.Services.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>()
+                .CreateLogger("Startup");
+            startupLog.LogInformation(
+                "Starting DevTemWpf {Version} on {OS}",
+                GetType().Assembly.GetName().Version,
+                Environment.OSVersion.VersionString);
 
             // Settings → theme before the window exists (ADR-0006).
             var settings = _host.Services.GetRequiredService<DevTemWpf.App.Services.ISettingsService>();

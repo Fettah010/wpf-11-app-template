@@ -13,6 +13,15 @@
     <!-- MVVM + hosting (ADR-0002) -->
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+    <!-- Production services (ADR-0011). Audited 2026-10-14: Serilog 4.4.0 /
+         Hosting 10.0.0 / File 7.0.0 (Apache-2.0); Sqlite 10.0.13 (Apache-2.0);
+         Velopack 1.2.161 (MIT); WPF-UI.Tray 4.3.0 (MIT, same vendor). -->
+    <PackageVersion Include="Serilog" Version="4.4.0" />
+    <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.13" />
+    <PackageVersion Include="Velopack" Version="1.2.161" />
+    <PackageVersion Include="WPF-UI.Tray" Version="4.3.0" />
     <!-- Charts (ADR-0010): optional dashboard module only. Audited 2026-10-14:
          2.0.5 stable (MIT), net8.0-windows asset, SkiaSharp 3.119 native runtimes. -->
     <PackageVersion Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.5" />

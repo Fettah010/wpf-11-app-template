@@ -23,13 +23,7 @@ public sealed class SettingsService : ISettingsService
 
     public event EventHandler<ShellSettings>? Updated;
 
-    public static string DefaultPath()
-    {
-        var dir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "Wpf11AppTemplate");
-        return Path.Combine(dir, "settings.json");
-    }
+    public static string DefaultPath() => AppPaths.SettingsPath;
 
     public async Task LoadAsync(CancellationToken cancellationToken = default)
     {

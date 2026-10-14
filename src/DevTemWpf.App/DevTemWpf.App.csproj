@@ -17,6 +17,13 @@
     <PackageReference Include="WPF-UI.DependencyInjection" />
     <!-- Dashboard-only charting (ADR-0010); excluded from clean scaffolds. -->
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" />
+    <!-- Production services (ADR-0011); each removable per its module. -->
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Velopack" />
+    <PackageReference Include="WPF-UI.Tray" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
   </ItemGroup>
