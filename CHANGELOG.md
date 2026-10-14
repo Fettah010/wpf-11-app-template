@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0 (2026-10-14)
+
+- Production services (all optional/inert by default): Serilog file logging,
+  SQLite favorites, typed HTTP client, zip backup/restore, Velopack updates
+  (channels, explicit flow), tray integration, EN+de localization.
+- Diagnostics page (log viewer/filter/export, support bundle, backup,
+  updates, probe, paths/versions). CI workflow + distribution docs.
+- Tests: 77 passing. Startup 0.77s+ (re-measured below).
+
 ## 0.6.0 (2026-10-14)
 
 - Premium dashboard: stat cards, LiveCharts2 line chart, sortable/filterable

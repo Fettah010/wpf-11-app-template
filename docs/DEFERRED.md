@@ -15,9 +15,11 @@ milestone, risk.
 | D14 | Drag-and-drop workspace patterns | No 0.6.0 consumer; lower priority than table/charts | Rich workspace UX | 0.6.0+ / 0.9.0 scope decision | API/design time |
 | D15 | Top-navigation + tabbed-workspace shells | 0.6.0 ships patterns (master/detail, sections); full shells are template surface | Shell choice for generated apps | 0.8.0 (contracts then) | Scope — needs real consumer |
 | D06 | ~~Dashboard/gallery content, charts~~ — dashboard + charts done in 0.6.0; drag-drop remainder → D14 | — | — | 0.6.0 ✅ (partial) | — |
-| D07 | Serilog, SQLite, HTTP, tray/notifications, backup, auth sample, Velopack, MSIX/Store, release automation | Each needs fresh license/compat audit | 0.7.0 production | 0.7.0 | License/compat per package |
+| D07 | ~~Serilog, SQLite, HTTP, tray/notifications, backup, auth sample, Velopack, MSIX/Store, release automation~~ — done in 0.7.0 except: auth/reporting samples (security review), system toasts (MSIX-gated), signing execution | — | — | 0.7.0 ✅ (partial) | — |
+| D09 | ~~GitHub Actions CI, FlaUI automation, visual regression, signed artifacts~~ — CI done in 0.7.0; automation/regression/signing remain | — | — | 0.7.0 ✅ (partial) | Runner availability |
+| D11 | ~~Remote repository creation + push~~ — done (origin set, releases published) | — | — | 0.1.0–0.6.0 ✅ | — |
 | D08 | `dotnet new` templates, generators, VSIX, rebrand tooling | Roadmap scope | 0.8.0 DX | 0.8.0 | — |
-| D09 | GitHub Actions CI, FlaUI automation, visual regression, signed artifacts | No remote/CI in 0.1.0 | 0.7.0–0.9.0 quality | 0.7.0–0.9.0 | Runner availability |
+| D09 | ~~GitHub Actions CI~~ — CI done in 0.7.0; FlaUI automation, visual regression, signed artifacts remain | — | — | 0.7.0 ✅ (partial) | Runner availability |
 | D10 | Low-spec reference machine + ratified perf budgets | Single-machine baseline only | Budget trust | ≤0.4.0 | Hardware access |
 | D11 | Remote repository creation + push | No remote configured; needs user remote/credentials | Collaboration/CI | When provided | Secrets handling |
 | D12 | `Microsoft.ApplicationInsights` test-only transitive review | Via MTP telemetry ext. 2.5.1; harmless today | Supply-chain hygiene | 0.7.0 audit | Leakage into app output |

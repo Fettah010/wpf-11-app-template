@@ -90,3 +90,13 @@ post-load and do not move startup; no perpetual animation by default.
 
 Inside ratified budgets. Dashboard (incl. Skia natives + 1500-row source)
 resolves on first navigation — startup unaffected (design re-validated).
+
+## 0.7.0 baseline (2026-10-14, `release/0.7.0`)
+
+| Metric | Median | Max | How |
+|---|---|---|---|
+| Cold start (launch → window) | 0.80s | 0.84s | `measure-startup.ps1 -Runs 5` (0.84/0.80/0.78/0.80/0.79) |
+| Working set after start | 135.7 MB | 137 MB | same runs, +2s idle sample |
+
+Inside ratified budgets (≤1.0s, ≤150 MB). Serilog init + SQLite open add
+~0.03s / ~3 MB — lazy-init backstop documented if budgets ever tighten.

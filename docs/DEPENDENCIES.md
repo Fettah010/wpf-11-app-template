@@ -1,6 +1,6 @@
-# Dependencies (0.6.0 inventory, verified 2026-10-14)
+# Dependencies (0.7.0 inventory, verified 2026-10-14)
 
-One addition (see row). 0.2.0 inventory below otherwise current.
+Six additions (rows). 0.2.0 inventory below otherwise current.
 
 Single version source: `Directory.Packages.props` (CPM + transitive pinning).
 
@@ -15,6 +15,13 @@ Single version source: `Directory.Packages.props` (CPM + transitive pinning).
 | `WPF-UI.DependencyInjection` | 4.3.0 | DI page provider for NavigationView (ADR-0005; v4 has no `IPageService` impl) | `github.com/lepoco/wpfui` | MIT (same repo) | Ships `net10.0`; deps only DI.Abstractions + Abstractions | Stable 2026-05-04, same 4.3.0 line |
 | `Xunit.StaFact` | 4.0.24 | STA/Dispatcher test attributes, test-only (ADR-0004 update) | `github.com/AArnott/Xunit.StaFact` | MS-PL (test-only, never shipped) | `net8.0` → net10 compatible | Stable 2026-10-01; used by Avalonia/Roslyn/WPF repos |
 | `LiveChartsCore.SkiaSharpView.WPF` | 2.0.5 | Dashboard charting, app-only/isolated (ADR-0010) | `github.com/Live-Charts/LiveCharts2` | MIT | `net8.0-windows` → net10 compatible; SkiaSharp 3.119 natives (win-x64 covered) | Stable 2026-06-18; 2.0.0 stable since 3/2026; 5.5k stars |
+| `Serilog` | 4.4.0 | Structured logging core (ADR-0011) | `github.com/serilog/serilog` | Apache-2.0 | net10 compatible | Stable |
+| `Serilog.Extensions.Hosting` | 10.0.0 | Serilog ↔ Generic Host bridge | `github.com/serilog/serilog-extensions-hosting` | Apache-2.0 | Matches Hosting 10.x | Stable |
+| `Serilog.Sinks.File` | 7.0.0 | Rolling file sink (14-day retention) | `github.com/serilog/serilog-sinks-file` | Apache-2.0 | net10 compatible | Stable |
+| `Microsoft.Data.Sqlite` | 10.0.13 | Local database (favorites store) | `github.com/dotnet/efcore` | MIT (verified in nuspec) | net10; native SQLite win-x64 bundled | Stable 10.0.x band |
+| `Microsoft.Extensions.Http` | 10.0.12 | Typed `HttpClient` factory | `github.com/dotnet/runtime` | MIT | Matches Hosting 10.x | Same release train |
+| `Velopack` | 1.2.161 | Installer/update engine (explicit flow) | `github.com/velopack/velopack` | MIT | `net10.0` asset, zero net10 deps | Stable 2026-09-29; heavy WPF adoption |
+| `WPF-UI.Tray` | 4.3.0 | Tray icon + menu (same vendor) | `github.com/lepoco/wpfui` | MIT (same repo) | `net10.0-windows7.0` asset | Stable 2026-05-04, same 4.3.0 line |
 
 ## Notable transitive dependencies
 
