@@ -9,8 +9,9 @@ namespace DevTemWpf.UiAutomation;
 /// <summary>
 /// Desktop UI automation (FlaUI + UIA3). Drives the built app exe; needs an
 /// interactive session. Set <c>DEVTEM_RUN_UI_TESTS=0</c> to skip loudly
-/// (headless CI); skips never pass silently — they print and are recorded in
-/// the release report.
+/// (headless CI). Skips use <c>Assert.Skip</c> so they are counted as skipped
+/// (never as passes); the required release gate fails on unexpected skips —
+/// see <c>eng/check-ui-tests.ps1</c>.
 /// </summary>
 public sealed class ShellFlowsTests : IDisposable
 {
@@ -57,6 +58,14 @@ public sealed class ShellFlowsTests : IDisposable
 
         reason = string.Empty;
         return true;
+    }
+
+    private static void RequireUiOrSkip()
+    {
+        if (!UiEnabled(out var reason))
+        {
+            Assert.Skip($"UI tests disabled ({reason}). Run on an interactive Windows session without DEVTEM_RUN_UI_TESTS=0.");
+        }
     }
 
     private static string AppRoot()
@@ -176,11 +185,7 @@ public sealed class ShellFlowsTests : IDisposable
     [WpfFact]
     public void Launch_ShowsWindow_And_ClosesCleanly()
     {
-        if (!UiEnabled(out var reason))
-        {
-            Console.WriteLine($"SKIPPED UI test ({reason}).");
-            return;
-        }
+        RequireUiOrSkip();
 
         var window = Launch(out var app, out var automation);
         using (automation)
@@ -194,11 +199,7 @@ public sealed class ShellFlowsTests : IDisposable
     [WpfFact]
     public void Navigate_ViaMenu_And_KeyboardFocus_Moves()
     {
-        if (!UiEnabled(out var reason))
-        {
-            Console.WriteLine($"SKIPPED UI test ({reason}).");
-            return;
-        }
+        RequireUiOrSkip();
 
         var window = Launch(out var app, out var automation);
         try
@@ -239,11 +240,7 @@ public sealed class ShellFlowsTests : IDisposable
     [WpfFact]
     public void Visit_AllPages_ShowsExpectedContent()
     {
-        if (!UiEnabled(out var reason))
-        {
-            Console.WriteLine($"SKIPPED UI test ({reason}).");
-            return;
-        }
+        RequireUiOrSkip();
 
         var stops = new List<(string NavItem, string ContentName)>
         {
@@ -309,11 +306,7 @@ public sealed class ShellFlowsTests : IDisposable
     [WpfFact]
     public void Dialog_Confirm_RoundTrips_Result()
     {
-        if (!UiEnabled(out var reason))
-        {
-            Console.WriteLine($"SKIPPED UI test ({reason}).");
-            return;
-        }
+        RequireUiOrSkip();
 
         var window = Launch(out var app, out var automation);
         try
