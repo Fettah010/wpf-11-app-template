@@ -34,7 +34,9 @@ public sealed class ThemeService : IThemeService
                 _applier.Apply(ApplicationTheme.Dark, effective);
                 break;
             default:
-                _applier.ApplySystemTheme();
+                // System mode resolves explicitly so the persisted backdrop
+                // choice is honored (ApplySystemTheme would force Mica).
+                _applier.Apply(_applier.GetSystemApplicationTheme(), effective);
                 break;
         }
 

@@ -16,10 +16,9 @@ public sealed class ThemeServiceTests : IDisposable
     private sealed class FakeApplier : IThemeApplier
     {
         public List<(ApplicationTheme Theme, WindowBackdropType Backdrop)> Applied { get; } = [];
-        public int SystemApplied { get; private set; }
 
         public void Apply(ApplicationTheme theme, WindowBackdropType backdrop) => Applied.Add((theme, backdrop));
-        public void ApplySystemTheme() => SystemApplied++;
+        public ApplicationTheme GetSystemApplicationTheme() => ApplicationTheme.Dark;
         public bool IsHighContrast() => false;
     }
 
@@ -65,13 +64,14 @@ public sealed class ThemeServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task System_DelegatesToSystemTheme()
+    public async Task System_AppliesOsTheme_WithEffectiveBackdrop()
     {
         var (service, applier) = await CreateAsync(new ShellSettings { Theme = ThemeMode.System });
 
         await service.ApplyCurrentAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(1, applier.SystemApplied);
-        Assert.Empty(applier.Applied);
+        var call = Assert.Single(applier.Applied);
+        Assert.Equal(ApplicationTheme.Dark, call.Theme);
+        Assert.Equal(WindowBackdropType.Mica, call.Backdrop);
     }
 }

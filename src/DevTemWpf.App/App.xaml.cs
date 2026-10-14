@@ -27,6 +27,8 @@ public partial class App : Application
             // Settings → theme before the window exists (ADR-0006).
             var settings = _host.Services.GetRequiredService<DevTemWpf.App.Services.ISettingsService>();
             await settings.LoadAsync().ConfigureAwait(true);
+            // Persist (creates the file on first run, repairs corrupt files).
+            await settings.UpdateAsync(static s => s).ConfigureAwait(true);
             var theme = _host.Services.GetRequiredService<DevTemWpf.App.Services.IThemeService>();
             await theme.ApplyCurrentAsync().ConfigureAwait(true);
 

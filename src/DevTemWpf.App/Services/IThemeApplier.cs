@@ -11,7 +11,8 @@ public interface IThemeApplier
 {
     void Apply(ApplicationTheme theme, WindowBackdropType backdrop);
 
-    void ApplySystemTheme();
+    /// <summary>Current OS theme mapped to Light/Dark/HighContrast.</summary>
+    ApplicationTheme GetSystemApplicationTheme();
 
     bool IsHighContrast();
 }

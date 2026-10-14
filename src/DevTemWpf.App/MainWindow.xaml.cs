@@ -14,7 +14,6 @@ namespace DevTemWpf.App;
 public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 {
     private readonly ISettingsService _settings;
-    private readonly IBackdropService _backdrop;
 
     public MainWindow(
         MainViewModel viewModel,
@@ -24,7 +23,13 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         IBackdropService backdrop)
     {
         _settings = settings;
-        _backdrop = backdrop;
+
+        // Set before InitializeComponent so FluentWindow picks it up at
+        // OnSourceInitialized (its own timing). Never re-set afterwards:
+        // re-setting the DP post-init crashes in SetWindowChrome on .NET 10.
+        // Runtime material changes go through ApplicationThemeManager.Apply
+        // (DWM-only path, no WindowChrome touch).
+        WindowBackdropType = backdrop.Current(settings.Current.BackdropEnabled);
 
         InitializeComponent();
         ViewModel = viewModel;
@@ -37,7 +42,6 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
         SizeChanged += (_, e) => ViewModel.ApplyResponsiveWidth(e.NewSize.Width);
         Loaded += (_, _) => OnFirstLoaded();
-        _settings.Updated += (_, _) => ApplyChrome();
     }
 
     public MainViewModel ViewModel { get; }
@@ -45,19 +49,11 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     private void OnFirstLoaded()
     {
         ViewModel.ApplyResponsiveWidth(ActualWidth);
-        ApplyChrome();
         if (_settings.Current.Theme == Services.ThemeMode.System)
         {
             SystemThemeWatcher.Watch(this);
         }
 
         _ = RootNavigation.Navigate(typeof(HomePage));
-    }
-
-    private void ApplyChrome()
-    {
-        // Extend-first: FluentWindow throws if a backdrop is applied without it.
-        ExtendsContentIntoTitleBar = true;
-        WindowBackdropType = _backdrop.Current(_settings.Current.BackdropEnabled);
     }
 }
