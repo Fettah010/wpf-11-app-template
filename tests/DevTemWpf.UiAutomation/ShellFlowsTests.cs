@@ -697,6 +697,11 @@ public sealed class ShellFlowsTests : IDisposable
 
             // Selecting a node selects it. Keyboard-driven from a visible node:
             // arrow navigation auto-scrolls, so no manual scrolling is needed.
+            // Jump via the section index first: on small viewports (e.g. CI
+            // at 1024x768) the tree starts below the fold.
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Go to Tree section")),
+                TimeSpan.FromSeconds(10), "tree index button").Patterns.Invoke.Pattern.Invoke();
+            Thread.Sleep(800);
             var engineering = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Engineering")),
                 TimeSpan.FromSeconds(10), "tree root label");
             engineering.Click();
