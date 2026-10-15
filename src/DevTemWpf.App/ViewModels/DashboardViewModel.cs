@@ -1,10 +1,13 @@
 using System.ComponentModel;
+using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DevTemWpf.App.Services;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
 using Wpf.Ui.Abstractions.Controls;
 
 namespace DevTemWpf.App.ViewModels;
@@ -22,29 +25,36 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
 
     private readonly List<ActivityItem> _all;
     private readonly FavoritesStore _favorites;
+    private readonly ISettingsService? _settings;
+    private readonly Func<string, Color?> _resolveColor;
+    private readonly List<double> _weeklyValues;
+    private readonly List<string> _weekdayLabels;
     private string _sortColumn = nameof(ActivityItem.Timestamp);
     private ListSortDirection _sortDirection = ListSortDirection.Descending;
 
-    public DashboardViewModel(SampleDataService data, FavoritesStore favorites)
+    public DashboardViewModel(
+        SampleDataService data,
+        FavoritesStore favorites,
+        ISettingsService? settings = null,
+        Func<string, Color?>? resolveColor = null)
     {
         _favorites = favorites;
+        _settings = settings;
+        _resolveColor = resolveColor ?? DefaultResolveColor;
         Metrics = data.GetMetrics();
         _all = data.GetActivities().ToList();
         Activities = CollectionViewSource.GetDefaultView(_all);
         Activities.Filter = Matches;
         ApplySort();
 
-        Series =
-        [
-            new LineSeries<double>
-            {
-                Values = data.GetWeeklyValues(),
-                Fill = null,
-                GeometrySize = 8,
-                Name = "Completed tasks",
-            },
-        ];
-        XAxes = [new Axis { Labels = data.GetWeekdayLabels().ToList() }];
+        _weeklyValues = data.GetWeeklyValues().ToList();
+        _weekdayLabels = data.GetWeekdayLabels().ToList();
+        BuildChart();
+        if (_settings is not null)
+        {
+            _settings.Updated += OnSettingsUpdated;
+        }
+
         UpdateStep();
     }
 
@@ -52,9 +62,17 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
 
     public ICollectionView Activities { get; }
 
-    public ISeries[] Series { get; }
+    [ObservableProperty]
+    private ISeries[] series = [];
 
-    public Axis[] XAxes { get; }
+    [ObservableProperty]
+    private Axis[] xAxes = [];
+
+    [ObservableProperty]
+    private Axis[] yAxes = [];
+
+    [ObservableProperty]
+    private string chartSummary = string.Empty;
 
     [ObservableProperty]
     private string searchText = string.Empty;
@@ -89,7 +107,86 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
 
     public Task OnNavigatedToAsync() => Task.CompletedTask;
 
-    public Task OnNavigatedFromAsync() => Task.CompletedTask;
+    public Task OnNavigatedFromAsync()
+    {
+        if (_settings is not null)
+        {
+            _settings.Updated -= OnSettingsUpdated;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private void OnSettingsUpdated(object? sender, ShellSettings settings) => BuildChart();
+
+    private static Color? DefaultResolveColor(string key) =>
+        Application.Current?.TryFindResource(key) as Color?;
+
+    /// <summary>
+    /// Rebuilds chart paints from the live theme (1.3.0). Colors resolve
+    /// from application resources with dark fallbacks, so light, dark,
+    /// high-contrast, and custom accents all flow through.
+    /// </summary>
+    private void BuildChart()
+    {
+        var text = _resolveColor("TextFillColorPrimary") ?? Color.FromRgb(0xF3, 0xF3, 0xF3);
+        var accent = _resolveColor("SystemAccentColorPrimary") ?? Color.FromRgb(0x4C, 0xC2, 0xFF);
+        var palette = ChartPalette.For(text, accent);
+
+        Series =
+        [
+            new LineSeries<double>
+            {
+                Values = _weeklyValues,
+                Fill = null,
+                Stroke = new SolidColorPaint(palette.Series, 2),
+                GeometryFill = new SolidColorPaint(palette.Series),
+                GeometrySize = 8,
+                Name = "Completed tasks",
+            },
+        ];
+        XAxes =
+        [
+            new Axis
+            {
+                Labels = _weekdayLabels,
+                LabelsPaint = new SolidColorPaint(palette.AxisText),
+                SeparatorsPaint = new SolidColorPaint(palette.GridLines),
+            },
+        ];
+        YAxes =
+        [
+            new Axis
+            {
+                LabelsPaint = new SolidColorPaint(palette.AxisText),
+                SeparatorsPaint = new SolidColorPaint(palette.GridLines),
+            },
+        ];
+        ChartSummary = DescribeTrend(_weeklyValues, _weekdayLabels);
+    }
+
+    internal static string DescribeTrend(IReadOnlyList<double> values, IReadOnlyList<string> labels)
+    {
+        if (values.Count == 0)
+        {
+            return "No data.";
+        }
+
+        var total = values.Sum();
+        var peak = values.Max();
+        var peakIndex = 0;
+        for (var i = 1; i < values.Count; i++)
+        {
+            if (values[i] > values[peakIndex])
+            {
+                peakIndex = i;
+            }
+        }
+
+        var peakLabel = labels.Count == values.Count ? labels[peakIndex] : $"point {peakIndex + 1}";
+        var trend = values[^1] > values[0] ? "trending up" : values[^1] < values[0] ? "trending down" : "flat";
+        return $"7-day total {total:0}, peak {peakLabel} ({peak:0}), {trend}.";
+    }
 
     partial void OnSearchTextChanged(string value)
     {

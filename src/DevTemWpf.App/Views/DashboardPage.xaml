@@ -55,8 +55,10 @@
              AutomationProperties.Name="Weekly activity chart card">
       <StackPanel>
         <TextBlock Text="Completed tasks, last 7 days" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapItem}" />
-        <lvc:CartesianChart Series="{Binding ViewModel.Series}" XAxes="{Binding ViewModel.XAxes}"
-                            Height="200" AutomationProperties.Name="Weekly activity chart" />
+        <lvc:CartesianChart Series="{Binding ViewModel.Series}" XAxes="{Binding ViewModel.XAxes}" YAxes="{Binding ViewModel.YAxes}"
+                             Background="Transparent" Height="200" AutomationProperties.Name="Weekly activity chart" />
+        <TextBlock Text="{Binding ViewModel.ChartSummary}" Style="{StaticResource AppCaptionText}"
+                   Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Chart summary" />
       </StackPanel>
     </ui:Card>
 
