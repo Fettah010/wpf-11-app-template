@@ -10,48 +10,48 @@
   <ScrollViewer Padding="{StaticResource AppPageMargin}"
                 AutomationProperties.Name="Effects showcase">
     <StackPanel MaxWidth="{StaticResource AppContentMaxWidth}">
-      <TextBlock Text="Effects" Style="{StaticResource AppSubtitleText}" Margin="0,0,0,4" />
+      <TextBlock Text="Effects" Style="{StaticResource AppSubtitleText}" Margin="{StaticResource AppGapTitle}" />
       <TextBlock Text="Bounded, switchable demos. Nothing here is required to use the app; reduced motion skips all of it."
-                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="0,0,0,8" />
+                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
       <TextBlock Text="{Binding ViewModel.PolicyText}" Style="{StaticResource AppBodyText}" />
       <TextBlock Text="{Binding ViewModel.EnvironmentText}" Style="{StaticResource AppCaptionText}"
-                 TextWrapping="Wrap" Margin="0,0,0,16" />
+                 TextWrapping="Wrap" Margin="{StaticResource AppGapSection}" />
 
-      <TextBlock Text="Motion presets" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,4" />
+      <TextBlock Text="Motion presets" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
       <TextBlock Text="Plays the entrance on the preview card at each speed."
-                 Style="{StaticResource AppCaptionText}" Margin="0,0,0,8" />
-      <WrapPanel Margin="0,0,0,8">
+                 Style="{StaticResource AppCaptionText}" Margin="{StaticResource AppGapItem}" />
+      <WrapPanel Margin="{StaticResource AppGapItem}">
         <ui:Button Content="Subtle (120ms)" Click="OnPresetClick" Tag="Subtle"
-                   AutomationProperties.Name="Play subtle preset" Margin="0,0,8,8" />
+                   AutomationProperties.Name="Play subtle preset" Margin="{StaticResource AppGapFlow}" />
         <ui:Button Content="Standard (220ms)" Click="OnPresetClick" Tag="Standard"
-                   AutomationProperties.Name="Play standard preset" Margin="0,0,8,8" />
+                   AutomationProperties.Name="Play standard preset" Margin="{StaticResource AppGapFlow}" />
         <ui:Button Content="Expressive (380ms + slide)" Click="OnPresetClick" Tag="Expressive"
-                   AutomationProperties.Name="Play expressive preset" Margin="0,0,8,8" />
+                   AutomationProperties.Name="Play expressive preset" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
       <Border x:Name="PresetPreview" Background="{DynamicResource AppCardBackgroundBrush}"
               BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="{StaticResource AppBorderThickness}"
               CornerRadius="{StaticResource AppCornerRadiusMedium}" Padding="{StaticResource AppCardPadding}"
-              Margin="0,0,0,16" AutomationProperties.Name="Motion preset preview">
+              Margin="{StaticResource AppGapSection}" AutomationProperties.Name="Motion preset preview">
         <TextBlock Text="The entrance plays here." Style="{StaticResource AppBodyText}" />
       </Border>
 
-      <TextBlock Text="Ripple" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,4" />
+      <TextBlock Text="Ripple" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
       <TextBlock Text="Click inside the surface. Storyboard-only, decorative, skipped unless motion is Full and effects are on."
-                 Style="{StaticResource AppCaptionText}" Margin="0,0,0,8" />
+                 Style="{StaticResource AppCaptionText}" Margin="{StaticResource AppGapItem}" />
       <Border Background="{DynamicResource AppSubtleBackgroundBrush}"
               BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="{StaticResource AppBorderThickness}"
-              CornerRadius="{StaticResource AppCornerRadiusMedium}" Height="160" Margin="0,0,0,16">
+              CornerRadius="{StaticResource AppCornerRadiusMedium}" Height="160" Margin="{StaticResource AppGapSection}">
         <Canvas x:Name="RippleHost" Background="Transparent" ClipToBounds="True"
                 MouseLeftButtonDown="OnRippleSurfaceDown"
                 AutomationProperties.Name="Ripple demo surface" />
       </Border>
 
-      <TextBlock Text="Animated surface" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,4" />
+      <TextBlock Text="Animated surface" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
       <TextBlock Text="Opt-in ambient gradient. Off by default; stops when you leave the page."
-                 Style="{StaticResource AppCaptionText}" Margin="0,0,0,8" />
+                 Style="{StaticResource AppCaptionText}" Margin="{StaticResource AppGapItem}" />
       <Border Height="96" CornerRadius="{StaticResource AppCornerRadiusMedium}"
               BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="{StaticResource AppBorderThickness}"
-              Margin="0,0,0,8" AutomationProperties.Name="Animated gradient surface">
+              Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Animated gradient surface">
         <Border.Background>
           <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
             <GradientStop x:Name="GradientStopA" Offset="0" Color="{DynamicResource SystemAccentColorSecondary}" />

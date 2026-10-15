@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Input;
@@ -58,6 +60,38 @@ public sealed class ShellFlowsTests : IDisposable
 
         reason = string.Empty;
         return true;
+    }
+
+    private static class NativeWindow
+    {
+        public const int Restore = 9;
+
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        public static extern bool MoveWindow(IntPtr hWnd, int x, int y, int width, int height, bool repaint);
+
+        [DllImport("user32.dll")]
+        public static extern bool GetWindowRect(IntPtr hWnd, out Rect rect);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Rect
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+            public readonly int Width => Right - Left;
+            public readonly int Height => Bottom - Top;
+        }
+    }
+
+    private static IntPtr MainHandle(Application app)
+    {
+        var handle = Process.GetProcessById(app.ProcessId).MainWindowHandle;
+        Assert.NotEqual(IntPtr.Zero, handle);
+        return handle;
     }
 
     private static void RequireUiOrSkip()
@@ -343,6 +377,161 @@ public sealed class ShellFlowsTests : IDisposable
 
             WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Cancel")) is null ? new object() : null,
                 TimeSpan.FromSeconds(10), "dialog to close");
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    [WpfFact]
+    public void GalleryIndex_JumpsToSection_AndMovesFocus()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                TimeSpan.FromSeconds(10), "nav item 'Controls'").Click();
+            var index = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Go to Inputs section")),
+                TimeSpan.FromSeconds(10), "gallery index button");
+            index.Patterns.Invoke.Pattern.Invoke();
+
+            var heading = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Inputs section heading")),
+                TimeSpan.FromSeconds(10), "inputs section heading");
+            Assert.NotNull(heading);
+
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+            string? focused = null;
+            while (DateTime.UtcNow < deadline)
+            {
+                try
+                {
+                    focused = automation.FocusedElement()?.Name;
+                    if (focused == "Inputs section heading")
+                    {
+                        break;
+                    }
+                }
+                catch
+                {
+                    // Focused element is transient; retry.
+                }
+
+                Thread.Sleep(150);
+            }
+
+            Assert.Equal("Inputs section heading", focused);
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    [WpfFact]
+    public void Resize_PreservesNavigationAndContent()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            // Launch maximizes; restore first so resizes take effect.
+            var handle = MainHandle(app);
+            NativeWindow.ShowWindow(handle, NativeWindow.Restore);
+            Thread.Sleep(500);
+
+            // Below-minimum requests clamp to MinWidth/MinHeight (640x480).
+            NativeWindow.MoveWindow(handle, 0, 0, 500, 400, true);
+            Thread.Sleep(800);
+            NativeWindow.GetWindowRect(handle, out var clamped);
+            Assert.True(clamped.Width >= 640, $"width clamped to min, got {clamped.Width}");
+            Assert.True(clamped.Height >= 480, $"height clamped to min, got {clamped.Height}");
+
+            foreach (var width in new[] { 640, 1024, 1280, 1600 })
+            {
+                NativeWindow.MoveWindow(handle, 0, 0, width, 800, true);
+                Thread.Sleep(800);
+                window.Focus();
+                var nav = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                    TimeSpan.FromSeconds(10), $"nav item at width {width}");
+                Assert.NotNull(nav);
+                var home = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home headline")),
+                    TimeSpan.FromSeconds(10), $"home content at width {width}");
+                Assert.NotNull(home);
+            }
+
+            // Narrow navigation still works: gallery content reachable at 640.
+            NativeWindow.MoveWindow(handle, 0, 0, 640, 800, true);
+            Thread.Sleep(800);
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                TimeSpan.FromSeconds(10), "nav item at 640").Click();
+            var gallery = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Gallery dialog demo")),
+                TimeSpan.FromSeconds(10), "gallery content at 640");
+            Assert.NotNull(gallery);
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    [WpfFact]
+    public void ThemeSwitch_LightDark_KeepsContent()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
+                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
+            var combo = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Theme selector")),
+                TimeSpan.FromSeconds(10), "theme selector");
+            Assert.NotNull(combo);
+
+            foreach (var theme in new[] { "Light", "Dark" })
+            {
+                combo.Patterns.ExpandCollapse.Pattern.Expand();
+                var item = WaitFor(() => combo.FindFirstDescendant(cf => cf.ByName(theme)),
+                    TimeSpan.FromSeconds(10), $"theme option '{theme}'");
+                item.Patterns.SelectionItem.Pattern.Select();
+                // Dismiss the dropdown: an open popup swallows the next click
+                // instead of activating its target.
+                combo.Patterns.ExpandCollapse.Pattern.Collapse();
+                Thread.Sleep(1000); // Theme re-resolves live; let it settle.
+                Assert.NotNull(window.FindFirstDescendant(cf => cf.ByName("Theme selector")));
+
+                window.Focus();
+                WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home")),
+                    TimeSpan.FromSeconds(10), $"nav item after '{theme}'").Click();
+                var headline = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home headline")),
+                    TimeSpan.FromSeconds(10), $"home content on '{theme}'");
+                Assert.NotNull(headline);
+
+                window.Focus();
+                WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
+                    TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
+                combo = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Theme selector")),
+                    TimeSpan.FromSeconds(10), "theme selector");
+            }
         }
         finally
         {

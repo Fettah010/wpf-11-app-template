@@ -7,29 +7,44 @@
       mc:Ignorable="d"
       d:DesignHeight="1400" d:DesignWidth="720"
       Title="Controls">
-  <ScrollViewer Padding="{StaticResource AppPageMargin}"
+  <ScrollViewer Padding="{StaticResource AppPageMargin}" x:Name="GalleryScroller"
                 AutomationProperties.Name="Controls gallery">
     <StackPanel MaxWidth="{StaticResource AppContentMaxWidth}">
-      <TextBlock Text="Controls" Style="{StaticResource AppSubtitleText}" Margin="0,0,0,4" />
-      <TextBlock Text="Everyday controls, their states, and the patterns to use them. Full catalog: docs/design-system/components.md"
-                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="0,0,0,16" />
+      <TextBlock Text="Controls" Style="{StaticResource AppSubtitleText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="Everyday controls, their states, and the patterns to use them. Full catalog: docs/design-system/components.md. Tab reaches every control and section heading; the index below jumps between sections."
+                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
+
+      <!-- Category index (1.2.0): mouse and keyboard anchor navigation. -->
+      <WrapPanel Margin="{StaticResource AppGapSection}" AutomationProperties.Name="Gallery section index">
+        <ui:Button Content="Buttons" Click="OnIndexClick" Tag="ButtonsSection"
+                   AutomationProperties.Name="Go to Buttons section" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Inputs" Click="OnIndexClick" Tag="InputsSection"
+                   AutomationProperties.Name="Go to Inputs section" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Content" Click="OnIndexClick" Tag="ContentSection"
+                   AutomationProperties.Name="Go to Content section" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Feedback" Click="OnIndexClick" Tag="FeedbackSection"
+                   AutomationProperties.Name="Go to Feedback section" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Validated form" Click="OnIndexClick" Tag="FormSection"
+                   AutomationProperties.Name="Go to Validated form section" Margin="{StaticResource AppGapFlow}" />
+      </WrapPanel>
 
       <!-- Buttons -->
-      <TextBlock Text="Buttons" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,4" />
+      <TextBlock x:Name="ButtonsSection" Focusable="True" Text="Buttons" Style="{StaticResource AppSectionHeadingText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Buttons section heading" />
       <TextBlock Text="Appearance sets intent: Primary for the one main action, Danger for destructive, Secondary/Transparent otherwise."
-                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="0,0,0,8" />
-      <WrapPanel Margin="0,0,0,8">
-        <ui:Button Content="Primary" Appearance="Primary" AutomationProperties.Name="Gallery primary button" Margin="0,0,8,8" />
-        <ui:Button Content="Secondary" Appearance="Secondary" AutomationProperties.Name="Gallery secondary button" Margin="0,0,8,8" />
-        <ui:Button Content="Transparent" Appearance="Transparent" AutomationProperties.Name="Gallery transparent button" Margin="0,0,8,8" />
-        <ui:Button Content="Danger" Appearance="Danger" AutomationProperties.Name="Gallery danger button" Margin="0,0,8,8" />
-        <ui:Button Content="With icon" Icon="{ui:SymbolIcon Checkmark24}" AutomationProperties.Name="Gallery icon button" Margin="0,0,8,8" />
-        <ui:Button Content="Disabled" IsEnabled="False" AutomationProperties.Name="Gallery disabled button" Margin="0,0,8,8" />
+                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
+      <WrapPanel Margin="{StaticResource AppGapItem}">
+        <ui:Button Content="Primary" Appearance="Primary" AutomationProperties.Name="Gallery primary button" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Secondary" Appearance="Secondary" AutomationProperties.Name="Gallery secondary button" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Transparent" Appearance="Transparent" AutomationProperties.Name="Gallery transparent button" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Danger" Appearance="Danger" AutomationProperties.Name="Gallery danger button" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="With icon" Icon="{ui:SymbolIcon Checkmark24}" AutomationProperties.Name="Gallery icon button" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Disabled" IsEnabled="False" AutomationProperties.Name="Gallery disabled button" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
-      <WrapPanel Margin="0,0,0,16">
-        <ToggleButton Content="Toggle" AutomationProperties.Name="Gallery toggle button" Margin="0,0,8,8" />
-        <ui:HyperlinkButton Content="Hyperlink" AutomationProperties.Name="Gallery hyperlink button" Margin="0,0,8,8" />
-        <ui:SplitButton Content="Split" AutomationProperties.Name="Gallery split button" Margin="0,0,8,8">
+      <WrapPanel Margin="{StaticResource AppGapSection}">
+        <ToggleButton Content="Toggle" AutomationProperties.Name="Gallery toggle button" Margin="{StaticResource AppGapFlow}" />
+        <ui:HyperlinkButton Content="Hyperlink" AutomationProperties.Name="Gallery hyperlink button" Margin="{StaticResource AppGapFlow}" />
+        <ui:SplitButton Content="Split" AutomationProperties.Name="Gallery split button" Margin="{StaticResource AppGapFlow}">
           <ui:SplitButton.Flyout>
             <ContextMenu>
               <MenuItem Header="Option A" />
@@ -39,16 +54,17 @@
         </ui:SplitButton>
         <ui:Button Content="Run busy task" Command="{Binding ViewModel.RunBusyDemoCommand}"
                    IsEnabled="{Binding ViewModel.IsIdle}"
-                   AutomationProperties.Name="Gallery busy demo button" Margin="0,0,8,8" />
+                   AutomationProperties.Name="Gallery busy demo button" Margin="{StaticResource AppGapFlow}" />
         <ui:ProgressRing IsIndeterminate="{Binding ViewModel.IsBusy}" Width="24" Height="24"
-                         AutomationProperties.Name="Busy indicator" Margin="0,0,8,8" />
+                         AutomationProperties.Name="Busy indicator" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
 
       <!-- Inputs -->
-      <TextBlock Text="Inputs" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,4" />
+      <TextBlock x:Name="InputsSection" Focusable="True" Text="Inputs" Style="{StaticResource AppSectionHeadingText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Inputs section heading" />
       <TextBlock Text="Placeholder + automation name on every field. Validation states are demonstrated in the form below."
-                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="0,0,0,8" />
-      <Grid Margin="0,0,0,16">
+                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
+      <Grid Margin="{StaticResource AppGapSection}">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*" />
           <ColumnDefinition Width="*" />
@@ -59,89 +75,92 @@
           <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <ui:TextBox Grid.Row="0" Grid.Column="0" PlaceholderText="Search…" Icon="{ui:SymbolIcon Search24}"
-                    AutomationProperties.Name="Gallery search input" Margin="0,0,8,8" />
+                    AutomationProperties.Name="Gallery search input" Margin="{StaticResource AppGapFlow}" />
         <ui:PasswordBox Grid.Row="0" Grid.Column="1" PlaceholderText="Password"
-                        AutomationProperties.Name="Gallery password input" Margin="0,0,0,8" />
+                        AutomationProperties.Name="Gallery password input" Margin="{StaticResource AppGapItem}" />
         <ui:NumberBox Grid.Row="1" Grid.Column="0" PlaceholderText="42"
-                      AutomationProperties.Name="Gallery number input" Margin="0,0,8,8" />
+                      AutomationProperties.Name="Gallery number input" Margin="{StaticResource AppGapFlow}" />
         <ComboBox Grid.Row="1" Grid.Column="1" SelectedIndex="0"
-                  AutomationProperties.Name="Gallery combo box" Margin="0,0,0,8">
+                  AutomationProperties.Name="Gallery combo box" Margin="{StaticResource AppGapItem}">
           <ComboBoxItem Content="First" />
           <ComboBoxItem Content="Second" />
         </ComboBox>
         <Slider Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Minimum="0" Maximum="100" Value="40"
-                AutomationProperties.Name="Gallery slider" Margin="0,0,0,8" />
+                AutomationProperties.Name="Gallery slider" Margin="{StaticResource AppGapItem}" />
       </Grid>
-      <WrapPanel Margin="0,0,0,8">
-        <CheckBox Content="Check box" IsChecked="True" AutomationProperties.Name="Gallery check box" Margin="0,0,16,8" />
-        <ui:ToggleSwitch Content="Toggle switch" AutomationProperties.Name="Gallery toggle switch" Margin="0,0,16,8" />
+      <WrapPanel Margin="{StaticResource AppGapItem}">
+        <CheckBox Content="Check box" IsChecked="True" AutomationProperties.Name="Gallery check box" Margin="{StaticResource AppGapInline}" />
+        <ui:ToggleSwitch Content="Toggle switch" AutomationProperties.Name="Gallery toggle switch" Margin="{StaticResource AppGapInline}" />
       </WrapPanel>
-      <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-        <RadioButton Content="Alpha" IsChecked="True" AutomationProperties.Name="Gallery radio alpha" Margin="0,0,16,0" />
+      <StackPanel Orientation="Horizontal" Margin="{StaticResource AppGapSection}">
+        <RadioButton Content="Alpha" IsChecked="True" AutomationProperties.Name="Gallery radio alpha" Margin="{StaticResource AppGapInline}" />
         <RadioButton Content="Beta" AutomationProperties.Name="Gallery radio beta" />
       </StackPanel>
 
       <!-- Content -->
-      <TextBlock Text="Content" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,4" />
+      <TextBlock x:Name="ContentSection" Focusable="True" Text="Content" Style="{StaticResource AppSectionHeadingText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Content section heading" />
       <TextBlock Text="Cards group related content; expanders hide detail; badges annotate; tooltips explain."
-                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="0,0,0,8" />
-      <ui:Card Margin="0,0,0,8" AutomationProperties.Name="Gallery card">
+                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
+      <ui:Card Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Gallery card">
         <StackPanel>
           <TextBlock Text="Card title" Style="{StaticResource AppSectionHeadingText}" />
           <TextBlock Text="Card body copy." Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" />
         </StackPanel>
       </ui:Card>
       <ui:CardExpander Header="Card expander" Content="Hidden detail lives here."
-                       AutomationProperties.Name="Gallery card expander" Margin="0,0,0,8" />
-      <Expander Header="Expander" AutomationProperties.Name="Gallery expander" Margin="0,0,0,8">
+                       AutomationProperties.Name="Gallery card expander" Margin="{StaticResource AppGapItem}" />
+      <Expander Header="Expander" AutomationProperties.Name="Gallery expander" Margin="{StaticResource AppGapItem}">
         <TextBlock Text="Expandable content." Style="{StaticResource AppBodyText}" />
       </Expander>
-      <WrapPanel Margin="0,0,0,16">
-        <ui:InfoBadge Value="7" AutomationProperties.Name="Gallery info badge" Margin="0,0,8,8" />
+      <WrapPanel Margin="{StaticResource AppGapSection}">
+        <ui:InfoBadge Value="7" AutomationProperties.Name="Gallery info badge" Margin="{StaticResource AppGapFlow}" />
         <ui:Button Content="Hover for tooltip" ToolTip="Tooltips explain — they never carry the only copy of information."
-                   AutomationProperties.Name="Gallery tooltip button" Margin="0,0,8,8" />
+                   AutomationProperties.Name="Gallery tooltip button" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
 
       <!-- Feedback -->
-      <TextBlock Text="Feedback" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,4" />
+      <TextBlock x:Name="FeedbackSection" Focusable="True" Text="Feedback" Style="{StaticResource AppSectionHeadingText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Feedback section heading" />
       <TextBlock Text="InfoBar for inline severity; snackbar for transient confirmation; dialog for decisions that need an explicit answer."
-                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="0,0,0,8" />
+                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
       <ui:InfoBar Title="Informational" Message="Neutral context lives here." Severity="Informational" IsOpen="True"
-                  AutomationProperties.Name="Gallery info bar informational" Margin="0,0,0,8" />
+                  AutomationProperties.Name="Gallery info bar informational" Margin="{StaticResource AppGapItem}" />
       <ui:InfoBar Title="Success" Message="The thing worked." Severity="Success" IsOpen="True"
-                  AutomationProperties.Name="Gallery info bar success" Margin="0,0,0,8" />
+                  AutomationProperties.Name="Gallery info bar success" Margin="{StaticResource AppGapItem}" />
       <ui:InfoBar Title="Warning" Message="Check this before continuing." Severity="Warning" IsOpen="True"
-                  AutomationProperties.Name="Gallery info bar warning" Margin="0,0,0,8" />
+                  AutomationProperties.Name="Gallery info bar warning" Margin="{StaticResource AppGapItem}" />
       <ui:InfoBar Title="Error" Message="Something failed; here is what to do." Severity="Error" IsOpen="True"
-                  AutomationProperties.Name="Gallery info bar error" Margin="0,0,0,8" />
-      <ProgressBar Value="62" AutomationProperties.Name="Gallery determinate progress" Margin="0,0,0,8" />
-      <ProgressBar IsIndeterminate="True" AutomationProperties.Name="Gallery indeterminate progress" Margin="0,0,0,8" />
-      <WrapPanel Margin="0,0,0,8">
+                  AutomationProperties.Name="Gallery info bar error" Margin="{StaticResource AppGapItem}" />
+      <ProgressBar Value="62" AutomationProperties.Name="Gallery determinate progress" Margin="{StaticResource AppGapItem}" />
+      <ProgressBar IsIndeterminate="True" AutomationProperties.Name="Gallery indeterminate progress" Margin="{StaticResource AppGapItem}" />
+      <WrapPanel Margin="{StaticResource AppGapItem}">
         <ui:Button Content="Show snackbar" Command="{Binding ViewModel.ShowSnackbarCommand}"
-                   AutomationProperties.Name="Gallery snackbar demo" Margin="0,0,8,8" />
+                   AutomationProperties.Name="Gallery snackbar demo" Margin="{StaticResource AppGapFlow}" />
         <ui:Button Content="Ask for confirmation" Command="{Binding ViewModel.ShowConfirmDialogCommand}"
-                   AutomationProperties.Name="Gallery dialog demo" Margin="0,0,8,8" />
+                   AutomationProperties.Name="Gallery dialog demo" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
       <TextBlock Text="{Binding ViewModel.StatusText}" Style="{StaticResource AppSecondaryBodyText}"
-                 TextWrapping="Wrap" Margin="0,0,0,16" AutomationProperties.Name="Demo status line" />
+                 TextWrapping="Wrap" Margin="{StaticResource AppGapSection}" AutomationProperties.Name="Demo status line" />
 
       <!-- Validated form -->
-      <TextBlock Text="Validated form" Style="{StaticResource AppSectionHeadingText}" Margin="0,0,0,4" />
+      <TextBlock x:Name="FormSection" Focusable="True" Text="Validated form" Style="{StaticResource AppSectionHeadingText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Validated form section heading" />
       <TextBlock Text="DataAnnotations + ObservableValidator. Errors appear under fields and block saving — never color-only."
-                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="0,0,0,8" />
-      <TextBlock Text="Name" Style="{StaticResource AppBodyText}" Margin="0,0,0,4" />
+                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
+      <TextBlock Text="Name" Style="{StaticResource AppBodyText}" Margin="{StaticResource AppGapTitle}" />
       <ui:TextBox Text="{Binding ViewModel.Form.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                   PlaceholderText="Ada Lovelace"
-                  AutomationProperties.Name="Sample form name" Margin="0,0,0,4" />
-      <TextBlock Text="{Binding ViewModel.Form.NameError, TargetNullValue=''}" Style="{StaticResource AppErrorText}" Margin="0,0,0,8" />
-      <TextBlock Text="Email" Style="{StaticResource AppBodyText}" Margin="0,0,0,4" />
+                  AutomationProperties.Name="Sample form name" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{Binding ViewModel.Form.NameError, TargetNullValue=''}" Style="{StaticResource AppErrorText}" Margin="{StaticResource AppGapItem}" />
+      <TextBlock Text="Email" Style="{StaticResource AppBodyText}" Margin="{StaticResource AppGapTitle}" />
       <ui:TextBox Text="{Binding ViewModel.Form.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                   PlaceholderText="ada@example.com"
-                  AutomationProperties.Name="Sample form email" Margin="0,0,0,4" />
-      <TextBlock Text="{Binding ViewModel.Form.EmailError, TargetNullValue=''}" Style="{StaticResource AppErrorText}" Margin="0,0,0,8" />
+                  AutomationProperties.Name="Sample form email" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{Binding ViewModel.Form.EmailError, TargetNullValue=''}" Style="{StaticResource AppErrorText}" Margin="{StaticResource AppGapItem}" />
       <WrapPanel>
         <ui:Button Content="Save sample" Command="{Binding ViewModel.Form.SaveCommand}" Appearance="Primary"
-                   AutomationProperties.Name="Sample form save" Margin="0,0,8,8" />
+                   AutomationProperties.Name="Sample form save" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
       <TextBlock Text="{Binding ViewModel.Form.SavedMessage, TargetNullValue=''}" Style="{StaticResource AppSecondaryBodyText}"
                  TextWrapping="Wrap" AutomationProperties.Name="Sample form result" />

@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.2.0 (2026-10-14)
+
+Visual-system upgrade. No new controls, no new packages, no breaking changes.
+
+- Token-driven gap rhythm: seven `AppGap*` Thickness tokens in both
+  densities (Comfortable preserves the 1.1.0 look; Compact visibly
+  tightens it — 9% pixels on Controls). All 7 Views converted; retired
+  literals enforced by `XamlTokenTests`.
+- Gallery: category index with anchor scroll + keyboard focus move,
+  focusable section headings, keyboard note; new
+  `GalleryIndex_JumpsToSection_AndMovesFocus` UI test.
+- Dashboard: standard title/description header; page scrolls on short
+  windows (table keeps fixed-height virtualization).
+- Rail/sidebar + dashboard audit: rail collapses below 800 px, selection
+  and persistence verified; no product changes needed beyond the above.
+- Visual-regression spike: `eng/compare-screenshots.ps1` (tolerant pixel
+  diff, masks, red-overlay artifacts, never auto-approves) + committed
+  baselines; advisory-only in 1.2.0 (same-UI noise 0.03%).
+- Contrast contract in `docs/design-system/tokens.md`; theme chain
+  allowlisted by `ThemeTokenChainTests`. Light/Dark round-trip and
+  640–1600 px resize covered by new UI tests.
+- Known toolkit gaps (not fixed): `ui:Card` automation names do not
+  surface; chart unthemed in dark (D17, → 1.3.0).
+
 ## 1.1.0 (2026-10-14)
 
 Stabilization and test truth. No new features; no breaking changes.
