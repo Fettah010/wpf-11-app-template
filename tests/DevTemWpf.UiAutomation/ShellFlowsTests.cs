@@ -140,6 +140,21 @@ public sealed class ShellFlowsTests : IDisposable
         throw new InvalidOperationException($"Could not set data filter to '{text}' (desktop focus may be contested).");
     }
 
+    private static AutomationElement? FindTreeItem(AutomationElement scope, string label)
+    {
+        // TreeViewItem containers are unnamed (the label lives on the inner
+        // text); climb from the label to its owning TreeItem.
+        var text = scope.FindAllDescendants(cf => cf.ByName(label))
+            .FirstOrDefault(e => e.ControlType == FlaUI.Core.Definitions.ControlType.Text);
+        var current = text?.Parent;
+        while (current is not null && current.ControlType != FlaUI.Core.Definitions.ControlType.TreeItem)
+        {
+            current = current.Parent;
+        }
+
+        return current;
+    }
+
     private static IntPtr MainHandle(Application app)
     {
         var handle = Process.GetProcessById(app.ProcessId).MainWindowHandle;
@@ -592,6 +607,83 @@ public sealed class ShellFlowsTests : IDisposable
             }
 
             Assert.True(seen.Count >= 3, $"Focus visited {seen.Count} distinct elements.");
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    [WpfFact]
+    public void DataTree_ExpandSelectKeyboard_RoundTrip()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data")),
+                TimeSpan.FromSeconds(10), "nav item 'Data'").Click();
+            var tree = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data tree")),
+                TimeSpan.FromSeconds(10), "data tree");
+            Assert.NotNull(tree);
+
+            // Expand-all reveals deep nodes. Note: nodes surface twice in the
+            // tree (TreeItem container + inner text); interact with the
+            // TreeItem, which carries SelectionItem.
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Expand all nodes")),
+                TimeSpan.FromSeconds(10), "expand-all button").Patterns.Invoke.Pattern.Invoke();
+            var alice = WaitFor(() => FindTreeItem(window, "Alice"),
+                TimeSpan.FromSeconds(10), "tree leaf");
+            Assert.NotNull(alice);
+
+            // Selecting a node selects it. Keyboard-driven from a visible node:
+            // arrow navigation auto-scrolls, so no manual scrolling is needed.
+            var engineering = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Engineering")),
+                TimeSpan.FromSeconds(10), "tree root label");
+            engineering.Click();
+            Thread.Sleep(300);
+            Keyboard.Press(VirtualKeyShort.DOWN); // Engineering -> Backend
+            Thread.Sleep(300);
+            Keyboard.Press(VirtualKeyShort.RIGHT); // Backend -> first child (Alice)
+            Thread.Sleep(300);
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+            var selected = false;
+            while (!selected && DateTime.UtcNow < deadline)
+            {
+                try
+                {
+                    var current = FindTreeItem(window, "Alice");
+                    selected = current?.Patterns.SelectionItem.Pattern.IsSelected == true;
+                }
+                catch
+                {
+                    // Tree is transient; retry.
+                }
+
+                Thread.Sleep(200);
+            }
+
+            Assert.True(selected, "Keyboard-selected tree node is selected.");
+
+            // Keyboard traverses the tree onward from Alice (Bob, Cara, …).
+            // TreeItems are unnamed, so key on each focused item's label text.
+            string LabelOf(AutomationElement? el) =>
+                el?.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text))?.Name ?? "<none>";
+            var seen = new HashSet<string>();
+            for (var i = 0; i < 6; i++)
+            {
+                Keyboard.Press(VirtualKeyShort.DOWN);
+                Thread.Sleep(200);
+                seen.Add(LabelOf(automation.FocusedElement()));
+            }
+
+            Assert.True(seen.Count >= 2, $"Keyboard visited {seen.Count} distinct tree elements.");
         }
         finally
         {

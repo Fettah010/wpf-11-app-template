@@ -16,11 +16,19 @@
     <StackPanel MaxWidth="{StaticResource AppContentMaxWidth}">
       <TextBlock Text="Data" Style="{StaticResource AppSubtitleText}" Margin="{StaticResource AppGapTitle}" />
       <TextBlock Text="Editable grid, tree, and time input with validation, states, and keyboard support. Tab reaches every control; validation errors are text, never color-only."
-                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapSection}" />
+                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
+
+      <!-- Category index: mouse and keyboard anchor navigation. -->
+      <WrapPanel Margin="{StaticResource AppGapSection}" AutomationProperties.Name="Data section index">
+        <ui:Button Content="Grid" Click="OnIndexClick" Tag="GridSection"
+                   AutomationProperties.Name="Go to Grid section" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Tree" Click="OnIndexClick" Tag="TreeSection"
+                   AutomationProperties.Name="Go to Tree section" Margin="{StaticResource AppGapFlow}" />
+      </WrapPanel>
 
       <!-- Editable grid -->
-      <TextBlock Text="Editable grid" Style="{StaticResource AppSectionHeadingText}"
-                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Data grid section heading" />
+      <TextBlock x:Name="GridSection" Focusable="True" Text="Editable grid" Style="{StaticResource AppSectionHeadingText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Grid section heading" />
       <TextBlock Text="Double-click (or F2) a cell to edit; Enter commits, Esc cancels. New rows validate on commit; the filter, count, and empty states update live."
                  Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
       <WrapPanel Margin="{StaticResource AppGapItem}">
@@ -63,6 +71,35 @@
       <TextBlock Text="{Binding ViewModel.Grid.SelectedRow.Name, StringFormat=Selected: {0}, TargetNullValue='Nothing selected.'}"
                  Style="{StaticResource AppBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapSection}"
                  AutomationProperties.Name="Selected row summary" />
+
+      <!-- Tree -->
+      <TextBlock x:Name="TreeSection" Focusable="True" Text="Tree" Style="{StaticResource AppSectionHeadingText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Tree section heading" />
+      <TextBlock Text="Arrow keys move, Right expands, Left collapses, Enter selects. Expansion persists across restarts."
+                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
+      <WrapPanel Margin="{StaticResource AppGapItem}">
+        <ui:Button Content="Expand all" Command="{Binding ViewModel.Tree.ExpandAllCommand}"
+                   AutomationProperties.Name="Expand all nodes" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Collapse all" Command="{Binding ViewModel.Tree.CollapseAllCommand}"
+                   AutomationProperties.Name="Collapse all nodes" Margin="{StaticResource AppGapFlow}" />
+      </WrapPanel>
+      <TreeView ItemsSource="{Binding ViewModel.Tree.Nodes}" SelectedItemChanged="OnTreeSelected"
+                Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Data tree">
+        <TreeView.ItemContainerStyle>
+          <Style TargetType="TreeViewItem">
+            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+          </Style>
+        </TreeView.ItemContainerStyle>
+        <TreeView.ItemTemplate>
+          <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+            <TextBlock Text="{Binding Label}" />
+          </HierarchicalDataTemplate>
+        </TreeView.ItemTemplate>
+      </TreeView>
+      <TextBlock Text="{Binding ViewModel.Tree.SelectedDetail}" Style="{StaticResource AppBodyText}"
+                 TextWrapping="Wrap" Margin="{StaticResource AppGapSection}"
+                 AutomationProperties.Name="Selected tree node" />
     </StackPanel>
   </ScrollViewer>
 </Page>
