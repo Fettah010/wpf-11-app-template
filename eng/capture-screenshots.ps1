@@ -74,6 +74,10 @@ function Capture-Window([string]$Path) {
 }
 
 function Navigate-ToPage([string]$Page) {
+  # Foreground first: coordinate clicks land reliably only when our window
+  # is frontmost (same lesson as the FlaUI suite).
+  [void][DevTem.Win32]::SetForegroundWindow($proc.MainWindowHandle)
+  Start-Sleep -Milliseconds 500
   $root_el = [System.Windows.Automation.AutomationElement]::FromHandle($proc.MainWindowHandle)
   $typeCond = New-Object System.Windows.Automation.PropertyCondition(
     [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
