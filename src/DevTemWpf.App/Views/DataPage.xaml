@@ -65,6 +65,7 @@
         </DataGrid.RowValidationRules>
       </DataGrid>
       <ui:ProgressRing IsIndeterminate="{Binding ViewModel.Grid.IsLoading}" Width="24" Height="24"
+                       Visibility="{Binding ViewModel.Grid.IsLoading, Converter={StaticResource BoolToVisibility}}"
                        Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Data loading indicator" />
       <TextBlock Text="{Binding ViewModel.Grid.StatusText, TargetNullValue=''}" Style="{StaticResource AppSecondaryBodyText}"
                  TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Data grid status" />

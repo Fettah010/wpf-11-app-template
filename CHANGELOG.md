@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.3.0 (2026-10-15)
+
+Core control and data completion. No new packages, no breaking changes.
+
+- New Data gallery page: editable validated `DataGrid` (sort/filter/search,
+  selection, add-rows, loading/error/empty states, 10k toggle), `TreeView`
+  (selection, expand-all, persisted expansion), gallery-scoped time editor
+  (WPF-UI `TimePicker` rejected: unnamed + broken popup on 4.3.0, spike
+  evidence in report).
+- Chart theming: transparent chart, paints rebound on theme/accent change,
+  textual trend summary for screen readers; light + dark verified.
+- Full gallery localization (220+ keys, en+de; automation names invariant;
+  culture-aware weekday labels) + `Strings.OverrideCulture` fix for
+  thread-culture page construction.
+- Cancellable busy demo (owned CTS, `Idle` on cancel) with unit + UI tests.
+- Fixes found by testing: `HasResults` no longer uses `IsEmpty`
+  (`NewItemPlaceholder` keeps it false); `ReplaceAll` notifies `View`;
+  no reload-on-navigation race; dashboard scrolls on short windows.
+- Template package `DevTemWPF.Templates 1.3.0` (attached to the release).
+- Perf (proxy hardware): cold-start ~0.8 s, working set ~145 MB, idle 0%;
+  10k filter + 10k tree walk well under 2 s wall-clock.
+
 ## 1.2.0 (2026-10-14)
 
 Visual-system upgrade. No new controls, no new packages, no breaking changes.
