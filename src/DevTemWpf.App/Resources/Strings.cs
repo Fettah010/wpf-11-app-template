@@ -267,4 +267,6 @@ public static class Strings
     public static string Ctl_InfoSuccessMsg => Get(nameof(Ctl_InfoSuccessMsg));
     public static string Ctl_InfoWarningMsg => Get(nameof(Ctl_InfoWarningMsg));
     public static string Ctl_InfoErrorMsg => Get(nameof(Ctl_InfoErrorMsg));
+    public static string Ctl_StatusCancelled => Get(nameof(Ctl_StatusCancelled));
+    public static string Ctl_BtnCancel => Get(nameof(Ctl_BtnCancel));
 }

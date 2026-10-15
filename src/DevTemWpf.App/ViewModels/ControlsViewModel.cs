@@ -30,6 +30,7 @@ public sealed partial class ControlsViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsIdle))]
+    [NotifyCanExecuteChangedFor(nameof(CancelBusyDemoCommand))]
     private bool isBusy;
 
     public bool IsIdle => !IsBusy;
@@ -64,8 +65,8 @@ public sealed partial class ControlsViewModel : ObservableObject
     // Single-flight declaratively: concurrent invocations are ignored, so the
     // IsBusy guard below only ever observes its own execution.
     // NOTE: no CancellationToken parameter — the command-supplied token was
-    // observed pre-cancelled under the MTP/WpfFact runner (see 0.4.0 report);
-    // cancellation is a documented non-goal for this demo.
+    // observed pre-cancelled under the MTP/WpfFact runner (see 0.4.0 report),
+    // so cancellation uses an owned CTS instead.
     [RelayCommand(AllowConcurrentExecutions = false)]
     private async Task RunBusyDemoAsync()
     {
@@ -74,16 +75,30 @@ public sealed partial class ControlsViewModel : ObservableObject
             return;
         }
 
+        _busyCts = new CancellationTokenSource();
         try
         {
             IsBusy = true;
             StatusText = Strings.Ctl_StatusWorking;
-            await Task.Delay(TimeSpan.FromMilliseconds(900)).ConfigureAwait(true);
+            await Task.Delay(TimeSpan.FromSeconds(5), _busyCts.Token).ConfigureAwait(true);
             StatusText = Strings.Ctl_StatusDone;
+        }
+        catch (OperationCanceledException)
+        {
+            StatusText = Strings.Ctl_StatusCancelled;
         }
         finally
         {
+            _busyCts.Dispose();
+            _busyCts = null;
             IsBusy = false;
         }
     }
+
+    private CancellationTokenSource? _busyCts;
+
+    private bool CanCancelBusy() => IsBusy;
+
+    [RelayCommand(CanExecute = nameof(CanCancelBusy))]
+    private void CancelBusyDemo() => _busyCts?.Cancel();
 }

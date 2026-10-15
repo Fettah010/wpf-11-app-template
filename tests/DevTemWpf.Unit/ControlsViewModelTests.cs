@@ -105,6 +105,22 @@ public sealed class ControlsViewModelTests
 
         Assert.False(vm.IsBusy);
         Assert.True(vm.IsIdle);
-        Assert.Equal("Busy task finished.", vm.StatusText);
+        Assert.Equal(DevTemWpf.App.Resources.Strings.Ctl_StatusDone, vm.StatusText);
+    }
+
+    [Fact]
+    public async Task BusyDemo_Cancel_ReportsCancelledAndIdles()
+    {
+        var vm = new ControlsViewModel(new FakeSnackbar(), new FakeDialogs(), new FormViewModel());
+
+        var running = vm.RunBusyDemoCommand.ExecuteAsync(null);
+        Assert.True(vm.IsBusy);
+        Assert.True(vm.CancelBusyDemoCommand.CanExecute(null));
+        vm.CancelBusyDemoCommand.Execute(null);
+        await running;
+
+        Assert.False(vm.IsBusy);
+        Assert.True(vm.IsIdle);
+        Assert.Equal(DevTemWpf.App.Resources.Strings.Ctl_StatusCancelled, vm.StatusText);
     }
 }

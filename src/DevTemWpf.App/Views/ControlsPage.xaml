@@ -56,6 +56,8 @@
         <ui:Button Content="{x:Static res:Strings.Ctl_BtnBusy}" Command="{Binding ViewModel.RunBusyDemoCommand}"
                    IsEnabled="{Binding ViewModel.IsIdle}"
                    AutomationProperties.Name="Gallery busy demo button" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="{x:Static res:Strings.Ctl_BtnCancel}" Command="{Binding ViewModel.CancelBusyDemoCommand}"
+                   AutomationProperties.Name="Cancel busy task" Margin="{StaticResource AppGapFlow}" />
         <ui:ProgressRing IsIndeterminate="{Binding ViewModel.IsBusy}" Width="24" Height="24"
                          AutomationProperties.Name="Busy indicator" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>

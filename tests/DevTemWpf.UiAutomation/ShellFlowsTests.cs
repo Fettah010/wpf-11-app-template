@@ -843,4 +843,52 @@ public sealed class ShellFlowsTests : IDisposable
             }
         }
     }
+
+    [WpfFact]
+    public void BusyDemo_Cancel_StopsEarly()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                TimeSpan.FromSeconds(10), "nav item 'Controls'").Click();
+            var run = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Gallery busy demo button")),
+                TimeSpan.FromSeconds(10), "busy demo button");
+            run.Patterns.Invoke.Pattern.Invoke();
+
+            // Cancel while busy: the run button must re-enable long before
+            // the 5-second natural finish.
+            var cancel = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Cancel busy task")),
+                TimeSpan.FromSeconds(10), "cancel busy button");
+            cancel.Patterns.Invoke.Pattern.Invoke();
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(4);
+            var idle = false;
+            while (!idle && DateTime.UtcNow < deadline)
+            {
+                try
+                {
+                    idle = window.FindFirstDescendant(cf => cf.ByName("Gallery busy demo button"))?.IsEnabled == true;
+                }
+                catch
+                {
+                    // Tree transient; retry.
+                }
+
+                Thread.Sleep(200);
+            }
+
+            Assert.True(idle, "Run button re-enabled shortly after cancel (not after 5 s).");
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
 }

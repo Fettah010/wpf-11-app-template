@@ -242,4 +242,6 @@
   <data name="Ctl_InfoSuccessMsg" xml:space="preserve"><value>Es hat funktioniert.</value></data>
   <data name="Ctl_InfoWarningMsg" xml:space="preserve"><value>Vor dem Fortfahren prüfen.</value></data>
   <data name="Ctl_InfoErrorMsg" xml:space="preserve"><value>Etwas ist fehlgeschlagen; hier steht, was zu tun ist.</value></data>
+  <data name="Ctl_StatusCancelled" xml:space="preserve"><value>Abgebrochen.</value></data>
+  <data name="Ctl_BtnCancel" xml:space="preserve"><value>Abbrechen</value></data>
 </root>
