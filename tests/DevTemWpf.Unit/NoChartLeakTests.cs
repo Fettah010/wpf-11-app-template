@@ -16,6 +16,14 @@ public sealed class NoChartLeakTests
         "ChartPalette.cs",
     ];
 
+    private static readonly string[] DashboardExcludedFromNonFull =
+    [
+        "src/DevTemWpf.App/Views/DashboardPage.xaml",
+        "src/DevTemWpf.App/Views/DashboardPage.xaml.cs",
+        "src/DevTemWpf.App/ViewModels/DashboardViewModel.cs",
+        "src/DevTemWpf.App/ViewModels/ChartPalette.cs",
+    ];
+
     private static readonly string[] ChartMarkers =
     [
         "LiveCharts",
@@ -58,5 +66,27 @@ public sealed class NoChartLeakTests
         }
 
         Assert.True(leaks.Count == 0, "Charting leaked outside dashboard files: " + string.Join("; ", leaks));
+    }
+
+    [Fact]
+    public void TemplateJson_ExcludesChartFiles_FromNonFullPresets()
+    {
+        // Regression guard for 1.3.0: ChartPalette.cs shipped in Clean and
+        // broke its build (SkiaSharp only exists with the Full chart package).
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        for (var i = 0; i < 5; i++)
+        {
+            dir = dir.Parent ?? throw new InvalidOperationException("Cannot locate repo root.");
+        }
+
+        var path = Path.Combine(dir.FullName, ".template.config", "template.json");
+        using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(path));
+        var modifiers = doc.RootElement.GetProperty("sources")[0].GetProperty("modifiers");
+        var dashboard = modifiers.EnumerateArray()
+            .First(m => m.GetProperty("condition").GetString() == "(!IncludeDashboard)");
+        var excluded = dashboard.GetProperty("exclude").EnumerateArray()
+            .Select(e => e.GetString() ?? string.Empty).ToHashSet();
+        var missing = DashboardExcludedFromNonFull.Where(f => !excluded.Contains(f)).ToList();
+        Assert.True(missing.Count == 0, "Not excluded from non-Full presets: " + string.Join(", ", missing));
     }
 }
