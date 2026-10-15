@@ -130,4 +130,15 @@ public sealed class XamlTokenTests
 
         Assert.True(missing.Count == 0, "Pages missing AppContentMaxWidth: " + string.Join(", ", missing));
     }
+
+    [Fact]
+    public void DataGrid_KeepsRowVirtualization()
+    {
+        // The 10k story depends on the default virtualizing panel; fail
+        // loudly if anyone disables it in XAML.
+        var path = Path.Combine(RepoRoot().FullName, "src", "DevTemWpf.App", "Views", "DataPage.xaml");
+        var text = File.ReadAllText(path);
+        Assert.DoesNotContain("EnableRowVirtualization=\"False\"", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("VirtualizingStackPanel.IsVirtualizing=\"False\"", text, StringComparison.Ordinal);
+    }
 }
