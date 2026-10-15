@@ -10,7 +10,7 @@ post-1.0 unless marked **1.0**.
 | D07t | System toast notifications | Post-1.0 — MSIX-gated. |
 | D07s | Release signing execution (real cert) | Post-1.0 — app-level concern; guidance published. |
 | D08r | VSIX / VS Add-Item integration | Post-1.0 — CLI templates surface in VS already. |
-| D09r | Visual regression snapshots | Post-1.0 — no snapshot infra; review is manual. |
+| D09r | Visual regression snapshots | **1.2.0 (partial)** — dependency-free spike shipped (`eng/compare-screenshots.ps1` + baselines, advisory-only, 0.03% noise floor proven). Required-gate decision → 1.3.0 with this evidence. |
 | D10 | Low-spec reference machine | Post-1.0 — no hardware; modern-HW budgets ratified. |
 | D12 | `Microsoft.ApplicationInsights` test-only transitive | Watch each audit — still test-only, still harmless. |
 | D13 | HLSL water-warp shader | Post-1.0 — needs toolchain + low-spec proof (D10). |
