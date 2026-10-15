@@ -140,6 +140,53 @@ public sealed class ShellFlowsTests : IDisposable
         throw new InvalidOperationException($"Could not set '{boxName}' to '{text}' (desktop focus may be contested).");
     }
 
+    /// <summary>
+    /// Finds a Button by its visible label. Some dialog buttons surface only
+    /// as inner text (no invokable peer carries the name); climb to the
+    /// owning Button in that case. Prefers enabled buttons: idle gallery
+    /// buttons (e.g. the busy-task Cancel) share labels with dialog buttons.
+    /// Returns null when nothing actionable exists yet (keeps WaitFor honest).
+    /// </summary>
+    private static AutomationElement? FindButtonWithText(AutomationElement scope, string label)
+    {
+        var matches = scope.FindAllDescendants(cf => cf.ByName(label));
+        foreach (var el in matches)
+        {
+            AutomationElement? button = el.ControlType == FlaUI.Core.Definitions.ControlType.Button
+                ? el
+                : ClimbToButton(el);
+            if (button is null)
+            {
+                continue;
+            }
+
+            try
+            {
+                if (button.IsEnabled)
+                {
+                    return button;
+                }
+            }
+            catch
+            {
+                // Stale peer; keep looking.
+            }
+        }
+
+        return null;
+    }
+
+    private static AutomationElement? ClimbToButton(AutomationElement el)
+    {
+        var current = el.Parent;
+        while (current is not null && current.ControlType != FlaUI.Core.Definitions.ControlType.Button)
+        {
+            current = current.Parent;
+        }
+
+        return current;
+    }
+
     private static AutomationElement? FindTreeItem(AutomationElement scope, string label)
     {
         // TreeViewItem containers are unnamed (the label lives on the inner
@@ -458,11 +505,17 @@ public sealed class ShellFlowsTests : IDisposable
             Thread.Sleep(300);
             demo.Patterns.Invoke.Pattern.Invoke();
 
-            var cancel = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Cancel")),
-                TimeSpan.FromSeconds(10), "dialog Cancel button");
+            var cancel = WaitFor(() =>
+            {
+                var button = FindButtonWithText(window, "Cancel");
+                return button is not null && button.IsEnabled ? button : null;
+            }, TimeSpan.FromSeconds(10), "dialog Cancel button");
+            Assert.NotNull(cancel);
             cancel.Patterns.Invoke.Pattern.Invoke();
 
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Cancel")) is null ? new object() : null,
+            // The busy demo button shares the "Cancel" label, so wait on the
+            // dialog window itself disappearing instead of the name.
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Delete sample item?")) is null ? new object() : null,
                 TimeSpan.FromSeconds(10), "dialog to close");
         }
         finally
