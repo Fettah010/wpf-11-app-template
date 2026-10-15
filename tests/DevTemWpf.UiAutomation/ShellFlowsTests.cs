@@ -91,26 +91,26 @@ public sealed class ShellFlowsTests : IDisposable
     }
 
     /// <summary>
-    /// Sets the Data grid filter exactly like a user would (focus, select
-    /// all, type), re-finding the box on every attempt and verifying the
-    /// effect by reading the value back. Retries while desktop focus is
-    /// contested or peers recycle; throws on persistent mismatch.
+    /// Sets a named text box exactly like a user would (focus — which scrolls
+    /// it into view — select all, type), re-finding the box on every attempt
+    /// and verifying the effect by reading the value back. Retries while
+    /// desktop focus is contested; throws on persistent mismatch.
     /// </summary>
-    private static void SetDataFilter(Window window, string text)
+    private static void TypeIntoBox(Window window, string boxName, string text)
     {
         var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(30);
         while (DateTime.UtcNow < deadline)
         {
             try
             {
-                var box = window.FindFirstDescendant(cf => cf.ByName("Data grid filter"));
+                var box = window.FindFirstDescendant(cf => cf.ByName(boxName));
                 if (box is null)
                 {
                     Thread.Sleep(300);
                     continue;
                 }
 
-                box.Click();
+                box.Focus();
                 Thread.Sleep(200);
                 Keyboard.Press(VirtualKeyShort.CONTROL);
                 Keyboard.Press(VirtualKeyShort.KEY_A);
@@ -123,7 +123,7 @@ public sealed class ShellFlowsTests : IDisposable
                 }
 
                 Thread.Sleep(500);
-                var current = window.FindFirstDescendant(cf => cf.ByName("Data grid filter"));
+                var current = window.FindFirstDescendant(cf => cf.ByName(boxName));
                 if (current?.Patterns.Value.Pattern.Value == text)
                 {
                     return;
@@ -137,7 +137,7 @@ public sealed class ShellFlowsTests : IDisposable
             Thread.Sleep(300);
         }
 
-        throw new InvalidOperationException($"Could not set data filter to '{text}' (desktop focus may be contested).");
+        throw new InvalidOperationException($"Could not set '{boxName}' to '{text}' (desktop focus may be contested).");
     }
 
     private static AutomationElement? FindTreeItem(AutomationElement scope, string label)
@@ -546,7 +546,7 @@ public sealed class ShellFlowsTests : IDisposable
             // test asserts on cell presence, not label text.)
             var filter = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid filter")),
                 TimeSpan.FromSeconds(10), "data grid filter");
-            SetDataFilter(window, "Task 00001");
+            TypeIntoBox(window, "Data grid filter", "Task 00001");
             var cell = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Task 00001")),
                 TimeSpan.FromSeconds(10), "filtered cell");
             Assert.NotNull(cell);
@@ -555,7 +555,7 @@ public sealed class ShellFlowsTests : IDisposable
             // from the UIA tree, so presence proves visibility).
             filter = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid filter")),
                 TimeSpan.FromSeconds(10), "data grid filter");
-            SetDataFilter(window, "zzz-no-match");
+            TypeIntoBox(window, "Data grid filter", "zzz-no-match");
             var empty = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid empty notice")),
                 TimeSpan.FromSeconds(10), "empty notice");
             Assert.NotNull(empty);
@@ -566,7 +566,7 @@ public sealed class ShellFlowsTests : IDisposable
             window.Focus();
             filter = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid filter")),
                 TimeSpan.FromSeconds(10), "data grid filter");
-            SetDataFilter(window, string.Empty);
+            TypeIntoBox(window, "Data grid filter", string.Empty);
             cell = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Task 00001")),
                 TimeSpan.FromSeconds(10), "restored cell");
             cell.Click();
@@ -788,6 +788,51 @@ public sealed class ShellFlowsTests : IDisposable
                 combo = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Theme selector")),
                     TimeSpan.FromSeconds(10), "theme selector");
             }
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    [WpfFact]
+    public void TimeEditor_SetAndValidate_RoundTrip()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data")),
+                TimeSpan.FromSeconds(10), "nav item 'Data'").Click();
+            var hour = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Time hour input")),
+                TimeSpan.FromSeconds(10), "time hour input");
+            Assert.NotNull(hour);
+
+            // Invalid hour surfaces a text error (collapsed = absent, so
+            // presence proves visibility).
+            TypeIntoBox(window, "Time hour input", "99");
+            var error = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Time validation error")),
+                TimeSpan.FromSeconds(10), "time validation error");
+            Assert.NotNull(error);
+
+            // Valid input clears the error and updates the summary.
+            TypeIntoBox(window, "Time hour input", "14");
+            TypeIntoBox(window, "Time minute input", "30");
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+            var cleared = false;
+            while (!cleared && DateTime.UtcNow < deadline)
+            {
+                Thread.Sleep(300);
+                cleared = window.FindFirstDescendant(cf => cf.ByName("Time validation error")) is null;
+            }
+
+            Assert.True(cleared, "Time error cleared after valid input.");
         }
         finally
         {

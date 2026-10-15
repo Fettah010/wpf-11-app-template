@@ -24,6 +24,8 @@
                    AutomationProperties.Name="Go to Grid section" Margin="{StaticResource AppGapFlow}" />
         <ui:Button Content="Tree" Click="OnIndexClick" Tag="TreeSection"
                    AutomationProperties.Name="Go to Tree section" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Time" Click="OnIndexClick" Tag="TimeSection"
+                   AutomationProperties.Name="Go to Time section" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
 
       <!-- Editable grid -->
@@ -100,6 +102,27 @@
       <TextBlock Text="{Binding ViewModel.Tree.SelectedDetail}" Style="{StaticResource AppBodyText}"
                  TextWrapping="Wrap" Margin="{StaticResource AppGapSection}"
                  AutomationProperties.Name="Selected tree node" />
+
+      <!-- Time -->
+      <TextBlock x:Name="TimeSection" Focusable="True" Text="Time" Style="{StaticResource AppSectionHeadingText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Time section heading" />
+      <TextBlock Text="Hour and minute with range validation, plus Now. A gallery-scoped recipe: the WPF-UI TimePicker neither names itself nor opens reliably on 4.3.0 (see 1.3.0 report)."
+                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
+      <StackPanel Orientation="Horizontal" Margin="{StaticResource AppGapItem}">
+        <TextBox Width="64" Text="{Binding ViewModel.Time.Hour, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True, ValidatesOnDataErrors=True}"
+                 AutomationProperties.Name="Time hour input" Margin="{StaticResource AppGapFlow}" />
+        <TextBlock Text=":" Style="{StaticResource AppTitleText}" Margin="{StaticResource AppGapFlow}" />
+        <TextBox Width="64" Text="{Binding ViewModel.Time.Minute, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True, ValidatesOnDataErrors=True}"
+                 AutomationProperties.Name="Time minute input" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Now" Command="{Binding ViewModel.Time.SetNowCommand}"
+                   AutomationProperties.Name="Set time to now" Margin="{StaticResource AppGapFlow}" />
+      </StackPanel>
+      <TextBlock Text="{Binding ViewModel.Time.TimeError, TargetNullValue=''}" Style="{StaticResource AppErrorText}"
+                 Visibility="{Binding ViewModel.Time.HasErrors, Converter={StaticResource BoolToVisibility}}"
+                 Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Time validation error" />
+      <TextBlock Text="{Binding ViewModel.Time.Summary}" Style="{StaticResource AppBodyText}"
+                 Margin="{StaticResource AppGapSection}"
+                 AutomationProperties.Name="Selected time summary" />
     </StackPanel>
   </ScrollViewer>
 </Page>

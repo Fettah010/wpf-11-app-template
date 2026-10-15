@@ -71,6 +71,7 @@ public static class AppComposition
         builder.Services.AddTransient<ControlsViewModel>();
         builder.Services.AddTransient<DataGridViewModel>();
         builder.Services.AddTransient<DataTreeViewModel>();
+        builder.Services.AddTransient<TimeEditorViewModel>();
         builder.Services.AddTransient<DataViewModel>();
         //#if (IncludeDashboard)
         builder.Services.AddTransient<DashboardViewModel>();
