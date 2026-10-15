@@ -26,6 +26,7 @@ public sealed partial class MainViewModel : ObservableObject
             new NavigationViewItem(Strings.Nav_Dashboard, SymbolRegular.Board24, typeof(DashboardPage)),
             //#endif
             new NavigationViewItem(Strings.Nav_Controls, SymbolRegular.DataHistogram24, typeof(ControlsPage)),
+            new NavigationViewItem(Strings.Nav_Data, SymbolRegular.TableSimple24, typeof(DataPage)),
             new NavigationViewItem(Strings.Nav_Tokens, SymbolRegular.PaintBrush24, typeof(TokensPage)),
             new NavigationViewItem(Strings.Nav_Effects, SymbolRegular.Fluent24, typeof(EffectsPage)),
             //#if (IncludeDiagnostics)

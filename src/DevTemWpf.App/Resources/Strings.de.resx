@@ -11,6 +11,7 @@
   <data name="Nav_Effects" xml:space="preserve"><value>Effekte</value></data>
   <data name="Nav_Settings" xml:space="preserve"><value>Einstellungen</value></data>
   <data name="Nav_Diagnostics" xml:space="preserve"><value>Diagnose</value></data>
+  <data name="Nav_Data" xml:space="preserve"><value>Daten</value></data>
   <data name="Settings_Appearance" xml:space="preserve"><value>Darstellung</value></data>
   <data name="Settings_Theme" xml:space="preserve"><value>Design</value></data>
   <data name="Settings_Accent" xml:space="preserve"><value>Akzentfarbe</value></data>

@@ -1,0 +1,68 @@
+<Page x:Class="DevTemWpf.App.Views.DataPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:vm="clr-namespace:DevTemWpf.App.ViewModels"
+      mc:Ignorable="d"
+      d:DesignHeight="1000" d:DesignWidth="720"
+      Title="Data">
+  <Page.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+  </Page.Resources>
+  <ScrollViewer Padding="{StaticResource AppPageMargin}" x:Name="DataScroller"
+                AutomationProperties.Name="Data gallery">
+    <StackPanel MaxWidth="{StaticResource AppContentMaxWidth}">
+      <TextBlock Text="Data" Style="{StaticResource AppSubtitleText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="Editable grid, tree, and time input with validation, states, and keyboard support. Tab reaches every control; validation errors are text, never color-only."
+                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapSection}" />
+
+      <!-- Editable grid -->
+      <TextBlock Text="Editable grid" Style="{StaticResource AppSectionHeadingText}"
+                 Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Data grid section heading" />
+      <TextBlock Text="Double-click (or F2) a cell to edit; Enter commits, Esc cancels. New rows validate on commit; the filter, count, and empty states update live."
+                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
+      <WrapPanel Margin="{StaticResource AppGapItem}">
+        <ui:TextBox PlaceholderText="Filter rows…" Text="{Binding ViewModel.Grid.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    AutomationProperties.Name="Data grid filter" MinWidth="200" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Refresh" Command="{Binding ViewModel.Grid.RefreshCommand}"
+                   AutomationProperties.Name="Refresh data grid" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Load 10,000" Command="{Binding ViewModel.Grid.LoadLargeCommand}"
+                   AutomationProperties.Name="Load ten thousand rows" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="Retry" Command="{Binding ViewModel.Grid.RetryCommand}"
+                   AutomationProperties.Name="Retry data load" Margin="{StaticResource AppGapFlow}" />
+      </WrapPanel>
+      <CheckBox Content="Simulate load failure on next refresh" IsChecked="{Binding ViewModel.Grid.SimulateError, Mode=TwoWay}"
+                AutomationProperties.Name="Simulate load failure" Margin="{StaticResource AppGapItem}" />
+      <TextBlock Text="{Binding ViewModel.Grid.CountText}" Style="{StaticResource AppCaptionText}"
+                 Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Data grid row count" />
+      <DataGrid ItemsSource="{Binding ViewModel.Grid.View}" SelectedItem="{Binding ViewModel.Grid.SelectedRow, Mode=TwoWay}"
+                AutoGenerateColumns="False" CanUserAddRows="True" CanUserSortColumns="True" Height="320"
+                AutomationProperties.Name="Data grid">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Name" Binding="{Binding Name, ValidatesOnDataErrors=True, NotifyOnValidationError=True}"
+                              Width="2*" AutomationProperties.Name="Name column" />
+          <DataGridComboBoxColumn Header="Status" SelectedItemBinding="{Binding Status}"
+                                  ItemsSource="{Binding Source={x:Static vm:DataGridViewModel.Statuses}}"
+                                  Width="*" AutomationProperties.Name="Status column" />
+          <DataGridTextColumn Header="Value" Binding="{Binding Value, ValidatesOnDataErrors=True, NotifyOnValidationError=True}"
+                              Width="*" AutomationProperties.Name="Value column" />
+        </DataGrid.Columns>
+        <DataGrid.RowValidationRules>
+          <DataErrorValidationRule />
+        </DataGrid.RowValidationRules>
+      </DataGrid>
+      <ui:ProgressRing IsIndeterminate="{Binding ViewModel.Grid.IsLoading}" Width="24" Height="24"
+                       Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Data loading indicator" />
+      <TextBlock Text="{Binding ViewModel.Grid.StatusText, TargetNullValue=''}" Style="{StaticResource AppSecondaryBodyText}"
+                 TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Data grid status" />
+      <TextBlock Text="No rows match the filter." Style="{StaticResource AppSecondaryBodyText}"
+                 Visibility="{Binding ViewModel.Grid.ShowEmpty, Converter={StaticResource BoolToVisibility}}"
+                 Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Data grid empty notice" />
+      <TextBlock Text="{Binding ViewModel.Grid.SelectedRow.Name, StringFormat=Selected: {0}, TargetNullValue='Nothing selected.'}"
+                 Style="{StaticResource AppBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapSection}"
+                 AutomationProperties.Name="Selected row summary" />
+    </StackPanel>
+  </ScrollViewer>
+</Page>

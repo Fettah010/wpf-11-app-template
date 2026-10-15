@@ -69,6 +69,8 @@ public static class AppComposition
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<TokensViewModel>();
         builder.Services.AddTransient<ControlsViewModel>();
+        builder.Services.AddTransient<DataGridViewModel>();
+        builder.Services.AddTransient<DataViewModel>();
         //#if (IncludeDashboard)
         builder.Services.AddTransient<DashboardViewModel>();
         //#endif
@@ -88,6 +90,7 @@ public static class AppComposition
         //#endif
         builder.Services.AddTransient<EffectsPage>();
         builder.Services.AddTransient<ControlsPage>();
+        builder.Services.AddTransient<DataPage>();
         return builder;
     }
 }

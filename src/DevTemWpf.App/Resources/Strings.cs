@@ -23,6 +23,7 @@ public static class Strings
     public static string Nav_Effects => Get(nameof(Nav_Effects));
     public static string Nav_Settings => Get(nameof(Nav_Settings));
     public static string Nav_Diagnostics => Get(nameof(Nav_Diagnostics));
+    public static string Nav_Data => Get(nameof(Nav_Data));
     public static string Settings_Appearance => Get(nameof(Settings_Appearance));
     public static string Settings_Theme => Get(nameof(Settings_Theme));
     public static string Settings_Accent => Get(nameof(Settings_Accent));

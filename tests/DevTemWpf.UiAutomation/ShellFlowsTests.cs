@@ -75,6 +75,9 @@ public sealed class ShellFlowsTests : IDisposable
         [DllImport("user32.dll")]
         public static extern bool GetWindowRect(IntPtr hWnd, out Rect rect);
 
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
+
         [StructLayout(LayoutKind.Sequential)]
         public struct Rect
         {
@@ -85,6 +88,56 @@ public sealed class ShellFlowsTests : IDisposable
             public readonly int Width => Right - Left;
             public readonly int Height => Bottom - Top;
         }
+    }
+
+    /// <summary>
+    /// Sets the Data grid filter exactly like a user would (focus, select
+    /// all, type), re-finding the box on every attempt and verifying the
+    /// effect by reading the value back. Retries while desktop focus is
+    /// contested or peers recycle; throws on persistent mismatch.
+    /// </summary>
+    private static void SetDataFilter(Window window, string text)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(30);
+        while (DateTime.UtcNow < deadline)
+        {
+            try
+            {
+                var box = window.FindFirstDescendant(cf => cf.ByName("Data grid filter"));
+                if (box is null)
+                {
+                    Thread.Sleep(300);
+                    continue;
+                }
+
+                box.Click();
+                Thread.Sleep(200);
+                Keyboard.Press(VirtualKeyShort.CONTROL);
+                Keyboard.Press(VirtualKeyShort.KEY_A);
+                Keyboard.Release(VirtualKeyShort.CONTROL);
+                Keyboard.Press(VirtualKeyShort.BACK);
+                foreach (var ch in text)
+                {
+                    Keyboard.Type(ch.ToString());
+                    Thread.Sleep(30);
+                }
+
+                Thread.Sleep(500);
+                var current = window.FindFirstDescendant(cf => cf.ByName("Data grid filter"));
+                if (current?.Patterns.Value.Pattern.Value == text)
+                {
+                    return;
+                }
+            }
+            catch
+            {
+                // Tree transient; retry.
+            }
+
+            Thread.Sleep(300);
+        }
+
+        throw new InvalidOperationException($"Could not set data filter to '{text}' (desktop focus may be contested).");
     }
 
     private static IntPtr MainHandle(Application app)
@@ -176,6 +229,24 @@ public sealed class ShellFlowsTests : IDisposable
         }
 
         window.Focus();
+        // Best-effort foreground: on contested desktops another window can
+        // steal activation between steps. Bounded wait; never fails here —
+        // later waits fail loudly with context if clicks truly miss.
+        try
+        {
+            var me = Process.GetProcessById(app.ProcessId).MainWindowHandle;
+            var until = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+            while (DateTime.UtcNow < until && NativeWindow.GetForegroundWindow() != me)
+            {
+                window.Focus();
+                Thread.Sleep(250);
+            }
+        }
+        catch
+        {
+            // Best effort only.
+        }
+
         return window;
     }
 
@@ -298,6 +369,7 @@ public sealed class ShellFlowsTests : IDisposable
             // Name replaces the text content in UIA lookups (verified).
             ("Home", "Home headline"),
             ("Controls", "Gallery dialog demo"),
+            ("Data", "Data grid"),
             ("Design Tokens", "Design token preview"),
             ("Effects", "Play standard preset"),
             ("Settings", "Theme selector"),
@@ -428,6 +500,98 @@ public sealed class ShellFlowsTests : IDisposable
             }
 
             Assert.Equal("Inputs section heading", focused);
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    [WpfFact]
+    public void DataGrid_FilterSelectKeyboard_RoundTrip()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data")),
+                TimeSpan.FromSeconds(10), "nav item 'Data'").Click();
+            var grid = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid")),
+                TimeSpan.FromSeconds(10), "data grid");
+            Assert.NotNull(grid);
+
+            // Filter narrows the rows; the surviving cell proves it. (Label
+            // TextBlocks carry automation names instead of content, so the
+            // test asserts on cell presence, not label text.)
+            var filter = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid filter")),
+                TimeSpan.FromSeconds(10), "data grid filter");
+            SetDataFilter(window, "Task 00001");
+            var cell = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Task 00001")),
+                TimeSpan.FromSeconds(10), "filtered cell");
+            Assert.NotNull(cell);
+
+            // Impossible filter shows the empty notice (collapsed = absent
+            // from the UIA tree, so presence proves visibility).
+            filter = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid filter")),
+                TimeSpan.FromSeconds(10), "data grid filter");
+            SetDataFilter(window, "zzz-no-match");
+            var empty = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid empty notice")),
+                TimeSpan.FromSeconds(10), "empty notice");
+            Assert.NotNull(empty);
+
+            // Clearing restores rows; selecting the first one selects it.
+            window = app.GetMainWindow(automation, TimeSpan.FromSeconds(15))
+                ?? throw new InvalidOperationException("Main window lost.");
+            window.Focus();
+            filter = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid filter")),
+                TimeSpan.FromSeconds(10), "data grid filter");
+            SetDataFilter(window, string.Empty);
+            cell = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Task 00001")),
+                TimeSpan.FromSeconds(10), "restored cell");
+            cell.Click();
+            // Selection is asserted on the grid: in FullRow mode cells do not
+            // carry SelectionItem themselves.
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+            var selected = false;
+            while (!selected && DateTime.UtcNow < deadline)
+            {
+                try
+                {
+                    selected = grid.Patterns.Selection.Pattern.Selection.Value.Length > 0;
+                }
+                catch
+                {
+                    // Tree is transient; retry.
+                }
+
+                Thread.Sleep(200);
+            }
+
+            Assert.True(selected, "Clicked grid row is selected.");
+
+            // Keyboard reaches grid content (focus moves across distinct elements).
+            filter = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid filter")),
+                TimeSpan.FromSeconds(10), "data grid filter");
+            filter.Click();
+            var seen = new HashSet<string>();
+            for (var i = 0; i < 10; i++)
+            {
+                Keyboard.Press(VirtualKeyShort.TAB);
+                Thread.Sleep(150);
+                var focused = automation.FocusedElement();
+                if (focused is not null)
+                {
+                    seen.Add($"{focused.ControlType}:{focused.Name}");
+                }
+            }
+
+            Assert.True(seen.Count >= 3, $"Focus visited {seen.Count} distinct elements.");
         }
         finally
         {
