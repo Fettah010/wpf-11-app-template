@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using CommunityToolkit.Mvvm.ComponentModel;
+using DevTemWpf.App.Resources;
 
 namespace DevTemWpf.App.ViewModels;
 
@@ -7,6 +8,7 @@ namespace DevTemWpf.App.ViewModels;
 /// One editable grid row. Validation flows through
 /// <see cref="ObservableValidator"/> so WPF picks it up as
 /// <see cref="System.ComponentModel.IDataErrorInfo"/> (cell + row errors).
+/// Messages resolve through <see cref="Strings"/>.
 /// </summary>
 public sealed partial class DataGridRow : ObservableValidator
 {
@@ -23,15 +25,15 @@ public sealed partial class DataGridRow : ObservableValidator
 
     [ObservableProperty]
     [NotifyDataErrorInfo]
-    [Required(ErrorMessage = "Name is required.")]
-    [MinLength(2, ErrorMessage = "Name needs at least 2 characters.")]
-    private string name = "New item";
+    [Required(ErrorMessageResourceType = typeof(Strings), ErrorMessageResourceName = nameof(Strings.GridRow_NameRequired))]
+    [MinLength(2, ErrorMessageResourceType = typeof(Strings), ErrorMessageResourceName = nameof(Strings.GridRow_NameMin))]
+    private string name = Strings.Data_NewItem;
 
     [ObservableProperty]
     private string status = "Open";
 
     [ObservableProperty]
     [NotifyDataErrorInfo]
-    [Range(0, 10000, ErrorMessage = "Value must be between 0 and 10000.")]
+    [Range(0, 10000, ErrorMessageResourceType = typeof(Strings), ErrorMessageResourceName = nameof(Strings.GridRow_ValueRange))]
     private int value;
 }

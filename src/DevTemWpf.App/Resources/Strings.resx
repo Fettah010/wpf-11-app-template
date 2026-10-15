@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>2.0</value></resheader>
@@ -21,4 +21,225 @@
   <data name="Settings_Language" xml:space="preserve"><value>Language</value></data>
   <data name="Settings_LanguageNote" xml:space="preserve"><value>Language applies after restart.</value></data>
   <data name="Settings_RestartNow" xml:space="preserve"><value>Restart now</value></data>
+  <data name="Ctl_Title" xml:space="preserve"><value>Controls</value></data>
+  <data name="Ctl_Description" xml:space="preserve"><value>Everyday controls, their states, and the patterns to use them. Full catalog: docs/design-system/components.md. Tab reaches every control and section heading; the index below jumps between sections.</value></data>
+  <data name="Ctl_Buttons" xml:space="preserve"><value>Buttons</value></data>
+  <data name="Ctl_Inputs" xml:space="preserve"><value>Inputs</value></data>
+  <data name="Ctl_Content" xml:space="preserve"><value>Content</value></data>
+  <data name="Ctl_Feedback" xml:space="preserve"><value>Feedback</value></data>
+  <data name="Ctl_ValidatedForm" xml:space="preserve"><value>Validated form</value></data>
+  <data name="Ctl_ButtonsNote" xml:space="preserve"><value>Appearance sets intent: Primary for the one main action, Danger for destructive, Secondary/Transparent otherwise.</value></data>
+  <data name="Ctl_BtnPrimary" xml:space="preserve"><value>Primary</value></data>
+  <data name="Ctl_BtnSecondary" xml:space="preserve"><value>Secondary</value></data>
+  <data name="Ctl_BtnTransparent" xml:space="preserve"><value>Transparent</value></data>
+  <data name="Ctl_BtnDanger" xml:space="preserve"><value>Danger</value></data>
+  <data name="Ctl_BtnIcon" xml:space="preserve"><value>With icon</value></data>
+  <data name="Ctl_BtnDisabled" xml:space="preserve"><value>Disabled</value></data>
+  <data name="Ctl_BtnToggle" xml:space="preserve"><value>Toggle</value></data>
+  <data name="Ctl_BtnHyperlink" xml:space="preserve"><value>Hyperlink</value></data>
+  <data name="Ctl_BtnSplit" xml:space="preserve"><value>Split</value></data>
+  <data name="Ctl_OptA" xml:space="preserve"><value>Option A</value></data>
+  <data name="Ctl_OptB" xml:space="preserve"><value>Option B</value></data>
+  <data name="Ctl_BtnBusy" xml:space="preserve"><value>Run busy task</value></data>
+  <data name="Ctl_InputsNote" xml:space="preserve"><value>Placeholder + automation name on every field. Validation states are demonstrated in the form below.</value></data>
+  <data name="Ctl_SearchPh" xml:space="preserve"><value>Search…</value></data>
+  <data name="Ctl_PasswordPh" xml:space="preserve"><value>Password</value></data>
+  <data name="Ctl_First" xml:space="preserve"><value>First</value></data>
+  <data name="Ctl_Second" xml:space="preserve"><value>Second</value></data>
+  <data name="Ctl_CheckBox" xml:space="preserve"><value>Check box</value></data>
+  <data name="Ctl_ToggleSwitch" xml:space="preserve"><value>Toggle switch</value></data>
+  <data name="Ctl_RadioAlpha" xml:space="preserve"><value>Alpha</value></data>
+  <data name="Ctl_RadioBeta" xml:space="preserve"><value>Beta</value></data>
+  <data name="Ctl_ContentNote" xml:space="preserve"><value>Cards group related content; expanders hide detail; badges annotate; tooltips explain.</value></data>
+  <data name="Ctl_CardTitle" xml:space="preserve"><value>Card title</value></data>
+  <data name="Ctl_CardBody" xml:space="preserve"><value>Card body copy.</value></data>
+  <data name="Ctl_CardExpander" xml:space="preserve"><value>Card expander</value></data>
+  <data name="Ctl_HiddenDetail" xml:space="preserve"><value>Hidden detail lives here.</value></data>
+  <data name="Ctl_Expander" xml:space="preserve"><value>Expander</value></data>
+  <data name="Ctl_ExpandableContent" xml:space="preserve"><value>Expandable content.</value></data>
+  <data name="Ctl_TooltipBtn" xml:space="preserve"><value>Hover for tooltip</value></data>
+  <data name="Ctl_TooltipText" xml:space="preserve"><value>Tooltips explain — they never carry the only copy of information.</value></data>
+  <data name="Ctl_FeedbackNote" xml:space="preserve"><value>InfoBar for inline severity; snackbar for transient confirmation; dialog for decisions that need an explicit answer.</value></data>
+  <data name="Ctl_BtnSnackbar" xml:space="preserve"><value>Show snackbar</value></data>
+  <data name="Ctl_BtnDialog" xml:space="preserve"><value>Ask for confirmation</value></data>
+  <data name="Ctl_FormNote" xml:space="preserve"><value>DataAnnotations + ObservableValidator. Errors appear under fields and block saving — never color-only.</value></data>
+  <data name="Ctl_FormName" xml:space="preserve"><value>Name</value></data>
+  <data name="Ctl_FormEmail" xml:space="preserve"><value>Email</value></data>
+  <data name="Ctl_BtnSave" xml:space="preserve"><value>Save sample</value></data>
+  <data name="Ctl_StatusPick" xml:space="preserve"><value>Pick a demo — snackbar, dialog, busy task, or the validated form.</value></data>
+  <data name="Ctl_StatusSnackbar" xml:space="preserve"><value>Snackbar shown (3s).</value></data>
+  <data name="Ctl_StatusDialog" xml:space="preserve"><value>Dialog result: {0}.</value></data>
+  <data name="Ctl_StatusWorking" xml:space="preserve"><value>Working… (button disabled, ring spinning)</value></data>
+  <data name="Ctl_StatusDone" xml:space="preserve"><value>Busy task finished.</value></data>
+  <data name="Efx_Title" xml:space="preserve"><value>Effects</value></data>
+  <data name="Efx_Description" xml:space="preserve"><value>Bounded, switchable demos. Nothing here is required to use the app; reduced motion skips all of it.</value></data>
+  <data name="Efx_Presets" xml:space="preserve"><value>Motion presets</value></data>
+  <data name="Efx_PresetsNote" xml:space="preserve"><value>Plays the entrance on the preview card at each speed.</value></data>
+  <data name="Efx_PresetSubtle" xml:space="preserve"><value>Subtle (120ms)</value></data>
+  <data name="Efx_PresetStandard" xml:space="preserve"><value>Standard (220ms)</value></data>
+  <data name="Efx_PresetExpressive" xml:space="preserve"><value>Expressive (380ms + slide)</value></data>
+  <data name="Efx_PreviewText" xml:space="preserve"><value>The entrance plays here.</value></data>
+  <data name="Efx_Ripple" xml:space="preserve"><value>Ripple</value></data>
+  <data name="Efx_RippleNote" xml:space="preserve"><value>Click inside the surface. Storyboard-only, decorative, skipped unless motion is Full and effects are on.</value></data>
+  <data name="Efx_Surface" xml:space="preserve"><value>Animated surface</value></data>
+  <data name="Efx_SurfaceNote" xml:space="preserve"><value>Opt-in ambient gradient. Off by default; stops when you leave the page.</value></data>
+  <data name="Efx_AnimateGradient" xml:space="preserve"><value>Animate the gradient</value></data>
+  <data name="Efx_PolicyFormat" xml:space="preserve"><value>Effective motion: {0} (preference: {1})</value></data>
+  <data name="Efx_EnvFormat" xml:space="preserve"><value>OS animations: {0}, render tier {1}, effects: {2}</value></data>
+  <data name="Efx_On" xml:space="preserve"><value>on</value></data>
+  <data name="Efx_Off" xml:space="preserve"><value>off</value></data>
+  <data name="Tok_Title" xml:space="preserve"><value>Design tokens</value></data>
+  <data name="Tok_Description" xml:space="preserve"><value>Live preview of the App* token layer. Switch theme, density, or accent in Settings to see every swatch follow.</value></data>
+  <data name="Tok_Colors" xml:space="preserve"><value>Colors</value></data>
+  <data name="Tok_TextPrimary" xml:space="preserve"><value>Text / Primary</value></data>
+  <data name="Tok_TextSecondary" xml:space="preserve"><value>Text / Secondary</value></data>
+  <data name="Tok_Accent" xml:space="preserve"><value>Accent</value></data>
+  <data name="Tok_CardBorder" xml:space="preserve"><value>Card / Border</value></data>
+  <data name="Tok_StatusSuccess" xml:space="preserve"><value>Status / Success</value></data>
+  <data name="Tok_StatusCaution" xml:space="preserve"><value>Status / Caution</value></data>
+  <data name="Tok_StatusError" xml:space="preserve"><value>Status / Error</value></data>
+  <data name="Tok_SubtleDivider" xml:space="preserve"><value>Subtle / Divider</value></data>
+  <data name="Tok_Typography" xml:space="preserve"><value>Typography</value></data>
+  <data name="Tok_Display" xml:space="preserve"><value>Display 32</value></data>
+  <data name="Tok_TypeTitle" xml:space="preserve"><value>Title 22</value></data>
+  <data name="Tok_Subtitle" xml:space="preserve"><value>Subtitle 18</value></data>
+  <data name="Tok_SectionHeading" xml:space="preserve"><value>Section heading 16</value></data>
+  <data name="Tok_Body" xml:space="preserve"><value>Body 14 — primary and secondary tones.</value></data>
+  <data name="Tok_SecondaryBody" xml:space="preserve"><value>Secondary body 14.</value></data>
+  <data name="Tok_Caption" xml:space="preserve"><value>Caption 12.</value></data>
+  <data name="Tok_Spacing" xml:space="preserve"><value>Spacing &amp; shapes</value></data>
+  <data name="Tok_States" xml:space="preserve"><value>States</value></data>
+  <data name="Tok_StandardButton" xml:space="preserve"><value>Standard button</value></data>
+  <data name="Tok_DisabledButton" xml:space="preserve"><value>Disabled button</value></data>
+  <data name="Tok_StandardCheck" xml:space="preserve"><value>Standard check box</value></data>
+  <data name="Tok_EditableText" xml:space="preserve"><value>Editable text</value></data>
+  <data name="Tok_Attention" xml:space="preserve"><value>Something needs attention.</value></data>
+  <data name="Dia_Title" xml:space="preserve"><value>Diagnostics</value></data>
+  <data name="Dia_Description" xml:space="preserve"><value>Logs, support bundle, backup, updates, and connectivity. Nothing here contacts the network unless you ask it to.</value></data>
+  <data name="Dia_Logs" xml:space="preserve"><value>Logs</value></data>
+  <data name="Dia_FilterPh" xml:space="preserve"><value>Filter lines…</value></data>
+  <data name="Dia_Refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="Dia_Export" xml:space="preserve"><value>Export log…</value></data>
+  <data name="Dia_Bundle" xml:space="preserve"><value>Support bundle…</value></data>
+  <data name="Dia_Backup" xml:space="preserve"><value>Backup &amp; restore</value></data>
+  <data name="Dia_BackupNow" xml:space="preserve"><value>Back up now</value></data>
+  <data name="Dia_Restore" xml:space="preserve"><value>Restore…</value></data>
+  <data name="Dia_Updates" xml:space="preserve"><value>Updates</value></data>
+  <data name="Dia_CheckUpdates" xml:space="preserve"><value>Check for updates</value></data>
+  <data name="Dia_DownloadRestart" xml:space="preserve"><value>Download &amp; restart</value></data>
+  <data name="Dia_Connectivity" xml:space="preserve"><value>Connectivity</value></data>
+  <data name="Dia_Probe" xml:space="preserve"><value>Probe endpoint</value></data>
+  <data name="Dia_Paths" xml:space="preserve"><value>Paths</value></data>
+  <data name="Dia_Versions" xml:space="preserve"><value>Versions</value></data>
+  <data name="Dia_NoLogs" xml:space="preserve"><value>No logs yet.</value></data>
+  <data name="Dia_CannotReadLogs" xml:space="preserve"><value>Could not read logs: {0}</value></data>
+  <data name="Dia_NoLogsExport" xml:space="preserve"><value>No logs to export.</value></data>
+  <data name="Dia_Exported" xml:space="preserve"><value>Exported {0}.</value></data>
+  <data name="Dia_BundleWritten" xml:space="preserve"><value>Bundle written to {0}.</value></data>
+  <data name="Dia_BackupWritten" xml:space="preserve"><value>Backup written: {0}. Restart after restore.</value></data>
+  <data name="Dia_BackupFailed" xml:space="preserve"><value>Backup failed: {0}</value></data>
+  <data name="Dia_RestoreDone" xml:space="preserve"><value>Restore complete — restart the app to apply.</value></data>
+  <data name="Dash_Title" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="Dash_Description" xml:space="preserve"><value>Sample business overview: metrics, trend, activity, and setup. Deterministic demo data.</value></data>
+  <data name="Dash_ChartTitle" xml:space="preserve"><value>Completed tasks, last 7 days</value></data>
+  <data name="Dash_FilterPh" xml:space="preserve"><value>Filter by name, category, or status…</value></data>
+  <data name="Dash_ColTime" xml:space="preserve"><value>Time</value></data>
+  <data name="Dash_ColName" xml:space="preserve"><value>Name</value></data>
+  <data name="Dash_ColCategory" xml:space="preserve"><value>Category</value></data>
+  <data name="Dash_ColStatus" xml:space="preserve"><value>Status</value></data>
+  <data name="Dash_ColValue" xml:space="preserve"><value>Value</value></data>
+  <data name="Dash_Detail" xml:space="preserve"><value>Detail</value></data>
+  <data name="Dash_ClearSelection" xml:space="preserve"><value>Clear selection</value></data>
+  <data name="Dash_Back" xml:space="preserve"><value>Back</value></data>
+  <data name="Dash_Next" xml:space="preserve"><value>Next</value></data>
+  <data name="Dash_Step1Title" xml:space="preserve"><value>Connect</value></data>
+  <data name="Dash_Step1Body" xml:space="preserve"><value>Step 1 of 3 — everything on this page is deterministic sample data.</value></data>
+  <data name="Dash_Step2Title" xml:space="preserve"><value>Choose</value></data>
+  <data name="Dash_Step2Body" xml:space="preserve"><value>Step 2 of 3 — filter or sort the activity table, then pick a row.</value></data>
+  <data name="Dash_Step3Title" xml:space="preserve"><value>Review</value></data>
+  <data name="Dash_Step3Body" xml:space="preserve"><value>Step 3 of 3 — review the detail card. Done (nothing is provisioned).</value></data>
+  <data name="Dash_SortStatusFormat" xml:space="preserve"><value>Sorted by {0} {1} · {2} rows</value></data>
+  <data name="Dash_NoResultsFormat" xml:space="preserve"><value>No activities match "{0}".</value></data>
+  <data name="Dash_FavMark" xml:space="preserve"><value>☆ Mark favorite</value></data>
+  <data name="Dash_FavRemove" xml:space="preserve"><value>★ Favorited — tap to remove</value></data>
+  <data name="Dash_SelectRow" xml:space="preserve"><value>Select a row…</value></data>
+  <data name="Dash_ChartSummaryFormat" xml:space="preserve"><value>7-day total {0}, peak {1} ({2}), {3}.</value></data>
+  <data name="Dash_TrendUp" xml:space="preserve"><value>trending up</value></data>
+  <data name="Dash_TrendDown" xml:space="preserve"><value>trending down</value></data>
+  <data name="Dash_TrendFlat" xml:space="preserve"><value>flat</value></data>
+  <data name="Data_Title" xml:space="preserve"><value>Data</value></data>
+  <data name="Data_Description" xml:space="preserve"><value>Editable grid, tree, and time input with validation, states, and keyboard support. Tab reaches every control; validation errors are text, never color-only.</value></data>
+  <data name="Data_IndexGrid" xml:space="preserve"><value>Grid</value></data>
+  <data name="Data_IndexTree" xml:space="preserve"><value>Tree</value></data>
+  <data name="Data_IndexTime" xml:space="preserve"><value>Time</value></data>
+  <data name="Data_GridTitle" xml:space="preserve"><value>Editable grid</value></data>
+  <data name="Data_GridNote" xml:space="preserve"><value>Double-click (or F2) a cell to edit; Enter commits, Esc cancels. New rows validate on commit; the filter, count, and empty states update live.</value></data>
+  <data name="Data_FilterPh" xml:space="preserve"><value>Filter rows…</value></data>
+  <data name="Data_Refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="Data_LoadLarge" xml:space="preserve"><value>Load 10,000</value></data>
+  <data name="Data_Retry" xml:space="preserve"><value>Retry</value></data>
+  <data name="Data_SimulateError" xml:space="preserve"><value>Simulate load failure on next refresh</value></data>
+  <data name="Data_ColName" xml:space="preserve"><value>Name</value></data>
+  <data name="Data_ColStatus" xml:space="preserve"><value>Status</value></data>
+  <data name="Data_ColValue" xml:space="preserve"><value>Value</value></data>
+  <data name="Data_StatusOpen" xml:space="preserve"><value>Open</value></data>
+  <data name="Data_StatusBlocked" xml:space="preserve"><value>Blocked</value></data>
+  <data name="Data_StatusDone" xml:space="preserve"><value>Done</value></data>
+  <data name="Data_Loading" xml:space="preserve"><value>Loading rows…</value></data>
+  <data name="Data_LoadErrorFormat" xml:space="preserve"><value>Load failed: {0}</value></data>
+  <data name="Data_EmptyNotice" xml:space="preserve"><value>No rows match the filter.</value></data>
+  <data name="Data_SelectedFormat" xml:space="preserve"><value>Selected: {0}</value></data>
+  <data name="Data_SelectedNone" xml:space="preserve"><value>Nothing selected.</value></data>
+  <data name="Data_TreeTitle" xml:space="preserve"><value>Tree</value></data>
+  <data name="Data_TreeNote" xml:space="preserve"><value>Arrow keys move, Right expands, Left collapses, Enter selects. Expansion persists across restarts.</value></data>
+  <data name="Data_ExpandAll" xml:space="preserve"><value>Expand all</value></data>
+  <data name="Data_CollapseAll" xml:space="preserve"><value>Collapse all</value></data>
+  <data name="Data_TreeEmptyDetail" xml:space="preserve"><value>Select a node to see its details.</value></data>
+  <data name="Data_TreeDetailFormat" xml:space="preserve"><value>{0} ({1} entries)</value></data>
+  <data name="Data_TimeTitle" xml:space="preserve"><value>Time</value></data>
+  <data name="Data_TimeNote" xml:space="preserve"><value>Hour and minute with range validation, plus Now. A gallery-scoped recipe: the WPF-UI TimePicker neither names itself nor opens reliably on 4.3.0 (see 1.3.0 report).</value></data>
+  <data name="Data_Now" xml:space="preserve"><value>Now</value></data>
+  <data name="Form_NameRequired" xml:space="preserve"><value>Name is required.</value></data>
+  <data name="Form_NameMin" xml:space="preserve"><value>Name needs at least 2 characters.</value></data>
+  <data name="Form_EmailRequired" xml:space="preserve"><value>Email is required.</value></data>
+  <data name="Form_EmailInvalid" xml:space="preserve"><value>Email does not look valid.</value></data>
+  <data name="Form_SavedFormat" xml:space="preserve"><value>Saved {0} &lt;{1}&gt; (sample — nothing leaves this machine).</value></data>
+  <data name="GridRow_NameRequired" xml:space="preserve"><value>Name is required.</value></data>
+  <data name="GridRow_NameMin" xml:space="preserve"><value>Name needs at least 2 characters.</value></data>
+  <data name="GridRow_ValueRange" xml:space="preserve"><value>Value must be between 0 and 10000.</value></data>
+  <data name="Time_HourRange" xml:space="preserve"><value>Hour must be 0-23.</value></data>
+  <data name="Time_MinuteRange" xml:space="preserve"><value>Minute must be 0-59.</value></data>
+  <data name="Time_SummaryFormat" xml:space="preserve"><value>Selected: {0}</value></data>
+  <data name="Settings_Title" xml:space="preserve"><value>Settings</value></data>
+  <data name="Settings_CustomAccent" xml:space="preserve"><value>Use a custom accent color</value></data>
+  <data name="Settings_AccentHexHelp" xml:space="preserve"><value>Hex color like #4CC2FF</value></data>
+  <data name="Settings_BackdropToggle" xml:space="preserve"><value>Enable Mica backdrop (falls back to opaque when unsupported)</value></data>
+  <data name="Settings_EffectsToggle" xml:space="preserve"><value>Enable premium effects (ripple, animated surfaces)</value></data>
+  <data name="Settings_TrayToggle" xml:space="preserve"><value>Minimize to tray instead of the taskbar</value></data>
+  <data name="Home_Title" xml:space="preserve"><value>Welcome to WPF 11 App Template</value></data>
+  <data name="Home_Subtitle" xml:space="preserve"><value>Rail/sidebar shell, theme switching, and settings persistence.</value></data>
+  <data name="Tray_Open" xml:space="preserve"><value>Open</value></data>
+  <data name="Tray_Exit" xml:space="preserve"><value>Exit</value></data>
+  <data name="Update_Disabled" xml:space="preserve"><value>Updates are not configured (empty feed URL).</value></data>
+  <data name="Update_CheckingFormat" xml:space="preserve"><value>Checking {0}…</value></data>
+  <data name="Update_Cancelled" xml:space="preserve"><value>Check cancelled.</value></data>
+  <data name="Update_UpToDate" xml:space="preserve"><value>You're up to date.</value></data>
+  <data name="Update_AvailableFormat" xml:space="preserve"><value>Version {0} available ({1} KB).</value></data>
+  <data name="Update_FailedFormat" xml:space="preserve"><value>Check failed: {0}</value></data>
+  <data name="Update_NothingToDownload" xml:space="preserve"><value>Nothing to download — check for updates first.</value></data>
+  <data name="Update_DownloadCancelled" xml:space="preserve"><value>Download cancelled.</value></data>
+  <data name="Update_DownloadFailedFormat" xml:space="preserve"><value>Download failed: {0}</value></data>
+  <data name="Update_ReadyFormat" xml:space="preserve"><value>Version {0} ready — restarting…</value></data>
+  <data name="Data_CountFormat" xml:space="preserve"><value>{0} of {1} rows</value></data>
+  <data name="Data_NewItem" xml:space="preserve"><value>New item</value></data>
+  <data name="Dia_LogCountFormat" xml:space="preserve"><value>{0} lines from {1} file(s).</value></data>
+  <data name="Dia_RestoreFailedFormat" xml:space="preserve"><value>Restore failed: {0}</value></data>
+  <data name="Ctl_SeverityInformational" xml:space="preserve"><value>Informational</value></data>
+  <data name="Ctl_SeveritySuccess" xml:space="preserve"><value>Success</value></data>
+  <data name="Ctl_SeverityWarning" xml:space="preserve"><value>Warning</value></data>
+  <data name="Ctl_SeverityError" xml:space="preserve"><value>Error</value></data>
+  <data name="Ctl_InfoNeutralMsg" xml:space="preserve"><value>Neutral context lives here.</value></data>
+  <data name="Ctl_InfoSuccessMsg" xml:space="preserve"><value>The thing worked.</value></data>
+  <data name="Ctl_InfoWarningMsg" xml:space="preserve"><value>Check this before continuing.</value></data>
+  <data name="Ctl_InfoErrorMsg" xml:space="preserve"><value>Something failed; here is what to do.</value></data>
 </root>

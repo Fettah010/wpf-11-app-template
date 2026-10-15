@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DevTemWpf.App.Resources;
 using DevTemWpf.App.Services;
 
 namespace DevTemWpf.App.ViewModels;
@@ -25,8 +26,8 @@ public sealed partial class DataTreeViewModel : ObservableObject
     private DataTreeNode? selectedNode;
 
     public string SelectedDetail => SelectedNode is null
-        ? "Select a node to see its details."
-        : $"{SelectedNode.Label} ({SelectedNode.Children.Count} children)";
+        ? Strings.Data_TreeEmptyDetail
+        : string.Format(Strings.Data_TreeDetailFormat, SelectedNode.Label, SelectedNode.Children.Count);
 
     partial void OnSelectedNodeChanged(DataTreeNode? value) => OnPropertyChanged(nameof(SelectedDetail));
 

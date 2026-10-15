@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DevTemWpf.App.Resources;
 
 namespace DevTemWpf.App.ViewModels;
 
@@ -20,7 +21,12 @@ public enum DataLoadState
 /// </summary>
 public sealed partial class DataGridViewModel : ObservableObject
 {
-    public static readonly string[] Statuses = ["Open", "Blocked", "Done"];
+    public static readonly string[] Statuses =
+    [
+        Strings.Data_StatusOpen,
+        Strings.Data_StatusBlocked,
+        Strings.Data_StatusDone,
+    ];
 
     public DataGridViewModel()
     {
@@ -59,6 +65,12 @@ public sealed partial class DataGridViewModel : ObservableObject
 
     [ObservableProperty]
     private DataGridRow? selectedRow;
+
+    public string SelectedSummary => SelectedRow is null
+        ? Strings.Data_SelectedNone
+        : string.Format(Strings.Data_SelectedFormat, SelectedRow.Name);
+
+    partial void OnSelectedRowChanged(DataGridRow? value) => OnPropertyChanged(nameof(SelectedSummary));
 
     [ObservableProperty]
     private DataLoadState loadState = DataLoadState.Loaded;
@@ -115,7 +127,7 @@ public sealed partial class DataGridViewModel : ObservableObject
 
         _lastCount = rowCount;
         LoadState = DataLoadState.Loading;
-        StatusText = "Loading rows…";
+        StatusText = Strings.Data_Loading;
         try
         {
             await Task.Delay(300).ConfigureAwait(true);
@@ -131,7 +143,7 @@ public sealed partial class DataGridViewModel : ObservableObject
         catch (Exception ex)
         {
             LoadState = DataLoadState.Error;
-            StatusText = $"Load failed: {ex.Message}";
+            StatusText = string.Format(Strings.Data_LoadErrorFormat, ex.Message);
         }
     }
 
@@ -186,6 +198,6 @@ public sealed partial class DataGridViewModel : ObservableObject
     private void UpdateCounts()
     {
         var shown = View.Cast<object>().OfType<DataGridRow>().Count();
-        CountText = $"{shown} of {Rows.Count} rows";
+        CountText = string.Format(Strings.Data_CountFormat, shown, Rows.Count);
     }
 }

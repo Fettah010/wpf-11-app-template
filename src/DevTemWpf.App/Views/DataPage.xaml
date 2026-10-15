@@ -3,47 +3,48 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+       xmlns:res="clr-namespace:DevTemWpf.App.Resources"
       xmlns:vm="clr-namespace:DevTemWpf.App.ViewModels"
       mc:Ignorable="d"
       d:DesignHeight="1000" d:DesignWidth="720"
-      Title="Data">
+      Title="{x:Static res:Strings.Data_Title}">
   <Page.Resources>
     <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
   </Page.Resources>
   <ScrollViewer Padding="{StaticResource AppPageMargin}" x:Name="DataScroller"
                 AutomationProperties.Name="Data gallery">
     <StackPanel MaxWidth="{StaticResource AppContentMaxWidth}">
-      <TextBlock Text="Data" Style="{StaticResource AppSubtitleText}" Margin="{StaticResource AppGapTitle}" />
-      <TextBlock Text="Editable grid, tree, and time input with validation, states, and keyboard support. Tab reaches every control; validation errors are text, never color-only."
+      <TextBlock Text="{x:Static res:Strings.Data_Title}" Style="{StaticResource AppSubtitleText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{x:Static res:Strings.Data_Description}"
                  Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
 
       <!-- Category index: mouse and keyboard anchor navigation. -->
       <WrapPanel Margin="{StaticResource AppGapSection}" AutomationProperties.Name="Data section index">
-        <ui:Button Content="Grid" Click="OnIndexClick" Tag="GridSection"
+        <ui:Button Content="{x:Static res:Strings.Data_IndexGrid}" Click="OnIndexClick" Tag="GridSection"
                    AutomationProperties.Name="Go to Grid section" Margin="{StaticResource AppGapFlow}" />
-        <ui:Button Content="Tree" Click="OnIndexClick" Tag="TreeSection"
+        <ui:Button Content="{x:Static res:Strings.Data_IndexTree}" Click="OnIndexClick" Tag="TreeSection"
                    AutomationProperties.Name="Go to Tree section" Margin="{StaticResource AppGapFlow}" />
-        <ui:Button Content="Time" Click="OnIndexClick" Tag="TimeSection"
+        <ui:Button Content="{x:Static res:Strings.Data_IndexTime}" Click="OnIndexClick" Tag="TimeSection"
                    AutomationProperties.Name="Go to Time section" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
 
       <!-- Editable grid -->
-      <TextBlock x:Name="GridSection" Focusable="True" Text="Editable grid" Style="{StaticResource AppSectionHeadingText}"
+      <TextBlock x:Name="GridSection" Focusable="True" Text="{x:Static res:Strings.Data_GridTitle}" Style="{StaticResource AppSectionHeadingText}"
                  Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Grid section heading" />
-      <TextBlock Text="Double-click (or F2) a cell to edit; Enter commits, Esc cancels. New rows validate on commit; the filter, count, and empty states update live."
+      <TextBlock Text="{x:Static res:Strings.Data_GridNote}"
                  Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
       <WrapPanel Margin="{StaticResource AppGapItem}">
-        <ui:TextBox PlaceholderText="Filter rows…" Text="{Binding ViewModel.Grid.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+        <ui:TextBox PlaceholderText="{x:Static res:Strings.Data_FilterPh}" Text="{Binding ViewModel.Grid.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     AutomationProperties.Name="Data grid filter" MinWidth="200" Margin="{StaticResource AppGapFlow}" />
-        <ui:Button Content="Refresh" Command="{Binding ViewModel.Grid.RefreshCommand}"
+        <ui:Button Content="{x:Static res:Strings.Data_Refresh}" Command="{Binding ViewModel.Grid.RefreshCommand}"
                    AutomationProperties.Name="Refresh data grid" Margin="{StaticResource AppGapFlow}" />
-        <ui:Button Content="Load 10,000" Command="{Binding ViewModel.Grid.LoadLargeCommand}"
+        <ui:Button Content="{x:Static res:Strings.Data_LoadLarge}" Command="{Binding ViewModel.Grid.LoadLargeCommand}"
                    AutomationProperties.Name="Load ten thousand rows" Margin="{StaticResource AppGapFlow}" />
-        <ui:Button Content="Retry" Command="{Binding ViewModel.Grid.RetryCommand}"
+        <ui:Button Content="{x:Static res:Strings.Data_Retry}" Command="{Binding ViewModel.Grid.RetryCommand}"
                    AutomationProperties.Name="Retry data load" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
-      <CheckBox Content="Simulate load failure on next refresh" IsChecked="{Binding ViewModel.Grid.SimulateError, Mode=TwoWay}"
+      <CheckBox Content="{x:Static res:Strings.Data_SimulateError}" IsChecked="{Binding ViewModel.Grid.SimulateError, Mode=TwoWay}"
                 AutomationProperties.Name="Simulate load failure" Margin="{StaticResource AppGapItem}" />
       <TextBlock Text="{Binding ViewModel.Grid.CountText}" Style="{StaticResource AppCaptionText}"
                  Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Data grid row count" />
@@ -51,12 +52,12 @@
                 AutoGenerateColumns="False" CanUserAddRows="True" CanUserSortColumns="True" Height="320"
                 AutomationProperties.Name="Data grid">
         <DataGrid.Columns>
-          <DataGridTextColumn Header="Name" Binding="{Binding Name, ValidatesOnDataErrors=True, NotifyOnValidationError=True}"
+          <DataGridTextColumn Header="{x:Static res:Strings.Data_ColName}" Binding="{Binding Name, ValidatesOnDataErrors=True, NotifyOnValidationError=True}"
                               Width="2*" AutomationProperties.Name="Name column" />
-          <DataGridComboBoxColumn Header="Status" SelectedItemBinding="{Binding Status}"
+          <DataGridComboBoxColumn Header="{x:Static res:Strings.Data_ColStatus}" SelectedItemBinding="{Binding Status}"
                                   ItemsSource="{Binding Source={x:Static vm:DataGridViewModel.Statuses}}"
                                   Width="*" AutomationProperties.Name="Status column" />
-          <DataGridTextColumn Header="Value" Binding="{Binding Value, ValidatesOnDataErrors=True, NotifyOnValidationError=True}"
+          <DataGridTextColumn Header="{x:Static res:Strings.Data_ColValue}" Binding="{Binding Value, ValidatesOnDataErrors=True, NotifyOnValidationError=True}"
                               Width="*" AutomationProperties.Name="Value column" />
         </DataGrid.Columns>
         <DataGrid.RowValidationRules>
@@ -67,22 +68,22 @@
                        Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Data loading indicator" />
       <TextBlock Text="{Binding ViewModel.Grid.StatusText, TargetNullValue=''}" Style="{StaticResource AppSecondaryBodyText}"
                  TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Data grid status" />
-      <TextBlock Text="No rows match the filter." Style="{StaticResource AppSecondaryBodyText}"
+      <TextBlock Text="{x:Static res:Strings.Data_EmptyNotice}" Style="{StaticResource AppSecondaryBodyText}"
                  Visibility="{Binding ViewModel.Grid.ShowEmpty, Converter={StaticResource BoolToVisibility}}"
                  Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Data grid empty notice" />
-      <TextBlock Text="{Binding ViewModel.Grid.SelectedRow.Name, StringFormat=Selected: {0}, TargetNullValue='Nothing selected.'}"
-                 Style="{StaticResource AppBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapSection}"
+      <TextBlock Text="{Binding ViewModel.Grid.SelectedSummary}" Style="{StaticResource AppBodyText}"
+                 TextWrapping="Wrap" Margin="{StaticResource AppGapSection}"
                  AutomationProperties.Name="Selected row summary" />
 
       <!-- Tree -->
-      <TextBlock x:Name="TreeSection" Focusable="True" Text="Tree" Style="{StaticResource AppSectionHeadingText}"
+      <TextBlock x:Name="TreeSection" Focusable="True" Text="{x:Static res:Strings.Data_TreeTitle}" Style="{StaticResource AppSectionHeadingText}"
                  Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Tree section heading" />
-      <TextBlock Text="Arrow keys move, Right expands, Left collapses, Enter selects. Expansion persists across restarts."
+      <TextBlock Text="{x:Static res:Strings.Data_TreeNote}"
                  Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
       <WrapPanel Margin="{StaticResource AppGapItem}">
-        <ui:Button Content="Expand all" Command="{Binding ViewModel.Tree.ExpandAllCommand}"
+        <ui:Button Content="{x:Static res:Strings.Data_ExpandAll}" Command="{Binding ViewModel.Tree.ExpandAllCommand}"
                    AutomationProperties.Name="Expand all nodes" Margin="{StaticResource AppGapFlow}" />
-        <ui:Button Content="Collapse all" Command="{Binding ViewModel.Tree.CollapseAllCommand}"
+        <ui:Button Content="{x:Static res:Strings.Data_CollapseAll}" Command="{Binding ViewModel.Tree.CollapseAllCommand}"
                    AutomationProperties.Name="Collapse all nodes" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
       <TreeView ItemsSource="{Binding ViewModel.Tree.Nodes}" SelectedItemChanged="OnTreeSelected"
@@ -104,9 +105,9 @@
                  AutomationProperties.Name="Selected tree node" />
 
       <!-- Time -->
-      <TextBlock x:Name="TimeSection" Focusable="True" Text="Time" Style="{StaticResource AppSectionHeadingText}"
+      <TextBlock x:Name="TimeSection" Focusable="True" Text="{x:Static res:Strings.Data_TimeTitle}" Style="{StaticResource AppSectionHeadingText}"
                  Margin="{StaticResource AppGapTitle}" AutomationProperties.Name="Time section heading" />
-      <TextBlock Text="Hour and minute with range validation, plus Now. A gallery-scoped recipe: the WPF-UI TimePicker neither names itself nor opens reliably on 4.3.0 (see 1.3.0 report)."
+      <TextBlock Text="{x:Static res:Strings.Data_TimeNote}"
                  Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
       <StackPanel Orientation="Horizontal" Margin="{StaticResource AppGapItem}">
         <TextBox Width="64" Text="{Binding ViewModel.Time.Hour, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True, ValidatesOnDataErrors=True}"
@@ -114,7 +115,7 @@
         <TextBlock Text=":" Style="{StaticResource AppTitleText}" Margin="{StaticResource AppGapFlow}" />
         <TextBox Width="64" Text="{Binding ViewModel.Time.Minute, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True, ValidatesOnDataErrors=True}"
                  AutomationProperties.Name="Time minute input" Margin="{StaticResource AppGapFlow}" />
-        <ui:Button Content="Now" Command="{Binding ViewModel.Time.SetNowCommand}"
+        <ui:Button Content="{x:Static res:Strings.Data_Now}" Command="{Binding ViewModel.Time.SetNowCommand}"
                    AutomationProperties.Name="Set time to now" Margin="{StaticResource AppGapFlow}" />
       </StackPanel>
       <TextBlock Text="{Binding ViewModel.Time.TimeError, TargetNullValue=''}" Style="{StaticResource AppErrorText}"

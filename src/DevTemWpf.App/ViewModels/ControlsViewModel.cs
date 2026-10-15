@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DevTemWpf.App.Resources;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
 using Wpf.Ui.Extensions;
@@ -25,7 +26,7 @@ public sealed partial class ControlsViewModel : ObservableObject
     public FormViewModel Form { get; }
 
     [ObservableProperty]
-    private string statusText = "Pick a demo — snackbar, dialog, busy task, or the validated form.";
+    private string statusText = Strings.Ctl_StatusPick;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsIdle))]
@@ -42,7 +43,7 @@ public sealed partial class ControlsViewModel : ObservableObject
             ControlAppearance.Primary,
             new SymbolIcon(SymbolRegular.Checkmark24),
             TimeSpan.FromSeconds(3));
-        StatusText = "Snackbar shown (3s).";
+        StatusText = Strings.Ctl_StatusSnackbar;
     }
 
     [RelayCommand]
@@ -57,7 +58,7 @@ public sealed partial class ControlsViewModel : ObservableObject
                 CloseButtonText = "Cancel",
             },
             cancellationToken).ConfigureAwait(true);
-        StatusText = $"Dialog result: {result}.";
+        StatusText = string.Format(Strings.Ctl_StatusDialog, result);
     }
 
     // Single-flight declaratively: concurrent invocations are ignored, so the
@@ -76,9 +77,9 @@ public sealed partial class ControlsViewModel : ObservableObject
         try
         {
             IsBusy = true;
-            StatusText = "Working… (button disabled, ring spinning)";
+            StatusText = Strings.Ctl_StatusWorking;
             await Task.Delay(TimeSpan.FromMilliseconds(900)).ConfigureAwait(true);
-            StatusText = "Busy task finished.";
+            StatusText = Strings.Ctl_StatusDone;
         }
         finally
         {

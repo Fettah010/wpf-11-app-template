@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using DevTemWpf.App.Resources;
 using Wpf.Ui.Abstractions.Controls;
 
 namespace DevTemWpf.App.ViewModels;
@@ -7,10 +8,10 @@ namespace DevTemWpf.App.ViewModels;
 public sealed partial class HomeViewModel : ObservableObject, INavigationAware
 {
     [ObservableProperty]
-    private string headline = "Welcome to WPF 11 App Template";
+    private string headline = Strings.Home_Title;
 
     [ObservableProperty]
-    private string subline = "Rail/sidebar shell, theme switching, and settings persistence.";
+    private string subline = Strings.Home_Subtitle;
 
     public Task OnNavigatedToAsync() => Task.CompletedTask;
 

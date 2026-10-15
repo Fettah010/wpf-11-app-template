@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DevTemWpf.App.Resources;
 
 namespace DevTemWpf.App.ViewModels;
 
@@ -21,12 +22,12 @@ public sealed partial class TimeEditorViewModel : ObservableValidator
 
     [ObservableProperty]
     [NotifyDataErrorInfo]
-    [Range(0, 23, ErrorMessage = "Hour must be 0-23.")]
+    [Range(0, 23, ErrorMessageResourceType = typeof(Strings), ErrorMessageResourceName = nameof(Strings.Time_HourRange))]
     private int hour;
 
     [ObservableProperty]
     [NotifyDataErrorInfo]
-    [Range(0, 59, ErrorMessage = "Minute must be 0-59.")]
+    [Range(0, 59, ErrorMessageResourceType = typeof(Strings), ErrorMessageResourceName = nameof(Strings.Time_MinuteRange))]
     private int minute;
 
     [ObservableProperty]
@@ -35,7 +36,7 @@ public sealed partial class TimeEditorViewModel : ObservableValidator
     [ObservableProperty]
     private string? timeError;
 
-    public string Summary => $"Selected: {SelectedTime:hh\\:mm}";
+    public string Summary => string.Format(Strings.Time_SummaryFormat, SelectedTime.ToString(@"hh\:mm"));
 
     partial void OnHourChanged(int value) => ValidateAndUpdate(nameof(Hour), value);
 
@@ -45,10 +46,8 @@ public sealed partial class TimeEditorViewModel : ObservableValidator
     private void SetNow()
     {
         var now = DateTime.Now;
-        SetProperty(ref hour, now.Hour);
-        SetProperty(ref minute, now.Minute);
-        ValidateAllProperties();
-        UpdateSelected();
+        Hour = now.Hour;
+        Minute = now.Minute;
     }
 
     private void ValidateAndUpdate(string property, int value)

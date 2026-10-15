@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using DevTemWpf.App.Services;
 using DevTemWpf.App.Views;
@@ -75,9 +75,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         _tray.TooltipText = title;
         _tray.Icon = TrayGlyph.Create(title);
 
-        var open = new MenuItem { Header = "Open" };
+        var open = new MenuItem { Header = DevTemWpf.App.Resources.Strings.Tray_Open };
         open.Click += (_, _) => RestoreFromTray();
-        var exit = new MenuItem { Header = "Exit" };
+        var exit = new MenuItem { Header = DevTemWpf.App.Resources.Strings.Tray_Exit };
         exit.Click += (_, _) => Application.Current.Shutdown();
         _tray.ContextMenu = new ContextMenu { Items = { open, exit } };
 

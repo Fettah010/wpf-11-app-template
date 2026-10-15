@@ -1,24 +1,26 @@
 using System.ComponentModel.DataAnnotations;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DevTemWpf.App.Resources;
 
 namespace DevTemWpf.App.ViewModels;
 
 /// <summary>
 /// Sample validated form (DataAnnotations + ObservableValidator, no new packages).
+/// Messages resolve through <see cref="Strings"/> so they follow the UI culture.
 /// </summary>
 public sealed partial class FormViewModel : ObservableValidator
 {
     [ObservableProperty]
     [NotifyDataErrorInfo]
-    [Required(ErrorMessage = "Name is required.")]
-    [MinLength(2, ErrorMessage = "Name needs at least 2 characters.")]
+    [Required(ErrorMessageResourceType = typeof(Strings), ErrorMessageResourceName = nameof(Strings.Form_NameRequired))]
+    [MinLength(2, ErrorMessageResourceType = typeof(Strings), ErrorMessageResourceName = nameof(Strings.Form_NameMin))]
     private string name = string.Empty;
 
     [ObservableProperty]
     [NotifyDataErrorInfo]
-    [Required(ErrorMessage = "Email is required.")]
-    [EmailAddress(ErrorMessage = "Email does not look valid.")]
+    [Required(ErrorMessageResourceType = typeof(Strings), ErrorMessageResourceName = nameof(Strings.Form_EmailRequired))]
+    [EmailAddress(ErrorMessageResourceType = typeof(Strings), ErrorMessageResourceName = nameof(Strings.Form_EmailInvalid))]
     private string email = string.Empty;
 
     [ObservableProperty]
@@ -54,6 +56,6 @@ public sealed partial class FormViewModel : ObservableValidator
             return;
         }
 
-        SavedMessage = $"Saved {Name.Trim()} <{Email.Trim()}> (sample — nothing leaves this machine).";
+        SavedMessage = string.Format(Strings.Form_SavedFormat, Name.Trim(), Email.Trim());
     }
 }

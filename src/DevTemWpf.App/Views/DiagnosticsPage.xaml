@@ -3,51 +3,52 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+       xmlns:res="clr-namespace:DevTemWpf.App.Resources"
       mc:Ignorable="d"
       d:DesignHeight="900" d:DesignWidth="720"
-      Title="Diagnostics">
+      Title="{x:Static res:Strings.Dia_Title}">
   <ScrollViewer Padding="{StaticResource AppPageMargin}"
                 AutomationProperties.Name="Diagnostics">
     <StackPanel MaxWidth="{StaticResource AppContentMaxWidth}">
-      <TextBlock Text="Diagnostics" Style="{StaticResource AppSubtitleText}" Margin="{StaticResource AppGapTitle}" />
-      <TextBlock Text="Logs, support bundle, backup, updates, and connectivity. Nothing here contacts the network unless you ask it to."
+      <TextBlock Text="{x:Static res:Strings.Dia_Title}" Style="{StaticResource AppSubtitleText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{x:Static res:Strings.Dia_Description}"
                  Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapSection}" />
 
-      <TextBlock Text="Logs" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
-      <ui:TextBox PlaceholderText="Filter lines…" Text="{Binding ViewModel.LogFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+      <TextBlock Text="{x:Static res:Strings.Dia_Logs}" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+      <ui:TextBox PlaceholderText="{x:Static res:Strings.Dia_FilterPh}" Text="{Binding ViewModel.LogFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                   AutomationProperties.Name="Log filter" Margin="{StaticResource AppGapItem}" />
       <ListBox ItemsSource="{Binding ViewModel.LogLines}" Height="180" FontFamily="{StaticResource AppMonoFontFamily}"
                FontSize="12" AutomationProperties.Name="Log viewer" Margin="{StaticResource AppGapItem}" />
       <WrapPanel Margin="{StaticResource AppGapTitle}">
-        <ui:Button Content="Refresh" Command="{Binding ViewModel.RefreshLogsCommand}"
+        <ui:Button Content="{x:Static res:Strings.Dia_Refresh}" Command="{Binding ViewModel.RefreshLogsCommand}"
                    AutomationProperties.Name="Refresh logs" Margin="{StaticResource AppGapFlow}" />
-        <ui:Button Content="Export log…" Click="OnExportLogClick"
+        <ui:Button Content="{x:Static res:Strings.Dia_Export}" Click="OnExportLogClick"
                    AutomationProperties.Name="Export log" Margin="{StaticResource AppGapFlow}" />
-        <ui:Button Content="Support bundle…" Click="OnBundleClick"
+        <ui:Button Content="{x:Static res:Strings.Dia_Bundle}" Click="OnBundleClick"
                    AutomationProperties.Name="Create support bundle" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
       <TextBlock Text="{Binding ViewModel.LogStatus}" Style="{StaticResource AppCaptionText}" Margin="{StaticResource AppGapSection}" />
 
-      <TextBlock Text="Backup &amp; restore" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{x:Static res:Strings.Dia_Backup}" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
       <WrapPanel Margin="{StaticResource AppGapTitle}">
-        <ui:Button Content="Back up now" Command="{Binding ViewModel.BackupNowCommand}"
-                   AutomationProperties.Name="Back up now" Margin="{StaticResource AppGapFlow}" />
-        <ui:Button Content="Restore…" Click="OnRestoreClick"
+        <ui:Button Content="{x:Static res:Strings.Dia_BackupNow}" Command="{Binding ViewModel.BackupNowCommand}"
+                   AutomationProperties.Name="{x:Static res:Strings.Dia_BackupNow}" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="{x:Static res:Strings.Dia_Restore}" Click="OnRestoreClick"
                    AutomationProperties.Name="Restore backup" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
       <TextBlock Text="{Binding ViewModel.BackupStatus}" Style="{StaticResource AppSecondaryBodyText}"
                  TextWrapping="Wrap" Margin="{StaticResource AppGapSection}" AutomationProperties.Name="Backup status" />
 
-      <TextBlock Text="Updates" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{x:Static res:Strings.Dia_Updates}" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
       <ComboBox ItemsSource="{Binding ViewModel.ChannelOptions}"
                 SelectedItem="{Binding ViewModel.SelectedChannel, Mode=TwoWay}"
                 AutomationProperties.Name="Update channel" Margin="{StaticResource AppGapTitle}" />
       <TextBlock Text="{Binding ViewModel.FeedUrlText}" Style="{StaticResource AppCaptionText}" Margin="{StaticResource AppGapItem}" />
       <WrapPanel Margin="{StaticResource AppGapTitle}">
-        <ui:Button Content="Check for updates" Command="{Binding ViewModel.CheckUpdatesCommand}"
-                   AutomationProperties.Name="Check for updates" Margin="{StaticResource AppGapFlow}" />
-        <ui:Button Content="Download &amp; restart" Command="{Binding ViewModel.DownloadUpdatesCommand}" Appearance="Primary"
+        <ui:Button Content="{x:Static res:Strings.Dia_CheckUpdates}" Command="{Binding ViewModel.CheckUpdatesCommand}"
+                   AutomationProperties.Name="{x:Static res:Strings.Dia_CheckUpdates}" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="{x:Static res:Strings.Dia_DownloadRestart}" Command="{Binding ViewModel.DownloadUpdatesCommand}" Appearance="Primary"
                    AutomationProperties.Name="Download and restart" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
       <TextBlock Text="{Binding ViewModel.Update.Detail}" Style="{StaticResource AppSecondaryBodyText}"
@@ -55,19 +56,19 @@
       <ProgressBar Value="{Binding ViewModel.Update.Progress, Mode=OneWay}" Minimum="0" Maximum="1" Height="6"
                    Margin="{StaticResource AppGapSection}" AutomationProperties.Name="Update progress" />
 
-      <TextBlock Text="Connectivity" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{x:Static res:Strings.Dia_Connectivity}" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
       <TextBlock Text="{Binding ViewModel.HttpBaseUrl, StringFormat=Endpoint: {0}}" Style="{StaticResource AppCaptionText}" Margin="{StaticResource AppGapTitle}" />
       <WrapPanel Margin="{StaticResource AppGapTitle}">
-        <ui:Button Content="Probe endpoint" Command="{Binding ViewModel.ProbeHttpCommand}"
-                   AutomationProperties.Name="Probe endpoint" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="{x:Static res:Strings.Dia_Probe}" Command="{Binding ViewModel.ProbeHttpCommand}"
+                   AutomationProperties.Name="{x:Static res:Strings.Dia_Probe}" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
       <TextBlock Text="{Binding ViewModel.ProbeResult}" Style="{StaticResource AppSecondaryBodyText}"
                  TextWrapping="Wrap" Margin="{StaticResource AppGapSection}" AutomationProperties.Name="Probe result" />
 
-      <TextBlock Text="Paths" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{x:Static res:Strings.Dia_Paths}" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
       <TextBlock Text="{Binding ViewModel.PathsText}" Style="{StaticResource AppCaptionText}"
                  FontFamily="{StaticResource AppMonoFontFamily}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
-      <TextBlock Text="Versions" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{x:Static res:Strings.Dia_Versions}" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
       <TextBlock Text="{Binding ViewModel.VersionsText}" Style="{StaticResource AppCaptionText}"
                  FontFamily="{StaticResource AppMonoFontFamily}" TextWrapping="Wrap" />
     </StackPanel>

@@ -4,6 +4,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DevTemWpf.App.Resources;
 using DevTemWpf.App.Services;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
@@ -15,12 +16,17 @@ namespace DevTemWpf.App.ViewModels;
 /// <summary>Dashboard: metrics, chart, sortable/filterable table, detail, stepper.</summary>
 public sealed partial class DashboardViewModel : ObservableObject, INavigationAware
 {
-    private static readonly string[] StepTitles = ["Connect", "Choose", "Review"];
+    private static readonly string[] StepTitles =
+    [
+        Strings.Dash_Step1Title,
+        Strings.Dash_Step2Title,
+        Strings.Dash_Step3Title,
+    ];
     private static readonly string[] StepBodies =
     [
-        "Step 1 of 3 — everything on this page is deterministic sample data.",
-        "Step 2 of 3 — filter or sort the activity table, then pick a row.",
-        "Step 3 of 3 — review the detail card. Done (nothing is provisioned).",
+        Strings.Dash_Step1Body,
+        Strings.Dash_Step2Body,
+        Strings.Dash_Step3Body,
     ];
 
     private readonly List<ActivityItem> _all;
@@ -81,7 +87,7 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
     private ActivityItem? selectedActivity;
 
     [ObservableProperty]
-    private string favoriteGlyph = "☆ Mark favorite";
+    private string favoriteGlyph = Strings.Dash_FavMark;
 
     [ObservableProperty]
     private string sortStatusText = string.Empty;
@@ -184,8 +190,10 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
         }
 
         var peakLabel = labels.Count == values.Count ? labels[peakIndex] : $"point {peakIndex + 1}";
-        var trend = values[^1] > values[0] ? "trending up" : values[^1] < values[0] ? "trending down" : "flat";
-        return $"7-day total {total:0}, peak {peakLabel} ({peak:0}), {trend}.";
+        var trend = values[^1] > values[0] ? Strings.Dash_TrendUp
+            : values[^1] < values[0] ? Strings.Dash_TrendDown
+            : Strings.Dash_TrendFlat;
+        return string.Format(Strings.Dash_ChartSummaryFormat, $"{total:0}", peakLabel, $"{peak:0}", trend);
     }
 
     partial void OnSearchTextChanged(string value)
@@ -214,8 +222,8 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
     private void UpdateFavoriteGlyph()
     {
         FavoriteGlyph = SelectedActivity is not null && _favorites.IsFavorite(SelectedActivity.Id)
-            ? "★ Favorited — tap to remove"
-            : "☆ Mark favorite";
+            ? Strings.Dash_FavRemove
+            : Strings.Dash_FavMark;
     }
 
     [RelayCommand]
@@ -260,14 +268,29 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
     {
         Activities.SortDescriptions.Clear();
         Activities.SortDescriptions.Add(new SortDescription(_sortColumn, _sortDirection));
-        SortStatusText = $"Sorted by {_sortColumn} {(_sortDirection == ListSortDirection.Ascending ? "↑" : "↓")} · {_all.Count} rows";
+        SortStatusText = string.Format(
+            Strings.Dash_SortStatusFormat,
+            DisplayColumnName(_sortColumn),
+            _sortDirection == ListSortDirection.Ascending ? "↑" : "↓",
+            _all.Count);
         UpdateResultFlags();
     }
+
+    /// <summary>Sort property names are technical; display the localized header.</summary>
+    private static string DisplayColumnName(string property) => property switch
+    {
+        nameof(ActivityItem.Timestamp) => Strings.Dash_ColTime,
+        nameof(ActivityItem.Name) => Strings.Dash_ColName,
+        nameof(ActivityItem.Category) => Strings.Dash_ColCategory,
+        nameof(ActivityItem.Status) => Strings.Dash_ColStatus,
+        nameof(ActivityItem.Value) => Strings.Dash_ColValue,
+        _ => property,
+    };
 
     private void UpdateResultFlags()
     {
         OnPropertyChanged(nameof(HasResults));
-        NoResultsMessage = HasResults ? null : $"No activities match \"{SearchText}\".";
+        NoResultsMessage = HasResults ? null : string.Format(Strings.Dash_NoResultsFormat, SearchText);
     }
 
     private bool Matches(object item)

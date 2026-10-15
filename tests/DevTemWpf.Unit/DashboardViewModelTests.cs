@@ -76,7 +76,7 @@ public sealed class DashboardViewModelTests : IDisposable
 
         vm.SortByCommand.Execute("Nope");
 
-        Assert.Contains("Timestamp", vm.SortStatusText);
+        Assert.Contains(DevTemWpf.App.Resources.Strings.Dash_ColTime, vm.SortStatusText);
     }
 
     [Fact]
@@ -170,7 +170,7 @@ public sealed class DashboardViewModelTests : IDisposable
     }
 
     [Fact]
-    public void Chart_RebuildsOnSettingsChange()
+    public async Task Chart_RebuildsOnSettingsChange()
     {
         var path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".json");
         try
@@ -183,8 +183,7 @@ public sealed class DashboardViewModelTests : IDisposable
                 _ => new System.Windows.Media.Color { R = 0x11, G = 0x11, B = 0x11, A = 0xFF });
             var first = vm.Series;
 
-            settings.UpdateAsync(s => s with { Density = DensityMode.Compact }, TestContext.Current.CancellationToken)
-                .GetAwaiter().GetResult();
+            await settings.UpdateAsync(s => s with { Density = DensityMode.Compact }, TestContext.Current.CancellationToken);
 
             // Subscription rebuilt the chart (new paint objects) instead of
             // going stale on theme-affecting changes.

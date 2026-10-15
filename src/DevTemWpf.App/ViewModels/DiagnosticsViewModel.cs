@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DevTemWpf.App.Resources;
 using DevTemWpf.App.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -101,7 +102,7 @@ public sealed partial class DiagnosticsViewModel : ObservableObject, INavigation
         {
             if (!Directory.Exists(_logsDir))
             {
-                LogStatus = "No logs yet.";
+                LogStatus = Strings.Dia_NoLogs;;
                 return;
             }
 
@@ -125,12 +126,12 @@ public sealed partial class DiagnosticsViewModel : ObservableObject, INavigation
                 }
             }
 
-            LogStatus = $"{taken} lines from {files.Count} file(s).";
+            LogStatus = string.Format(Strings.Dia_LogCountFormat, taken, files.Count);
             _log.LogDebug("Refreshed log view ({Count} lines).", taken);
         }
         catch (Exception ex)
         {
-            LogStatus = $"Could not read logs: {ex.Message}";
+            LogStatus = string.Format(Strings.Dia_CannotReadLogs, ex.Message);
             _log.LogWarning(ex, "Log refresh failed.");
         }
     }
@@ -140,12 +141,12 @@ public sealed partial class DiagnosticsViewModel : ObservableObject, INavigation
         var newest = NewestLog();
         if (newest is null)
         {
-            LogStatus = "No logs to export.";
+            LogStatus = Strings.Dia_NoLogsExport;
             return;
         }
 
         File.Copy(newest, destinationPath, overwrite: true);
-        LogStatus = $"Exported {Path.GetFileName(newest)}.";
+        LogStatus = string.Format(Strings.Dia_Exported, Path.GetFileName(newest));
         _log.LogInformation("Exported log to {Path}.", destinationPath);
     }
 
@@ -170,7 +171,7 @@ public sealed partial class DiagnosticsViewModel : ObservableObject, INavigation
             writer.Write(VersionsText);
         }
 
-        LogStatus = $"Bundle written to {Path.GetFileName(destinationPath)}.";
+        LogStatus = string.Format(Strings.Dia_BundleWritten, Path.GetFileName(destinationPath));
         _log.LogInformation("Created support bundle at {Path}.", destinationPath);
     }
 
@@ -180,11 +181,11 @@ public sealed partial class DiagnosticsViewModel : ObservableObject, INavigation
         try
         {
             var path = _backup.CreateBackup(destinationDir);
-            BackupStatus = $"Backup written: {Path.GetFileName(path)}. Restart after restore.";
+            BackupStatus = string.Format(Strings.Dia_BackupWritten, Path.GetFileName(path));
         }
         catch (Exception ex)
         {
-            BackupStatus = $"Backup failed: {ex.Message}";
+            BackupStatus = string.Format(Strings.Dia_BackupFailed, ex.Message);
             _log.LogWarning(ex, "Backup failed.");
         }
     }
@@ -194,11 +195,11 @@ public sealed partial class DiagnosticsViewModel : ObservableObject, INavigation
         try
         {
             _backup.RestoreBackup(zipPath);
-            BackupStatus = "Restore complete — restart the app to apply.";
+            BackupStatus = Strings.Dia_RestoreDone;
         }
         catch (Exception ex)
         {
-            BackupStatus = $"Restore failed: {ex.Message}";
+            BackupStatus = string.Format(Strings.Dia_RestoreFailedFormat, ex.Message);
             _log.LogWarning(ex, "Restore failed.");
         }
     }
