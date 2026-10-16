@@ -1,0 +1,106 @@
+<Page x:Class="DevTemWpf.App.Views.WorkspacePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:res="clr-namespace:DevTemWpf.App.Resources"
+      mc:Ignorable="d"
+      d:DesignHeight="640" d:DesignWidth="960"
+      Title="{x:Static res:Strings.Wsp_Title}">
+  <Page.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+  </Page.Resources>
+  <Grid Margin="{StaticResource AppPageMargin}" AutomationProperties.Name="Document workspace">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <StackPanel MaxWidth="{StaticResource AppContentMaxWidth}" HorizontalAlignment="Left">
+      <TextBlock Text="{x:Static res:Strings.Wsp_Title}" Style="{StaticResource AppSubtitleText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{x:Static res:Strings.Wsp_Description}"
+                 Style="{StaticResource AppSecondaryBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
+      <CheckBox Content="{x:Static res:Strings.Wsp_ShowDetails}" IsChecked="{Binding ViewModel.IsDetailOpen, Mode=TwoWay}"
+                AutomationProperties.Name="Toggle detail pane" Margin="{StaticResource AppGapItem}" />
+    </StackPanel>
+
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <!-- Document tabs: same page types as every other shell (registry). -->
+      <ui:TabView Grid.Column="0" ItemsSource="{Binding ViewModel.Documents}"
+                  SelectedItem="{Binding ViewModel.SelectedDocument, Mode=TwoWay}"
+                  AutomationProperties.Name="Open documents">
+        <TabControl.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding Title}" />
+          </DataTemplate>
+        </TabControl.ItemTemplate>
+        <TabControl.ContentTemplate>
+          <DataTemplate>
+            <!-- Documents are full Pages: WPF only parents a Page to a
+                 Window or Frame, so each tab hosts a chromeless Frame.
+                 Journal: per-frame stacks stay in memory only; the shell
+                 exposes Back/Forward through workspace history instead. -->
+            <Frame Content="{Binding Page}" NavigationUIVisibility="Hidden"
+                   Focusable="False" Background="Transparent"
+                   HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                   AutomationProperties.Name="Document frame" />
+          </DataTemplate>
+        </TabControl.ContentTemplate>
+      </ui:TabView>
+
+      <!-- Empty state: visible only with zero documents. -->
+      <TextBlock Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Text="{x:Static res:Strings.Wsp_Empty}" TextWrapping="Wrap" TextAlignment="Center"
+                 AutomationProperties.Name="No open documents" Margin="{StaticResource AppGapSection}">
+        <TextBlock.Style>
+          <Style TargetType="TextBlock" BasedOn="{StaticResource AppSecondaryBodyText}">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding ViewModel.Documents.Count}" Value="0">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </TextBlock.Style>
+      </TextBlock>
+
+      <GridSplitter Grid.Column="1" Width="4" Margin="4,0" HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                    ResizeBehavior="PreviousAndNext" DragCompleted="OnSplitterDragCompleted"
+                    AutomationProperties.Name="Detail splitter"
+                    Visibility="{Binding ViewModel.IsDetailOpen, Converter={StaticResource BoolToVisibility}}" />
+
+      <!-- Detail pane: inspector + keyboard alternatives for drag-reorder. -->
+      <Border Grid.Column="2" Width="{Binding ViewModel.DetailWidth, Mode=TwoWay}"
+              Visibility="{Binding ViewModel.IsDetailOpen, Converter={StaticResource BoolToVisibility}}"
+              AutomationProperties.Name="Document details" Margin="{StaticResource AppGapItem}">
+        <StackPanel MinWidth="180">
+          <TextBlock Text="{x:Static res:Strings.Wsp_Detail}" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+          <TextBlock Text="{Binding ViewModel.SelectedDocument.Title, FallbackValue=''}"
+                     Style="{StaticResource AppBodyText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}"
+                     AutomationProperties.Name="Selected document title" />
+          <WrapPanel Margin="{StaticResource AppGapSection}">
+            <ui:Button Content="{x:Static res:Strings.Wsp_Back}" Command="{Binding ViewModel.GoBackCommand}"
+                       AutomationProperties.Name="Go back" Margin="{StaticResource AppGapFlow}" />
+            <ui:Button Content="{x:Static res:Strings.Wsp_Forward}" Command="{Binding ViewModel.GoForwardCommand}"
+                       AutomationProperties.Name="Go forward" Margin="{StaticResource AppGapFlow}" />
+          </WrapPanel>
+          <WrapPanel>
+            <ui:Button Content="{x:Static res:Strings.Wsp_Close}" Command="{Binding ViewModel.CloseSelectedCommand}"
+                       AutomationProperties.Name="Close document" Margin="{StaticResource AppGapFlow}" />
+            <ui:Button Content="{x:Static res:Strings.Wsp_MoveLeft}" Command="{Binding ViewModel.MoveSelectedLeftCommand}"
+                       AutomationProperties.Name="Move document left" Margin="{StaticResource AppGapFlow}" />
+            <ui:Button Content="{x:Static res:Strings.Wsp_MoveRight}" Command="{Binding ViewModel.MoveSelectedRightCommand}"
+                       AutomationProperties.Name="Move document right" Margin="{StaticResource AppGapFlow}" />
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+    </Grid>
+  </Grid>
+</Page>

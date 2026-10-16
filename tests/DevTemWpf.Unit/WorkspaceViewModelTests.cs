@@ -94,6 +94,7 @@ public sealed class WorkspaceViewModelTests : IDisposable
         {
             Workspace = new WorkspaceState { OpenDocuments = ["home", "home"], SelectedDocument = "home" },
         });
+        vm.EnsureLoaded();
 
         Assert.Single(vm.Documents);
         Assert.Equal("home", vm.SelectedDocument?.RouteKey);
@@ -106,6 +107,7 @@ public sealed class WorkspaceViewModelTests : IDisposable
         {
             Workspace = new WorkspaceState { OpenDocuments = ["nope", "also-nope"], SelectedDocument = "nope" },
         });
+        vm.EnsureLoaded();
 
         Assert.Single(vm.Documents);
         Assert.Equal("home", vm.SelectedDocument?.RouteKey);
@@ -145,6 +147,7 @@ public sealed class WorkspaceViewModelTests : IDisposable
             {
                 Workspace = new WorkspaceState { OpenDocuments = ["controls"] },
             });
+        vm.EnsureLoaded();
         Assert.Single(vm.Documents);
 
         using var cts = new CancellationTokenSource();
@@ -218,6 +221,7 @@ public sealed class WorkspaceViewModelTests : IDisposable
         var settings = new SettingsService(_settingsPath);
         await settings.LoadAsync();
         var vm = new WorkspaceViewModel(settings, _ => new Page());
+        vm.EnsureLoaded();
 
         Assert.Single(vm.Documents);
         Assert.Equal("home", vm.SelectedDocument?.RouteKey);
@@ -232,5 +236,22 @@ public sealed class WorkspaceViewModelTests : IDisposable
         Assert.Equal(["home"], state.OpenDocuments);
         Assert.Equal(280, state.DetailWidth);
         Assert.True(state.IsDetailOpen);
+    }
+
+    [WpfFact]
+    public async Task DetailWidth_RoundTrips_ThroughPersistence()
+    {
+        var vm = Create();
+        await vm.OpenDocumentAsync("home");
+        vm.DetailWidth = 350;
+        await vm.PersistAsync();
+
+        var settings = new SettingsService(_settingsPath);
+        await settings.LoadAsync(TestContext.Current.CancellationToken);
+        var reloaded = new WorkspaceViewModel(settings, _ => new Page());
+        reloaded.EnsureLoaded();
+
+        Assert.Equal(350, reloaded.DetailWidth);
+        Assert.Equal("home", reloaded.SelectedDocument?.RouteKey);
     }
 }

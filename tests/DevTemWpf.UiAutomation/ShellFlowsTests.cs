@@ -835,6 +835,41 @@ public sealed class ShellFlowsTests : IDisposable
     }
 
     /// <summary>
+    /// Workspace selection persists asynchronously; wait for the settings
+    /// file to carry the newly selected document before restarting, so the
+    /// relaunched app cannot read a torn write (which would fall back to
+    /// default settings and the wrong shell).
+    /// </summary>
+    private static void WaitForWorkspaceSelected(string key)
+    {
+        var path = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "Wpf11AppTemplate", "settings.json");
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+        while (DateTime.UtcNow < deadline)
+        {
+            try
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(path));
+                if (doc.RootElement.TryGetProperty("Workspace", out var workspace)
+                    && workspace.TryGetProperty("SelectedDocument", out var selected)
+                    && selected.GetString() == key)
+                {
+                    return;
+                }
+            }
+            catch
+            {
+                // File missing or mid-write; retry.
+            }
+
+            Thread.Sleep(200);
+        }
+
+        throw new InvalidOperationException($"Settings file never selected workspace document '{key}'.");
+    }
+
+    /// <summary>
     /// Clicks the in-app restart button and attaches to the relaunched
     /// process (same exe name, newer start time than the click).
     /// </summary>
@@ -879,6 +914,120 @@ public sealed class ShellFlowsTests : IDisposable
         }
 
         throw new InvalidOperationException("Relaunched app window never appeared.");
+    }
+
+    private static AutomationElement? FindTabItem(AutomationElement scope, string title)
+    {
+        // Tab headers surface the title on inner text; climb from the label
+        // to its owning TabItem (same pattern as tree items).
+        foreach (var tab in scope.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.TabItem)))
+        {
+            try
+            {
+                if (tab.FindFirstDescendant(cf => cf.ByName(title)) is not null)
+                {
+                    return tab;
+                }
+            }
+            catch
+            {
+                // Tree transient; keep looking.
+            }
+        }
+
+        return null;
+    }
+
+    [WpfFact]
+    public void TabbedShell_Documents_OpenFocusClose_And_Persist()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            // Persist Tabbed through the settings selector, then restart
+            // into the workspace chrome (ADR-0015).
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
+                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
+            SelectShellOption(window, "Tabbed");
+            WaitForShellPersisted(3); // ShellMode.Tabbed
+            (window, app) = RelaunchAfterRestart(window, app, automation);
+
+            // Workspace chrome with the restored home document.
+            window.Focus();
+            var tabs = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Open documents")),
+                TimeSpan.FromSeconds(10), "documents tab strip");
+            Assert.NotNull(tabs);
+            var home = WaitFor(() => FindTabItem(window, "Home"),
+                TimeSpan.FromSeconds(10), "restored home tab");
+            Assert.NotNull(home);
+
+            // Rail clicks open route-keyed documents instead of navigating.
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data")),
+                TimeSpan.FromSeconds(10), "nav item 'Data'").Click();
+            var dataTab = WaitFor(() => FindTabItem(window, "Data"),
+                TimeSpan.FromSeconds(10), "data tab");
+            Assert.NotNull(dataTab);
+            var grid = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid")),
+                TimeSpan.FromSeconds(10), "data grid inside document");
+            Assert.NotNull(grid);
+
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                TimeSpan.FromSeconds(10), "nav item 'Controls'").Click();
+            Assert.NotNull(WaitFor(() => FindTabItem(window, "Controls"),
+                TimeSpan.FromSeconds(10), "controls tab"));
+            Assert.NotNull(WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Gallery dialog demo")),
+                TimeSpan.FromSeconds(10), "controls content inside document"));
+
+            // Tab selection switches document content (viewport-independent).
+            dataTab.Patterns.SelectionItem.Pattern.Select();
+            Assert.NotNull(WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid")),
+                TimeSpan.FromSeconds(10), "data content after tab select"));
+
+            // Detail pane closes the selected document.
+            window.Focus();
+            var close = WaitFor(() => FindButtonWithText(window, "Close document"),
+                TimeSpan.FromSeconds(10), "close document button");
+            Assert.NotNull(close);
+            close.Patterns.Invoke.Pattern.Invoke();
+            WaitWhile(() => FindTabItem(window, "Data") is not null,
+                TimeSpan.FromSeconds(10), "data tab to close");
+
+            // Remaining tabs persist across a restart (selected = last).
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
+                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
+            WaitForWorkspaceSelected("settings");
+            SelectShellOption(window, "Tabbed");
+            (window, app) = RelaunchAfterRestart(window, app, automation);
+            Assert.NotNull(WaitFor(() => FindTabItem(window, "Home"),
+                TimeSpan.FromSeconds(10), "persisted home tab"));
+            Assert.NotNull(WaitFor(() => FindTabItem(window, "Controls"),
+                TimeSpan.FromSeconds(10), "persisted controls tab"));
+
+            // Restore the default shell so later runs start Sidebar-first.
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
+                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
+            SelectShellOption(window, "Sidebar");
+            WaitForShellPersisted(1); // ShellMode.Sidebar
+            (window, app) = RelaunchAfterRestart(window, app, automation);
+            window.Focus();
+            Assert.NotNull(WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home headline")),
+                TimeSpan.FromSeconds(10), "home content in Sidebar shell"));
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
     }
 
     [WpfFact]

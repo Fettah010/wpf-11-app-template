@@ -1,6 +1,8 @@
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using DevTemWpf.App.Services;
+using DevTemWpf.App.ViewModels;
 using DevTemWpf.App.Views;
 using Microsoft.Extensions.Options;
 using Wpf.Ui.Abstractions;
@@ -15,12 +17,14 @@ namespace DevTemWpf.App;
 public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 {
     private readonly ISettingsService _settings;
+    private readonly WorkspaceViewModel _workspace;
     //#if (IncludeServices)
     private readonly Wpf.Ui.Tray.INotifyIconService _tray;
     //#endif
 
     public MainWindow(
         MainViewModel viewModel,
+        WorkspaceViewModel workspace,
         IOptions<AppOptions> options,
         INavigationViewPageProvider pageProvider,
         Wpf.Ui.ISnackbarService snackbar,
@@ -32,6 +36,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         IBackdropService backdrop)
     {
         _settings = settings;
+        _workspace = workspace;
         //#if (IncludeServices)
         _tray = tray;
         //#endif
@@ -56,6 +61,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         RootNavigation.SetPageProviderService(pageProvider);
         snackbar.SetSnackbarPresenter(RootSnackbar);
         dialogs.SetDialogHost(RootDialogHost);
+        RootNavigation.Navigating += OnNavNavigating;
+        _workspace.PropertyChanged += OnWorkspaceSelectionChanged;
         //#if (IncludeServices)
         SetupTray(options.Value.Title);
         //#endif
@@ -142,6 +149,68 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             SystemThemeWatcher.Watch(this);
         }
 
-        _ = RootNavigation.Navigate(typeof(HomePage));
+        // Tabbed shell hosts the document workspace instead of a start page.
+        _ = RootNavigation.Navigate(_settings.Current.Shell == ShellMode.Tabbed
+            ? typeof(WorkspacePage)
+            : typeof(HomePage));
+    }
+
+    /// <summary>
+    /// Tabbed shell (1.4.0): rail clicks open route-keyed documents in the
+    /// workspace instead of frame-navigating. The frame stays on the
+    /// workspace page; unknown pages fall back to normal navigation.
+    /// </summary>
+    private void OnNavNavigating(
+        Wpf.Ui.Controls.NavigationView sender,
+        Wpf.Ui.Controls.NavigatingCancelEventArgs e)
+    {
+        if (_settings.Current.Shell != ShellMode.Tabbed)
+        {
+            return;
+        }
+
+        var type = e.Page as Type ?? (e.Page as FrameworkElement)?.GetType();
+        var route = type is null
+            ? null
+            : NavigationRoutes.All.FirstOrDefault(r => r.PageType == type);
+        if (route is null)
+        {
+            return;
+        }
+
+        e.Cancel = true;
+        _ = _workspace.OpenDocumentAsync(route.Key);
+    }
+
+    /// <summary>
+    /// Tabbed shell: reflect the selected document in the rail via the
+    /// items' active flag (the control's SelectedItem setter is internal;
+    /// IsActive is the documented visual-selection flag and setting it
+    /// directly performs no navigation).
+    /// </summary>
+    private void OnWorkspaceSelectionChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(WorkspaceViewModel.SelectedDocument))
+        {
+            return;
+        }
+
+        if (_settings.Current.Shell != ShellMode.Tabbed)
+        {
+            return;
+        }
+
+        var key = _workspace.SelectedDocument?.RouteKey;
+        var route = key is null ? null : NavigationRoutes.Find(key);
+        if (route is null)
+        {
+            return;
+        }
+
+        foreach (var item in ViewModel.MenuItems.OfType<Wpf.Ui.Controls.NavigationViewItem>()
+            .Concat(ViewModel.FooterMenuItems.OfType<Wpf.Ui.Controls.NavigationViewItem>()))
+        {
+            item.IsActive = item.TargetPageType == route.PageType;
+        }
     }
 }

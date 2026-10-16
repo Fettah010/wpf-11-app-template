@@ -64,6 +64,10 @@ public static class AppComposition
 
         // Shell + pages
         builder.Services.AddSingleton<MainViewModel>();
+        // Workspace state is a singleton: the Tabbed shell, rail sync, and
+        // the workspace page share one document collection (1.4.0). Restore
+        // is lazy so other shells pay no startup cost (see EnsureLoaded).
+        builder.Services.AddSingleton<WorkspaceViewModel>();
         builder.Services.AddTransient<MainWindow>();
         builder.Services.AddTransient<HomeViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
@@ -93,6 +97,7 @@ public static class AppComposition
         builder.Services.AddTransient<EffectsPage>();
         builder.Services.AddTransient<ControlsPage>();
         builder.Services.AddTransient<DataPage>();
+        builder.Services.AddTransient<WorkspacePage>();
         return builder;
     }
 }

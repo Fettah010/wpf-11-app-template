@@ -29,6 +29,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject, INavigationAw
     private readonly ISettingsService _settings;
     private readonly Func<Type, object> _pageFactory;
     private int _generation;
+    private bool _loaded;
     private CancellationTokenSource? _openCts;
     private readonly List<string> _history = [];
     private int _historyIndex = -1;
@@ -39,10 +40,15 @@ public sealed partial class WorkspaceViewModel : ObservableObject, INavigationAw
         _settings = settings;
         _pageFactory = pageFactory;
         Documents = new ObservableCollection<Document>();
-        RestorePersisted();
+
+        // Restore is lazy (EnsureLoaded): the singleton VM is constructed at
+        // app startup in every shell, but pages must only be instantiated
+        // when the workspace is actually used (Tabbed shell), never as a
+        // startup tax on Sidebar/Rail/Top.
     }
 
     /// <summary>Alternate composition entry: resolve pages from DI.</summary>
+    [ActivatorUtilitiesConstructor]
     public WorkspaceViewModel(ISettingsService settings, IServiceProvider services)
         : this(settings, t => services.GetRequiredService(t))
     {
@@ -63,7 +69,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject, INavigationAw
 
     public bool CanGoForward => _historyIndex >= 0 && _historyIndex < _history.Count - 1;
 
-    public Task OnNavigatedToAsync() => Task.CompletedTask;
+    public Task OnNavigatedToAsync()
+    {
+        EnsureLoaded();
+        return Task.CompletedTask;
+    }
 
     public Task OnNavigatedFromAsync()
     {
@@ -78,6 +88,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject, INavigationAw
     /// </summary>
     public async Task OpenDocumentAsync(string routeKey, CancellationToken cancellationToken = default)
     {
+        EnsureLoaded();
         var route = NavigationRoutes.Find(routeKey) ?? NavigationRoutes.Find("home")!;
         var existing = Documents.FirstOrDefault(d => d.RouteKey == route.Key);
         if (existing is not null)
@@ -128,32 +139,24 @@ public sealed partial class WorkspaceViewModel : ObservableObject, INavigationAw
             return;
         }
 
-        var document = new Document(route.Key, route.Title(), page);
-        Documents.Add(document);
-        PushHistory(route.Key);
-        SelectDocument(document);
-        await PersistAsync().ConfigureAwait(false);
+        // The hook awaited above can resume on a threadpool thread, but the
+        // collection, selection, and persistence below are UI-bound (bindings
+        // + settings Updated subscribers), so rejoin the UI thread first.
+        await RunOnUiThreadAsync(async () =>
+        {
+            var document = new Document(route.Key, route.Title(), page);
+            Documents.Add(document);
+            PushHistory(route.Key);
+            SelectDocument(document);
+            await PersistAsync().ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     /// <summary>Closes a document; selection moves to a neighbor.</summary>
     public async Task CloseDocumentAsync(Document document)
     {
-        var index = Documents.IndexOf(document);
-        if (index < 0)
-        {
-            return;
-        }
-
         _openCts?.Cancel();
         var page = document.Page;
-        Documents.RemoveAt(index);
-        if (ReferenceEquals(SelectedDocument, document))
-        {
-            SelectedDocument = Documents.Count == 0
-                ? null
-                : Documents[Math.Min(index, Documents.Count - 1)];
-        }
-
         try
         {
             await (TryGetNavigationAware(page)?.OnNavigatedFromAsync() ?? Task.CompletedTask).ConfigureAwait(false);
@@ -163,7 +166,25 @@ public sealed partial class WorkspaceViewModel : ObservableObject, INavigationAw
             // Close must never fail because a page hook threw.
         }
 
-        await PersistAsync().ConfigureAwait(false);
+        await RunOnUiThreadAsync(async () =>
+        {
+            var index = Documents.IndexOf(document);
+            if (index < 0)
+            {
+                return;
+            }
+
+            Documents.RemoveAt(index);
+            if (ReferenceEquals(SelectedDocument, document))
+            {
+                SelectedDocument = Documents.Count == 0
+                    ? null
+                    : Documents[Math.Min(index, Documents.Count - 1)];
+                NotifyHistory();
+            }
+
+            await PersistAsync().ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     [RelayCommand]
@@ -252,8 +273,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject, INavigationAw
         OnPropertyChanged(nameof(CanGoForward));
     }
 
-    /// <summary>Persists workspace state (also called by the detail splitter).</summary>
-    public async Task PersistAsync()
+    /// <summary>
+    /// Persists workspace state. Always completes on the UI thread: settings
+    /// <c>Updated</c> subscribers (theme, charts, shell chrome) are UI-bound.
+    /// </summary>
+    public Task PersistAsync() => RunOnUiThreadAsync(async () =>
     {
         var state = new WorkspaceState
         {
@@ -263,6 +287,24 @@ public sealed partial class WorkspaceViewModel : ObservableObject, INavigationAw
             IsDetailOpen = IsDetailOpen,
         };
         await _settings.UpdateAsync(s => s with { Workspace = state }).ConfigureAwait(false);
+    });
+
+    /// <summary>
+    /// Runs UI-bound work on the dispatcher. Falls back to direct execution
+    /// when no WPF application exists (unit tests) or already on the UI
+    /// thread. Never blocks: fully async, no waits.
+    /// </summary>
+    private static async Task RunOnUiThreadAsync(Func<Task> action)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.CheckAccess())
+        {
+            await action().ConfigureAwait(false);
+            return;
+        }
+
+        var nested = await dispatcher.InvokeAsync(action).Task.ConfigureAwait(false);
+        await nested.ConfigureAwait(false);
     }
 
     /// <summary>Resolves the navigation-aware VM behind a page, if any.</summary>
@@ -291,6 +333,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject, INavigationAw
     private void SelectDocument(Document document)
     {
         SelectedDocument = document;
+        NotifyHistory();
+    }
+
+    private void NotifyHistory()
+    {
         OnPropertyChanged(nameof(CanGoBack));
         OnPropertyChanged(nameof(CanGoForward));
     }
@@ -324,6 +371,18 @@ public sealed partial class WorkspaceViewModel : ObservableObject, INavigationAw
         }
 
         _historyIndex = _history.Count - 1;
+    }
+
+    /// <summary>Loads persisted documents once (idempotent).</summary>
+    public void EnsureLoaded()
+    {
+        if (_loaded)
+        {
+            return;
+        }
+
+        _loaded = true;
+        RestorePersisted();
     }
 
     private void RestorePersisted()

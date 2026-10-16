@@ -47,6 +47,16 @@ public static class Strings
     public static string Settings_Language => Get(nameof(Settings_Language));
     public static string Settings_LanguageNote => Get(nameof(Settings_LanguageNote));
     public static string Settings_RestartNow => Get(nameof(Settings_RestartNow));
+    public static string Wsp_Title => Get(nameof(Wsp_Title));
+    public static string Wsp_Description => Get(nameof(Wsp_Description));
+    public static string Wsp_Empty => Get(nameof(Wsp_Empty));
+    public static string Wsp_Detail => Get(nameof(Wsp_Detail));
+    public static string Wsp_ShowDetails => Get(nameof(Wsp_ShowDetails));
+    public static string Wsp_Close => Get(nameof(Wsp_Close));
+    public static string Wsp_MoveLeft => Get(nameof(Wsp_MoveLeft));
+    public static string Wsp_MoveRight => Get(nameof(Wsp_MoveRight));
+    public static string Wsp_Back => Get(nameof(Wsp_Back));
+    public static string Wsp_Forward => Get(nameof(Wsp_Forward));
     public static string Ctl_Title => Get(nameof(Ctl_Title));
     public static string Ctl_Description => Get(nameof(Ctl_Description));
     public static string Ctl_Buttons => Get(nameof(Ctl_Buttons));

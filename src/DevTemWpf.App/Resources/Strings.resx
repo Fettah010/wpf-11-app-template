@@ -22,6 +22,16 @@
   <data name="Settings_Language" xml:space="preserve"><value>Language</value></data>
   <data name="Settings_LanguageNote" xml:space="preserve"><value>Language applies after restart.</value></data>
   <data name="Settings_RestartNow" xml:space="preserve"><value>Restart now</value></data>
+  <data name="Wsp_Title" xml:space="preserve"><value>Workspace</value></data>
+  <data name="Wsp_Description" xml:space="preserve"><value>Open pages as documents, arrange them, and pick up where you left off — tabs persist across restarts.</value></data>
+  <data name="Wsp_Empty" xml:space="preserve"><value>No open documents. Choose a page from the navigation rail.</value></data>
+  <data name="Wsp_Detail" xml:space="preserve"><value>Details</value></data>
+  <data name="Wsp_ShowDetails" xml:space="preserve"><value>Show details</value></data>
+  <data name="Wsp_Close" xml:space="preserve"><value>Close</value></data>
+  <data name="Wsp_MoveLeft" xml:space="preserve"><value>Move left</value></data>
+  <data name="Wsp_MoveRight" xml:space="preserve"><value>Move right</value></data>
+  <data name="Wsp_Back" xml:space="preserve"><value>Back</value></data>
+  <data name="Wsp_Forward" xml:space="preserve"><value>Forward</value></data>
   <data name="Ctl_Title" xml:space="preserve"><value>Controls</value></data>
   <data name="Ctl_Description" xml:space="preserve"><value>Everyday controls, their states, and the patterns to use them. Full catalog: docs/design-system/components.md. Tab reaches every control and section heading; the index below jumps between sections.</value></data>
   <data name="Ctl_Buttons" xml:space="preserve"><value>Buttons</value></data>
