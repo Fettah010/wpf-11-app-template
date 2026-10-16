@@ -14,7 +14,7 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
         _settings = settings;
         _theme = theme;
         ThemeOptions = [ThemeMode.System, ThemeMode.Light, ThemeMode.Dark];
-        ShellOptions = [ShellMode.Sidebar, ShellMode.Rail];
+        ShellOptions = [ShellMode.Sidebar, ShellMode.Rail, ShellMode.Top, ShellMode.Tabbed];
         DensityOptions = [DensityMode.Comfortable, DensityMode.Compact];
         MotionOptions = [MotionMode.Auto, MotionMode.Full, MotionMode.Reduced, MotionMode.Off];
         Reload();

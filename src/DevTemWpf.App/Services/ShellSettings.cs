@@ -8,12 +8,16 @@ public enum ThemeMode
     Dark = 2,
 }
 
-/// <summary>Shell layout preference (ADR-0005).</summary>
+/// <summary>Shell layout preference (ADR-0005; Top/Tabbed added in 1.4.0).</summary>
 public enum ShellMode
 {    /// <summary>Compact icon rail (<c>LeftMinimal</c>).</summary>
     Rail = 0,
     /// <summary>Full expandable sidebar (<c>Left</c>).</summary>
     Sidebar = 1,
+    /// <summary>Horizontal top navigation bar (<c>Top</c>).</summary>
+    Top = 2,
+    /// <summary>Document-workspace shell: rail chrome plus tabbed documents.</summary>
+    Tabbed = 3,
 }
 
 /// <summary>Spacing density preference (ADR-0007).</summary>

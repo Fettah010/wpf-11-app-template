@@ -1,8 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using DevTemWpf.App.Resources;
 using DevTemWpf.App.Services;
-using DevTemWpf.App.Views;
 using Microsoft.Extensions.Options;
 using Wpf.Ui.Controls;
 
@@ -19,24 +17,10 @@ public sealed partial class MainViewModel : ObservableObject
     {
         _settings = settings;
         AppTitle = options.Value.Title;
-        MenuItems = new ObservableCollection<object>
-        {
-            new NavigationViewItem(Strings.Nav_Home, SymbolRegular.Home24, typeof(HomePage)),
-            //#if (IncludeDashboard)
-            new NavigationViewItem(Strings.Nav_Dashboard, SymbolRegular.Board24, typeof(DashboardPage)),
-            //#endif
-            new NavigationViewItem(Strings.Nav_Controls, SymbolRegular.DataHistogram24, typeof(ControlsPage)),
-            new NavigationViewItem(Strings.Nav_Data, SymbolRegular.TableSimple24, typeof(DataPage)),
-            new NavigationViewItem(Strings.Nav_Tokens, SymbolRegular.PaintBrush24, typeof(TokensPage)),
-            new NavigationViewItem(Strings.Nav_Effects, SymbolRegular.Fluent24, typeof(EffectsPage)),
-            //#if (IncludeDiagnostics)
-            new NavigationViewItem(Strings.Nav_Diagnostics, SymbolRegular.Shield24, typeof(DiagnosticsPage)),
-            //#endif
-        };
-        FooterMenuItems = new ObservableCollection<object>
-        {
-            new NavigationViewItem(Strings.Nav_Settings, SymbolRegular.Settings24, typeof(SettingsPage)),
-        };
+        MenuItems = new ObservableCollection<object>(
+            NavigationRoutes.Menu.Select(r => new NavigationViewItem(r.Title(), r.Icon, r.PageType)));
+        FooterMenuItems = new ObservableCollection<object>(
+            NavigationRoutes.Footer.Select(r => new NavigationViewItem(r.Title(), r.Icon, r.PageType)));
         RefreshShell(_settings.Current);
         _settings.Updated += (_, s) => RefreshShell(s);
     }
@@ -72,7 +56,11 @@ public sealed partial class MainViewModel : ObservableObject
     }
 
     private static NavigationViewPaneDisplayMode MapMode(ShellMode shell)
-        => shell == ShellMode.Rail
-            ? NavigationViewPaneDisplayMode.LeftMinimal
-            : NavigationViewPaneDisplayMode.Left;
+        => shell switch
+        {
+            ShellMode.Rail => NavigationViewPaneDisplayMode.LeftMinimal,
+            ShellMode.Top => NavigationViewPaneDisplayMode.Top,
+            ShellMode.Tabbed => NavigationViewPaneDisplayMode.LeftMinimal,
+            _ => NavigationViewPaneDisplayMode.Left,
+        };
 }
