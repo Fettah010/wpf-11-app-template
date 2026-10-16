@@ -1159,6 +1159,121 @@ public sealed class ShellFlowsTests : IDisposable
     }
 
     [WpfFact]
+    public void Palette_Navigate_ByKeyboard()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            // Ctrl+K opens the palette from anywhere in the shell.
+            window.Focus();
+            Keyboard.Press(VirtualKeyShort.CONTROL);
+            Keyboard.Press(VirtualKeyShort.KEY_K);
+            Keyboard.Release(VirtualKeyShort.CONTROL);
+            var filter = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Command palette filter")),
+                TimeSpan.FromSeconds(10), "palette filter");
+            Assert.NotNull(filter);
+
+            // Filter narrows to the Tokens page; Enter executes and closes.
+            TypeIntoBox(window, "Command palette filter", "tok");
+            var result = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Design Tokens")),
+                TimeSpan.FromSeconds(10), "palette result");
+            Assert.NotNull(result);
+            Keyboard.Press(VirtualKeyShort.RETURN);
+            var content = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Design token preview")),
+                TimeSpan.FromSeconds(10), "tokens page after palette execute");
+            Assert.NotNull(content);
+            WaitWhile(() => window.FindFirstDescendant(cf => cf.ByName("Command palette filter")) is not null,
+                TimeSpan.FromSeconds(10), "palette to close after execute");
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    [WpfFact]
+    public void Palette_Escape_ReturnsFocus()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            // Mouse path: the header button opens with initial focus in the
+            // filter box.
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Open command palette")),
+                TimeSpan.FromSeconds(10), "palette button").Click();
+            var filter = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Command palette filter")),
+                TimeSpan.FromSeconds(10), "palette filter");
+            Assert.NotNull(filter);
+
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+            string? focused = null;
+            while (DateTime.UtcNow < deadline)
+            {
+                try
+                {
+                    focused = automation.FocusedElement()?.Name;
+                    if (focused == "Command palette filter")
+                    {
+                        break;
+                    }
+                }
+                catch
+                {
+                    // Focused element is transient; retry.
+                }
+
+                Thread.Sleep(150);
+            }
+
+            Assert.Equal("Command palette filter", focused);
+
+            // Escape dismisses and returns focus to the invoking button.
+            Keyboard.Press(VirtualKeyShort.ESCAPE);
+            WaitWhile(() => window.FindFirstDescendant(cf => cf.ByName("Command palette filter")) is not null,
+                TimeSpan.FromSeconds(10), "palette to close after escape");
+
+            deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+            focused = null;
+            while (DateTime.UtcNow < deadline)
+            {
+                try
+                {
+                    focused = automation.FocusedElement()?.Name;
+                    if (focused == "Open command palette")
+                    {
+                        break;
+                    }
+                }
+                catch
+                {
+                    // Focused element is transient; retry.
+                }
+
+                Thread.Sleep(150);
+            }
+
+            Assert.Equal("Open command palette", focused);
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    [WpfFact]
     public void TabbedShell_Documents_OpenFocusClose_And_Persist()
     {
         RequireUiOrSkip();

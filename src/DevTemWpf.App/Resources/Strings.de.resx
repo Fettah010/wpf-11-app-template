@@ -32,6 +32,10 @@
   <data name="Wsp_MoveRight" xml:space="preserve"><value>Nach rechts</value></data>
   <data name="Wsp_Back" xml:space="preserve"><value>Zurück</value></data>
   <data name="Wsp_Forward" xml:space="preserve"><value>Vor</value></data>
+  <data name="Pal_Title" xml:space="preserve"><value>Befehlspalette</value></data>
+  <data name="Pal_Filter" xml:space="preserve"><value>Befehl oder Seite eingeben</value></data>
+  <data name="Pal_Empty" xml:space="preserve"><value>Keine passenden Befehle</value></data>
+  <data name="Pal_Open" xml:space="preserve"><value>Befehlspalette (Strg+K)</value></data>
   <data name="Ctl_Title" xml:space="preserve"><value>Steuerelemente</value></data>
   <data name="Ctl_Description" xml:space="preserve"><value>Alltagssteuerelemente, ihre Zustände und Verwendungsmuster. Vollständiger Katalog: docs/design-system/components.md. Tab erreicht jedes Steuerelement und jede Abschnittsüberschrift; der Index unten springt zwischen Abschnitten.</value></data>
   <data name="Ctl_Buttons" xml:space="preserve"><value>Schaltflächen</value></data>

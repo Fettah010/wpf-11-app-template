@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:res="clr-namespace:DevTemWpf.App.Resources"
         mc:Ignorable="d"
         Title="{Binding ViewModel.AppTitle, FallbackValue=DevTemWpf}"
         Height="640" Width="1024"
@@ -23,7 +24,19 @@
         IsPaneOpen="{Binding ViewModel.IsPaneOpen, Mode=TwoWay}"
         AutomationProperties.Name="Primary navigation">
       <ui:NavigationView.Header>
-        <ui:BreadcrumbBar AutomationProperties.Name="Location breadcrumb" />
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <ui:BreadcrumbBar Grid.Column="0" AutomationProperties.Name="Location breadcrumb" />
+          <ui:Button Grid.Column="1" Click="OnPaletteButtonClick"
+                     Icon="{ui:SymbolIcon Search24}"
+                     Appearance="Transparent"
+                     ToolTip="{x:Static res:Strings.Pal_Open}"
+                     AutomationProperties.Name="Open command palette"
+                     Margin="4,0,8,0" />
+        </Grid>
       </ui:NavigationView.Header>
     </ui:NavigationView>
     <!-- Feedback overlays (ADR-0008): snackbar above content, dialog host topmost. -->
@@ -32,5 +45,44 @@
         AutomationProperties.Name="Notification presenter" />
     <ui:ContentDialogHost Grid.Row="0" Grid.RowSpan="2" x:Name="RootDialogHost"
         AutomationProperties.Name="Dialog host" />
+    <!-- Command palette overlay (1.4.0): keyboard-first route launcher. -->
+    <Border Grid.Row="0" Grid.RowSpan="2" x:Name="PaletteOverlay"
+            Background="#80000000" Visibility="Collapsed"
+            MouseDown="OnPaletteScrimClick"
+            AutomationProperties.Name="Command palette">
+      <Border Width="520" Padding="16" CornerRadius="8"
+              HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,120,0,0"
+              Background="{DynamicResource NavigationViewContentBackground}"
+              BorderBrush="{DynamicResource NavigationViewContentGridBorderBrush}"
+              BorderThickness="1">
+        <StackPanel>
+          <TextBlock Text="{x:Static res:Strings.Pal_Title}" Style="{StaticResource AppCaptionText}" Margin="0,0,0,8" />
+          <ui:TextBox x:Name="PaletteFilter" Text="{Binding Palette.Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      PlaceholderText="{x:Static res:Strings.Pal_Filter}"
+                      AutomationProperties.Name="Command palette filter"
+                      PreviewKeyDown="OnPaletteFilterKey" Margin="0,0,0,8" />
+          <ListBox x:Name="PaletteResults" ItemsSource="{Binding Palette.Results}"
+                   SelectedItem="{Binding Palette.SelectedResult, Mode=TwoWay}"
+                   DisplayMemberPath="Title" MaxHeight="320"
+                   ScrollViewer.VerticalScrollBarVisibility="Auto"
+                   AutomationProperties.Name="Command palette results"
+                   PreviewKeyDown="OnPaletteResultsKey"
+                   MouseDoubleClick="OnPaletteResultsDoubleClick" />
+          <TextBlock Text="{x:Static res:Strings.Pal_Empty}"
+                     AutomationProperties.Name="No matching commands" Margin="0,8,0,0">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock" BasedOn="{StaticResource AppSecondaryBodyText}">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding Palette.Results.Count}" Value="0">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </StackPanel>
+      </Border>
+    </Border>
   </Grid>
 </ui:FluentWindow>

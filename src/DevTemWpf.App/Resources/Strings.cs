@@ -57,6 +57,10 @@ public static class Strings
     public static string Wsp_MoveRight => Get(nameof(Wsp_MoveRight));
     public static string Wsp_Back => Get(nameof(Wsp_Back));
     public static string Wsp_Forward => Get(nameof(Wsp_Forward));
+    public static string Pal_Title => Get(nameof(Pal_Title));
+    public static string Pal_Filter => Get(nameof(Pal_Filter));
+    public static string Pal_Empty => Get(nameof(Pal_Empty));
+    public static string Pal_Open => Get(nameof(Pal_Open));
     public static string Ctl_Title => Get(nameof(Ctl_Title));
     public static string Ctl_Description => Get(nameof(Ctl_Description));
     public static string Ctl_Buttons => Get(nameof(Ctl_Buttons));

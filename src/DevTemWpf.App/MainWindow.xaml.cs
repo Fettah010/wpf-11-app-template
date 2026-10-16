@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using DevTemWpf.App.Services;
 using DevTemWpf.App.ViewModels;
 using DevTemWpf.App.Views;
@@ -18,6 +19,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 {
     private readonly ISettingsService _settings;
     private readonly WorkspaceViewModel _workspace;
+    private IInputElement? _paletteInvoker;
     //#if (IncludeServices)
     private readonly Wpf.Ui.Tray.INotifyIconService _tray;
     //#endif
@@ -70,9 +72,16 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         SizeChanged += (_, e) => ViewModel.ApplyResponsiveWidth(e.NewSize.Width);
         Loaded += (_, _) => OnFirstLoaded();
         _settings.Updated += (_, s) => DesignTokenBootstrap.ApplyDensity(s.Density);
+        PreviewKeyDown += OnWindowPreviewKeyDown;
+
+        Palette = new PaletteViewModel();
+        Palette.NavigateRoute = GoToRoute;
     }
 
     public MainViewModel ViewModel { get; }
+
+    /// <summary>Command palette model (1.4.0); overlay chrome is in XAML above.</summary>
+    public PaletteViewModel Palette { get; }
 
     //#if (IncludeServices)
     /// <summary>Tray: icon exists only while minimize-to-tray is enabled.</summary>
@@ -153,6 +162,132 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         _ = RootNavigation.Navigate(_settings.Current.Shell == ShellMode.Tabbed
             ? typeof(WorkspacePage)
             : typeof(HomePage));
+    }
+
+    /// <summary>Global Ctrl+K opens the palette from anywhere in the shell.</summary>
+    private void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.K && Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            OpenPalette();
+            e.Handled = true;
+        }
+    }
+
+    private void OnPaletteButtonClick(object sender, RoutedEventArgs e) => OpenPalette();
+
+    /// <summary>Opens the palette, focusing the filter; remembers the invoker for focus return.</summary>
+    private void OpenPalette()
+    {
+        _paletteInvoker = Keyboard.FocusedElement;
+        Palette.Query = string.Empty;
+        PaletteOverlay.Visibility = Visibility.Visible;
+        _ = PaletteFilter.Focus();
+    }
+
+    /// <summary>Closes the palette, returning focus to its invoker.</summary>
+    private void ClosePalette()
+    {
+        PaletteOverlay.Visibility = Visibility.Collapsed;
+        if (_paletteInvoker is not null)
+        {
+            _ = Keyboard.Focus(_paletteInvoker);
+            _paletteInvoker = null;
+        }
+    }
+
+    /// <summary>Executes a palette route in the active shell, then focuses its nav item.</summary>
+    private void GoToRoute(string routeKey)
+    {
+        var route = NavigationRoutes.Find(routeKey);
+        if (route is null)
+        {
+            return;
+        }
+
+        if (_settings.Current.Shell == ShellMode.Tabbed)
+        {
+            _ = _workspace.OpenDocumentAsync(route.Key);
+        }
+        else
+        {
+            _ = RootNavigation.Navigate(route.PageType);
+        }
+
+        ClosePalette();
+        FocusNavItem(routeKey);
+    }
+
+    private void FocusNavItem(string routeKey)
+    {
+        var route = NavigationRoutes.Find(routeKey);
+        var item = route is null
+            ? null
+            : ViewModel.MenuItems.OfType<Wpf.Ui.Controls.NavigationViewItem>()
+                .Concat(ViewModel.FooterMenuItems.OfType<Wpf.Ui.Controls.NavigationViewItem>())
+                .FirstOrDefault(i => i.TargetPageType == route.PageType);
+        if (item is not null)
+        {
+            _ = item.Focus();
+        }
+        else
+        {
+            _ = Focus();
+        }
+    }
+
+    private void OnPaletteFilterKey(object sender, KeyEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case Key.Enter:
+                if (Palette.SelectedResult is not null)
+                {
+                    Palette.ExecuteSelectedCommand.Execute(null);
+                }
+
+                e.Handled = true;
+                break;
+            case Key.Escape:
+                ClosePalette();
+                e.Handled = true;
+                break;
+            case Key.Down:
+                Palette.MoveSelection(1);
+                e.Handled = true;
+                break;
+            case Key.Up:
+                Palette.MoveSelection(-1);
+                e.Handled = true;
+                break;
+        }
+    }
+
+    private void OnPaletteResultsKey(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            Palette.ExecuteSelectedCommand.Execute(null);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Escape)
+        {
+            ClosePalette();
+            e.Handled = true;
+        }
+    }
+
+    private void OnPaletteResultsDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        Palette.ExecuteSelectedCommand.Execute(null);
+    }
+
+    private void OnPaletteScrimClick(object sender, MouseButtonEventArgs e)
+    {
+        if (ReferenceEquals(e.OriginalSource, PaletteOverlay))
+        {
+            ClosePalette();
+        }
     }
 
     /// <summary>
