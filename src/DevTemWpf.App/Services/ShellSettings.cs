@@ -35,6 +35,22 @@ public enum UpdateChannel
     Beta = 1,
 }
 
+/// <summary>Persisted tabbed-workspace state (1.4.0).</summary>
+public sealed record WorkspaceState
+{
+    /// <summary>Open document route keys, in tab order.</summary>
+    public string[] OpenDocuments { get; init; } = ["home"];
+
+    /// <summary>Selected document route key (falls back to first open).</summary>
+    public string? SelectedDocument { get; init; }
+
+    /// <summary>Detail-pane width in device-independent pixels.</summary>
+    public double DetailWidth { get; init; } = 280;
+
+    /// <summary>Whether the detail pane is expanded.</summary>
+    public bool IsDetailOpen { get; init; } = true;
+}
+
 /// <summary>Persisted shell preferences (DataContract-free JSON record).</summary>
 public sealed record ShellSettings
 {
@@ -55,6 +71,9 @@ public sealed record ShellSettings
 
     /// <summary>Expanded data-tree node IDs (1.3.0 sample persistence).</summary>
     public string[] ExpandedDataNodes { get; init; } = [];
+
+    /// <summary>Tabbed-shell workspace state (1.4.0, additive).</summary>
+    public WorkspaceState Workspace { get; init; } = new();
 
     public bool MinimizeToTray { get; init; }
 
