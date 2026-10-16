@@ -138,6 +138,51 @@ public sealed class WorkspaceViewModelTests : IDisposable
     }
 
     [WpfFact]
+    public async Task RapidOpens_SecondWins_FirstNeverSurfaces()
+    {
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var vm = Create(
+            t => t == typeof(DevTemWpf.App.Views.ControlsPage)
+                ? new BlockingPage(gate.Task)
+                : new Page(),
+            seed: new ShellSettings
+            {
+                Workspace = new WorkspaceState { OpenDocuments = ["home"] },
+            });
+        vm.EnsureLoaded();
+
+        var first = vm.OpenDocumentAsync("controls");
+        var second = vm.OpenDocumentAsync("data");
+        await second;
+        gate.TrySetResult();
+        await first;
+
+        Assert.DoesNotContain(vm.Documents, d => d.RouteKey == "controls");
+        Assert.Contains(vm.Documents, d => d.RouteKey == "data");
+        Assert.Equal("data", vm.SelectedDocument?.RouteKey);
+    }
+
+    [WpfFact]
+    public async Task LeaveCancels_InFlightOpen()
+    {
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var vm = Create(
+            t => new BlockingPage(gate.Task),
+            seed: new ShellSettings
+            {
+                Workspace = new WorkspaceState { OpenDocuments = ["home"] },
+            });
+        vm.EnsureLoaded();
+
+        var open = vm.OpenDocumentAsync("controls");
+        await vm.OnNavigatedFromAsync();
+        gate.TrySetResult();
+        await open;
+
+        Assert.Single(vm.Documents);
+        Assert.Equal("home", vm.Documents[0].RouteKey);
+    }
+    [WpfFact]
     public async Task CancelledOpen_NeverSurfaces()
     {
         var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);

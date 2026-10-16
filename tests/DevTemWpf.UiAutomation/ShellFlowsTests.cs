@@ -939,6 +939,47 @@ public sealed class ShellFlowsTests : IDisposable
     }
 
     [WpfFact]
+    public void RapidNavigation_SettlesOnLastPage()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            // Fire three navigations with no settle wait: the shell must
+            // converge on the last target with content intact, never on a
+            // stale page or a dead window.
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                TimeSpan.FromSeconds(10), "nav item 'Controls'").Click();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data")),
+                TimeSpan.FromSeconds(10), "nav item 'Data'").Click();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Effects")),
+                TimeSpan.FromSeconds(10), "nav item 'Effects'").Click();
+
+            var content = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Play standard preset")),
+                TimeSpan.FromSeconds(10), "effects content after rapid navigation");
+            Assert.NotNull(content);
+
+            // And back again just as fast.
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home")),
+                TimeSpan.FromSeconds(10), "nav item 'Home'").Click();
+            var headline = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home headline")),
+                TimeSpan.FromSeconds(10), "home content after rapid navigation");
+            Assert.NotNull(headline);
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    [WpfFact]
     public void TabbedShell_Documents_OpenFocusClose_And_Persist()
     {
         RequireUiOrSkip();
