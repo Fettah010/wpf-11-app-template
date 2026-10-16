@@ -6,14 +6,19 @@
   plus module presence/absence. See docs/releases/0.8.0-plan.md (1.4.0 adds
   the Shell dimension: every shell generates + builds + launches; presets
   keep full smoke; Full+Tabbed is the high-risk full smoke).
+  CI splits the gate into parallel jobs (presets vs shells, source vs
+  package) to bound wall time; defaults run everything (the full gate).
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1
   powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Presets Clean
   powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Shells Top, Tabbed
+  powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Shells Sidebar
+  powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -NoPresets
 #>
 param(
   [string[]]$Presets = @('Clean', 'Recommended', 'Full'),
   [string[]]$Shells = @('Sidebar', 'Rail', 'Top', 'Tabbed'),
+  [switch]$NoPresets,
   [string]$PackagePath = ''
 )
 
@@ -143,15 +148,17 @@ try {
   try { & dotnet new uninstall $uninstallId 2>&1 | Out-Null } catch { }
   if (-not (Invoke-Native 'dotnet' @('new', 'install', $installSource) $root)) { throw 'template install failed' }
 
-  if ($Presets -contains 'Clean') {
-    Test-Combo 'Clean' '' $true 'Clean'
-  }
-  if ($Presets -contains 'Recommended') {
-    Test-Combo 'Recommended' '' $true 'Recommended'
-  }
-  if ($Presets -contains 'Full') {
-    Test-Combo 'Full' '' $true 'Full'
-    Test-Combo 'Full' '--IncludeTests false' $false 'FullNoTests'
+  if (-not $NoPresets) {
+    if ($Presets -contains 'Clean') {
+      Test-Combo 'Clean' '' $true 'Clean'
+    }
+    if ($Presets -contains 'Recommended') {
+      Test-Combo 'Recommended' '' $true 'Recommended'
+    }
+    if ($Presets -contains 'Full') {
+      Test-Combo 'Full' '' $true 'Full'
+      Test-Combo 'Full' '--IncludeTests false' $false 'FullNoTests'
+    }
   }
 
   # Shell dimension (1.4.0): every non-default shell generates + builds +
@@ -160,12 +167,12 @@ try {
   foreach ($shell in @($Shells | Where-Object { $_ -ne 'Sidebar' })) {
     Test-Combo 'Recommended' '' $false "Rec$shell" $shell $true
   }
-  if (($Presets -contains 'Full') -and ($Shells -contains 'Tabbed')) {
+  if ($Shells -contains 'Tabbed') {
     Test-Combo 'Full' '' $true 'FullTabbed' 'Tabbed' $false
   }
 
   # Item templates (into the Full app).
-  if ($Presets -contains 'Full') {
+  if ((-not $NoPresets) -and ($Presets -contains 'Full')) {
   Write-Host "`n===== item templates =====" -ForegroundColor Cyan
   $fullApp = Join-Path $work 'Full'
   $pageDir = Join-Path $root 'templates\items\devtemwpf-page'
