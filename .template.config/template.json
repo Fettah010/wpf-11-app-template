@@ -24,6 +24,19 @@
       "defaultValue": "Recommended",
       "description": "Feature preset."
     },
+    "Shell": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        { "choice": "Sidebar", "description": "Expandable sidebar (default)." },
+        { "choice": "Rail", "description": "Compact icon rail." },
+        { "choice": "Top", "description": "Top navigation bar." },
+        { "choice": "Tabbed", "description": "Document workspace with tabs." }
+      ],
+      "defaultValue": "Sidebar",
+      "description": "Default shell for the generated app (applies at first launch; switchable in Settings with restart).",
+      "replaces": "DevTemWpfShellDefault"
+    },
     "IncludeDashboard": {
       "type": "computed",
       "value": "(Preset == \"Full\")"

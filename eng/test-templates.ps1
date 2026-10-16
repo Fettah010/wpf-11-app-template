@@ -2,14 +2,18 @@
 <#
 .SYNOPSIS
   Template matrix gate: installs the repo template, generates each supported
-  preset outside the repo tree, and verifies restore/build/test/launch plus
-  module presence/absence. See docs/releases/0.8.0-plan.md.
+  preset/shell outside the repo tree, and verifies restore/build/test/launch
+  plus module presence/absence. See docs/releases/0.8.0-plan.md (1.4.0 adds
+  the Shell dimension: every shell generates + builds + launches; presets
+  keep full smoke; Full+Tabbed is the high-risk full smoke).
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1
   powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Presets Clean
+  powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Shells Top, Tabbed
 #>
 param(
   [string[]]$Presets = @('Clean', 'Recommended', 'Full'),
+  [string[]]$Shells = @('Sidebar', 'Rail', 'Top', 'Tabbed'),
   [string]$PackagePath = ''
 )
 
@@ -48,12 +52,13 @@ function Invoke-Native([string]$Exe, [string[]]$Arguments, [string]$WorkDir) {
   return $true
 }
 
-function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [string]$DirName) {
-  $name = "Tmpl$Preset"
+function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [string]$DirName, [string]$Shell = 'Sidebar', [bool]$LaunchOnly = $false) {
+  $name = "Tmpl$Preset$Shell"
+  if ($Shell -eq 'Sidebar') { $name = "Tmpl$Preset" }
   $dir = Join-Path $work $DirName
-  Write-Host "`n===== $Preset ($ExtraArgs) =====" -ForegroundColor Cyan
+  Write-Host "`n===== $Preset / $Shell ($ExtraArgs) =====" -ForegroundColor Cyan
 
-  $genArgs = @('new', 'devtemwpf-app', '-n', $name, '-o', $dir, '--Preset', $Preset) + ($ExtraArgs -split ' ' | Where-Object { $_ })
+  $genArgs = @('new', 'devtemwpf-app', '-n', $name, '-o', $dir, '--Preset', $Preset, '--Shell', $Shell) + ($ExtraArgs -split ' ' | Where-Object { $_ })
   if (-not (Invoke-Native 'dotnet' $genArgs $work)) { return }
 
   $appDir = $dir
@@ -72,6 +77,12 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
   $ifHits = @(Get-ChildItem -LiteralPath (Join-Path $appDir 'src') -Recurse -File -Include *.cs, *.xaml, *.csproj, *.slnx -ErrorAction SilentlyContinue |
     Select-String -Pattern '#if \(|#endif' -ErrorAction SilentlyContinue)
   Assert-True ($ifHits.Count -eq 0) "Template directive residue"
+  # Stray conditional tokens in comments (1.4.0 T08: a `//#if` mention inside
+  # a comment silently truncates the generated file from that line on). Real
+  # directives are removed by the engine, so ANY remaining token is a defect.
+  $strayIf = @(Get-ChildItem -LiteralPath (Join-Path $appDir 'src') -Recurse -File -Include *.cs -ErrorAction SilentlyContinue |
+    Select-String -Pattern '//#(if|else|endif)' -ErrorAction SilentlyContinue)
+  Assert-True ($strayIf.Count -eq 0) "Stray template directive tokens: $($strayIf -join '; ')"
 
   # Module presence/absence.
   $hasDashboard = Test-Path (Join-Path $srcDir 'Views\DashboardPage.xaml')
@@ -88,7 +99,29 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
   $dashChecked = $features -match '- \[x\] Dashboard'
   Assert-True ($dashChecked -eq ($Preset -eq 'Full')) "$Preset FEATURES dashboard row"
 
-  if ($WithTests) {
+  # Shell seed (1.4.0): the generated default must carry the chosen shell and
+  # no unreplaced template token.
+  $settingsCs = Get-Content (Join-Path $srcDir 'Services\ShellSettings.cs') -Raw
+  Assert-True ($settingsCs -match "Enum\.TryParse<ShellMode>\(`"$Shell`"\)") "$Preset/$Shell default seed"
+  Assert-True ($settingsCs -notmatch 'DevTemWpfShellDefault') "$Preset/$Shell no unreplaced token"
+
+  if ($LaunchOnly) {
+    if (-not (Invoke-Native 'dotnet' @('restore') $appDir)) { return }
+    if (-not (Invoke-Native 'dotnet' @('build', '-c', 'Release', '--no-restore', '--warnaserror') $appDir)) { return }
+    $exe = Get-ChildItem -LiteralPath $appDir -Recurse -Filter "$name.App.exe" -ErrorAction SilentlyContinue |
+      Where-Object { $_.FullName -match 'Release' } | Select-Object -First 1
+    Assert-True ($null -ne $exe) "$Preset/$Shell exe built"
+    if ($null -eq $exe) { return }
+    $p = Start-Process -FilePath $exe.FullName -PassThru
+    Start-Sleep 20
+    $p.Refresh()
+    $hwnd = 0
+    try { $hwnd = $p.MainWindowHandle } catch { }
+    Assert-True ((-not $p.HasExited) -and ($hwnd -ne 0)) "$Preset/$Shell launched with window"
+    try { Stop-Process -Id $p.Id -Force -ErrorAction Stop } catch { }
+    if ($script:failures -eq 0) { Write-Host "OK: $Preset/$Shell build+launch" -ForegroundColor Green }
+  }
+  elseif ($WithTests) {
     if (-not (Invoke-Native 'powershell' @('-ExecutionPolicy', 'Bypass', '-File', (Join-Path $appDir 'eng\smoke.ps1')) $appDir)) { return }
     Write-Host "OK: $Preset smoke (restore/build/test/launch)" -ForegroundColor Green
   }
@@ -119,6 +152,16 @@ try {
   if ($Presets -contains 'Full') {
     Test-Combo 'Full' '' $true 'Full'
     Test-Combo 'Full' '--IncludeTests false' $false 'FullNoTests'
+  }
+
+  # Shell dimension (1.4.0): every non-default shell generates + builds +
+  # launches (preset matrix above already smokes the Sidebar default), plus
+  # the high-risk Full+Tabbed full smoke (dashboard/charts inside tabs).
+  foreach ($shell in @($Shells | Where-Object { $_ -ne 'Sidebar' })) {
+    Test-Combo 'Recommended' '' $false "Rec$shell" $shell $true
+  }
+  if (($Presets -contains 'Full') -and ($Shells -contains 'Tabbed')) {
+    Test-Combo 'Full' '' $true 'FullTabbed' 'Tabbed' $false
   }
 
   # Item templates (into the Full app).

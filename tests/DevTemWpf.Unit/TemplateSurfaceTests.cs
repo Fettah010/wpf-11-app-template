@@ -42,8 +42,17 @@ public sealed class TemplateSurfaceTests
         Assert.Equal(new HashSet<string> { "Clean", "Recommended", "Full" }, choices);
         Assert.Equal("Recommended", preset.GetProperty("defaultValue").GetString());
 
+        // Added in 1.4.0 (roadmap §8.4, ADR-0015): additive scaffold-time
+        // shell default. The choice value replaces the DevTemWpfShellDefault
+        // token in ShellSettings; all shells ship in every scaffold.
+        Assert.True(symbols.TryGetProperty("Shell", out var shell));
+        var shellChoices = shell.GetProperty("choices").EnumerateArray()
+            .Select(c => c.GetProperty("choice").GetString() ?? string.Empty).ToHashSet();
+        Assert.Equal(new HashSet<string> { "Sidebar", "Rail", "Top", "Tabbed" }, shellChoices);
+        Assert.Equal("Sidebar", shell.GetProperty("defaultValue").GetString());
+        Assert.Equal("DevTemWpfShellDefault", shell.GetProperty("replaces").GetString());
+
         // Cut in 0.8.0 with reason — must not silently return.
-        Assert.False(symbols.TryGetProperty("Shell", out _));
         Assert.False(symbols.TryGetProperty("ThemeDefault", out _));
     }
 }

@@ -12,23 +12,15 @@ public sealed class NavigationRoutesTests
         var keys = NavigationRoutes.All.Select(r => r.Key).ToList();
 
         Assert.Equal(keys.Count, keys.Distinct(StringComparer.Ordinal).Count());
-        Assert.Equal(
-            new HashSet<string>(
-                [
-                    "home",
-                    //#if (IncludeDashboard)
-                    "dashboard",
-                    //#endif
-                    "controls",
-                    "data",
-                    "tokens",
-                    "effects",
-                    //#if (IncludeDiagnostics)
-                    "diagnostics",
-                    //#endif
-                    "settings",
-                ]),
-            keys.ToHashSet(StringComparer.Ordinal));
+        // Statement-level conditionals (see NavigationRoutes.Build note).
+        var expected = new HashSet<string>(["home", "controls", "data", "tokens", "effects", "settings"]);
+        //#if (IncludeDashboard)
+        expected.Add("dashboard");
+        //#endif
+        //#if (IncludeDiagnostics)
+        expected.Add("diagnostics");
+        //#endif
+        Assert.Equal(expected, keys.ToHashSet(StringComparer.Ordinal));
     }
 
     [Fact]

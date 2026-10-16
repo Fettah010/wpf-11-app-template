@@ -36,7 +36,7 @@ public enum UpdateChannel
 }
 
 /// <summary>Persisted tabbed-workspace state (1.4.0).</summary>
-public sealed record WorkspaceState
+public sealed record WorkspaceState : IEquatable<WorkspaceState>
 {
     /// <summary>Open document route keys, in tab order.</summary>
     public string[] OpenDocuments { get; init; } = ["home"];
@@ -49,6 +49,27 @@ public sealed record WorkspaceState
 
     /// <summary>Whether the detail pane is expanded.</summary>
     public bool IsDetailOpen { get; init; } = true;
+
+    /// <summary>
+    /// Value equality: records compare array members by reference, but an
+    /// empty-vs-default round-trip must stay equal (the settings
+    /// missing/corrupt-file tests assert record equality). Empty collection
+    /// expressions already share the Array.Empty singleton; non-empty
+    /// document lists compare by sequence here.
+    /// </summary>
+    public bool Equals(WorkspaceState? other)
+        => other is not null
+            && OpenDocuments.SequenceEqual(other.OpenDocuments)
+            && SelectedDocument == other.SelectedDocument
+            && DetailWidth.Equals(other.DetailWidth)
+            && IsDetailOpen == other.IsDetailOpen;
+
+    public override int GetHashCode()
+        => HashCode.Combine(
+            OpenDocuments.Aggregate(0, HashCode.Combine),
+            SelectedDocument,
+            DetailWidth,
+            IsDetailOpen);
 }
 
 /// <summary>Persisted shell preferences (DataContract-free JSON record).</summary>
@@ -56,7 +77,7 @@ public sealed record ShellSettings
 {
     public ThemeMode Theme { get; init; } = ThemeMode.System;
     public bool BackdropEnabled { get; init; } = true;
-    public ShellMode Shell { get; init; } = ShellMode.Sidebar;
+    public ShellMode Shell { get; init; } = ParseShellDefault();
     public DensityMode Density { get; init; } = DensityMode.Comfortable;
 
     /// <summary>Custom accent as <c>#RRGGBB</c> or <c>#AARRGGBB</c>; null = system accent.</summary>
@@ -79,4 +100,17 @@ public sealed record ShellSettings
 
     /// <summary>UI culture name (e.g. "de"); empty = system culture.</summary>
     public string Culture { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Scaffold-time default shell (1.4.0 T08). The template engine replaces
+    /// the <c>DevTemWpfShellDefault</c> token with the <c>--Shell</c> choice
+    /// (Sidebar/Rail/Top/Tabbed); the token occurs nowhere else, so no other
+    /// logic or test seed is affected. An unparseable token falls back to
+    /// Sidebar, which is exactly the repository state (the token is never
+    /// replaced in-repo), so the repo always builds and runs Sidebar-first.
+    /// </summary>
+    private static ShellMode ParseShellDefault()
+        => Enum.TryParse<ShellMode>("DevTemWpfShellDefault", out var shell)
+            ? shell
+            : ShellMode.Sidebar;
 }

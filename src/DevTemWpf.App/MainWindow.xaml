@@ -52,8 +52,8 @@
             AutomationProperties.Name="Command palette">
       <Border Width="520" Padding="16" CornerRadius="8"
               HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,120,0,0"
-              Background="{DynamicResource NavigationViewContentBackground}"
-              BorderBrush="{DynamicResource NavigationViewContentGridBorderBrush}"
+              Background="{DynamicResource AppCardBackgroundBrush}"
+              BorderBrush="{DynamicResource AppBorderBrush}"
               BorderThickness="1">
         <StackPanel>
           <TextBlock Text="{x:Static res:Strings.Pal_Title}" Style="{StaticResource AppCaptionText}" Margin="0,0,0,8" />
