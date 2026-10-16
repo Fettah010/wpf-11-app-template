@@ -767,6 +767,197 @@ public sealed class ShellFlowsTests : IDisposable
         }
     }
 
+    /// <summary>
+    /// Best-effort dropdown dismissal: selecting via SelectionItem usually
+    /// auto-collapses the popup, so an explicit Collapse can race and throw.
+    /// </summary>
+    private static void CollapseIfExpanded(AutomationElement combo)
+    {
+        try
+        {
+            if (combo.Patterns.ExpandCollapse.Pattern.ExpandCollapseState
+                == FlaUI.Core.Definitions.ExpandCollapseState.Expanded)
+            {
+                combo.Patterns.ExpandCollapse.Pattern.Collapse();
+            }
+        }
+        catch
+        {
+            // Popup already gone; nothing to dismiss.
+        }
+    }
+
+    private static void SelectShellOption(AutomationElement window, string option)
+    {
+        var shell = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Navigation style selector")),
+            TimeSpan.FromSeconds(10), "shell selector");
+        shell.Patterns.ExpandCollapse.Pattern.Expand();
+        var item = WaitFor(() => shell.FindFirstDescendant(cf => cf.ByName(option)),
+            TimeSpan.FromSeconds(10), $"shell option '{option}'");
+        item.Patterns.SelectionItem.Pattern.Select();
+        // Dismiss the dropdown: an open popup swallows the next click
+        // instead of activating its target.
+        CollapseIfExpanded(shell);
+        Thread.Sleep(500);
+    }
+
+    /// <summary>
+    /// Shell changes persist asynchronously; the restart button must only be
+    /// pressed once the settings file carries the new value, otherwise the
+    /// relaunched app loads stale chrome.
+    /// </summary>
+    private static void WaitForShellPersisted(int shellValue)
+    {
+        var path = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "Wpf11AppTemplate", "settings.json");
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+        while (DateTime.UtcNow < deadline)
+        {
+            try
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(path));
+                if (doc.RootElement.TryGetProperty("Shell", out var shell)
+                    && shell.GetInt32() == shellValue)
+                {
+                    return;
+                }
+            }
+            catch
+            {
+                // File missing or mid-write; retry.
+            }
+
+            Thread.Sleep(200);
+        }
+
+        throw new InvalidOperationException($"Settings file never persisted Shell={shellValue}.");
+    }
+
+    /// <summary>
+    /// Clicks the in-app restart button and attaches to the relaunched
+    /// process (same exe name, newer start time than the click).
+    /// </summary>
+    private (Window Window, Application App) RelaunchAfterRestart(
+        Window window, Application app, UIA3Automation automation)
+    {
+        // The button carries an invariant automation name while its visible
+        // content is localized.
+        var restart = WaitFor(() => FindButtonWithText(window, "Restart application"),
+            TimeSpan.FromSeconds(10), "restart button");
+        Assert.NotNull(restart);
+        var since = DateTime.UtcNow;
+        var oldPid = app.ProcessId;
+        restart.Patterns.Invoke.Pattern.Invoke();
+
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(30);
+        while (DateTime.UtcNow < deadline)
+        {
+            try
+            {
+                var candidate = Process.GetProcessesByName("DevTemWpf.App")
+                    .Where(p => p.Id != oldPid && p.StartTime.ToUniversalTime() >= since.AddSeconds(-2))
+                    .OrderByDescending(p => p.StartTime)
+                    .FirstOrDefault();
+                if (candidate is not null)
+                {
+                    var attached = Application.Attach(candidate.Id);
+                    _apps.Add(attached);
+                    var fresh = attached.GetMainWindow(automation, TimeSpan.FromSeconds(15));
+                    if (fresh is not null)
+                    {
+                        return (fresh, attached);
+                    }
+                }
+            }
+            catch
+            {
+                // Process table is transient during restart; retry.
+            }
+
+            Thread.Sleep(500);
+        }
+
+        throw new InvalidOperationException("Relaunched app window never appeared.");
+    }
+
+    [WpfFact]
+    public void TopShell_AppliesAfterRestart_And_Navigates_AllPages()
+    {
+        RequireUiOrSkip();
+
+        // Shell changes apply at next launch (ADR-0015): swapping
+        // PaneDisplayMode on a live WPF-UI 4.3.0 NavigationView crashes with
+        // a NaN DoubleAnimationException during re-template, so the settings
+        // page documents the restart requirement and this test relaunches.
+        var stops = new List<(string NavItem, string ContentName)>
+        {
+            ("Home", "Home headline"),
+            ("Controls", "Gallery dialog demo"),
+            ("Data", "Data grid"),
+            ("Design Tokens", "Design token preview"),
+            ("Effects", "Play standard preset"),
+            ("Settings", "Theme selector"),
+        };
+        if (ModuleOn("Dashboard"))
+        {
+            stops.Insert(1, ("Dashboard", "Activity filter"));
+        }
+
+        if (ModuleOn("Diagnostics"))
+        {
+            stops.Insert(stops.Count - 1, ("Diagnostics", "Log viewer"));
+        }
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            // Persist Top through the settings selector (same path a user
+            // takes), then restart into the Top chrome.
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
+                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
+            SelectShellOption(window, "Top");
+            WaitForShellPersisted(2); // ShellMode.Top
+            (window, app) = RelaunchAfterRestart(window, app, automation);
+
+            foreach (var (navItem, contentName) in stops)
+            {
+                window.Focus();
+                var item = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(navItem)),
+                    TimeSpan.FromSeconds(10), $"nav item '{navItem}' in Top shell");
+                item.Click();
+                var content = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(contentName)),
+                    TimeSpan.FromSeconds(10), $"{navItem} page content '{contentName}' in Top shell");
+                Assert.NotNull(content);
+            }
+
+            // Restore the default shell so later runs start Sidebar-first,
+            // and prove the relaunched app is back on the default chrome.
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
+                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
+            SelectShellOption(window, "Sidebar");
+            WaitForShellPersisted(1); // ShellMode.Sidebar
+            (window, app) = RelaunchAfterRestart(window, app, automation);
+
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home")),
+                TimeSpan.FromSeconds(10), "nav item 'Home' in Sidebar shell").Click();
+            var headline = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home headline")),
+                TimeSpan.FromSeconds(10), "home content in Sidebar shell");
+            Assert.NotNull(headline);
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
     [WpfFact]
     public void Resize_PreservesNavigationAndContent()
     {

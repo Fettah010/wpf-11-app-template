@@ -101,6 +101,19 @@ public sealed class MainViewModelTests : IDisposable
     }
 
     [WpfFact]
+    public void ShellAppliesOnce_AtConstruction_NotFromLaterSettings()
+    {
+        // Restart-apply (ADR-0015): the live chrome follows the launch shell.
+        // A later persisted change must not move the pane until relaunch.
+        var vm = Create(new ShellSettings { Shell = ShellMode.Sidebar });
+
+        Assert.Equal(NavigationViewPaneDisplayMode.Left, vm.PaneMode);
+
+        var relaunched = Create(new ShellSettings { Shell = ShellMode.Top });
+        Assert.Equal(NavigationViewPaneDisplayMode.Top, relaunched.PaneMode);
+    }
+
+    [WpfFact]
     public void NarrowWidth_CollapsesPane_And_Widening_Restores()
     {
         var vm = Create(new ShellSettings { Shell = ShellMode.Sidebar });

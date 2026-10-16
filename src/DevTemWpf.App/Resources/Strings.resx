@@ -16,6 +16,7 @@
   <data name="Settings_Theme" xml:space="preserve"><value>Theme</value></data>
   <data name="Settings_Accent" xml:space="preserve"><value>Accent</value></data>
   <data name="Settings_NavigationStyle" xml:space="preserve"><value>Navigation style</value></data>
+  <data name="Settings_ShellNote" xml:space="preserve"><value>Navigation style applies after restart.</value></data>
   <data name="Settings_Density" xml:space="preserve"><value>Density</value></data>
   <data name="Settings_Motion" xml:space="preserve"><value>Motion</value></data>
   <data name="Settings_Language" xml:space="preserve"><value>Language</value></data>

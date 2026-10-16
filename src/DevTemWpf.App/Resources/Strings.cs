@@ -41,6 +41,7 @@ public static class Strings
     public static string Settings_Theme => Get(nameof(Settings_Theme));
     public static string Settings_Accent => Get(nameof(Settings_Accent));
     public static string Settings_NavigationStyle => Get(nameof(Settings_NavigationStyle));
+    public static string Settings_ShellNote => Get(nameof(Settings_ShellNote));
     public static string Settings_Density => Get(nameof(Settings_Density));
     public static string Settings_Motion => Get(nameof(Settings_Motion));
     public static string Settings_Language => Get(nameof(Settings_Language));

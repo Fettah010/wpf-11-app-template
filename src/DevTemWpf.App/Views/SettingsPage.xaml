@@ -35,7 +35,8 @@
       <TextBlock Text="{x:Static res:Strings.Settings_NavigationStyle}" Style="{StaticResource AppBodyText}" Margin="{StaticResource AppGapTitle}" />
       <ComboBox ItemsSource="{Binding ViewModel.ShellOptions}"
                 SelectedItem="{Binding ViewModel.SelectedShell, Mode=TwoWay}"
-                AutomationProperties.Name="Navigation style selector" Margin="{StaticResource AppGapGroup}" />
+                AutomationProperties.Name="Navigation style selector" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{x:Static res:Strings.Settings_ShellNote}" Style="{StaticResource AppCaptionText}" Margin="{StaticResource AppGapTitle}" />
 
       <TextBlock Text="{x:Static res:Strings.Settings_Density}" Style="{StaticResource AppBodyText}" Margin="{StaticResource AppGapTitle}" />
       <ComboBox ItemsSource="{Binding ViewModel.DensityOptions}"
