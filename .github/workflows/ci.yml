@@ -23,6 +23,13 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('Directory.Packages.props', 'global.json') }}
+          restore-keys: nuget-
+
 
       - name: Pinned SDK check
         run: dotnet --version
@@ -58,6 +65,12 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('Directory.Packages.props', 'global.json') }}
+          restore-keys: nuget-
 
       - name: Preset matrix (source folder)
         run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Shells Sidebar
@@ -74,6 +87,12 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('Directory.Packages.props', 'global.json') }}
+          restore-keys: nuget-
 
       - name: Shell matrix (source folder)
         run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -NoPresets
@@ -90,6 +109,12 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('Directory.Packages.props', 'global.json') }}
+          restore-keys: nuget-
 
       - name: Pack template package
         run: dotnet pack templates/pack/DevTemWPF.Templates.csproj -c Release -o artifacts/packages
@@ -109,6 +134,12 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('Directory.Packages.props', 'global.json') }}
+          restore-keys: nuget-
 
       - name: Pack template package
         run: dotnet pack templates/pack/DevTemWPF.Templates.csproj -c Release -o artifacts/packages
