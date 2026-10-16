@@ -13,8 +13,10 @@ VSTest-based runs are blocked for MTP projects on the .NET 10 SDK
 powershell -ExecutionPolicy Bypass -File eng/smoke.ps1
 ```
 
-Runs: `dotnet --version` → restore → Debug build → Release build →
+Runs: `dotnet --version` → restore → Release build →
 `dotnet test -c Release` → app launch check (window appears, then closed).
+(Release only since 1.4.0: no DEBUG-conditional code exists, and all required
+gates build Release with warnings as errors.)
 
 ## Individual commands
 
