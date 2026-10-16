@@ -38,6 +38,7 @@ jobs:
 
   template-matrix:
     runs-on: windows-latest
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
 
@@ -52,6 +53,7 @@ jobs:
 
   template-package:
     runs-on: windows-latest
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
 
