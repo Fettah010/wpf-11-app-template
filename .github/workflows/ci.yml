@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-          cache: true
+
 
       - name: Pinned SDK check
         run: dotnet --version
@@ -57,7 +57,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-          cache: true
+
 
       - name: Preset matrix (source folder)
         run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Shells Sidebar
@@ -73,7 +73,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-          cache: true
+
 
       - name: Shell matrix (source folder)
         run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -NoPresets
@@ -89,7 +89,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-          cache: true
+
 
       - name: Pack template package
         run: dotnet pack templates/pack/DevTemWPF.Templates.csproj -c Release -o artifacts/packages
@@ -108,7 +108,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-          cache: true
+
 
       - name: Pack template package
         run: dotnet pack templates/pack/DevTemWPF.Templates.csproj -c Release -o artifacts/packages
