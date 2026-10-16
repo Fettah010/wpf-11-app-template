@@ -1022,7 +1022,7 @@ public sealed class ShellFlowsTests : IDisposable
     }
 
     [WpfFact]
-    public void WorkspaceTab_Drag_Reorders()
+    public void WorkspaceTabs_Reorder_ByKeyboard()
     {
         RequireUiOrSkip();
 
@@ -1104,63 +1104,39 @@ public sealed class ShellFlowsTests : IDisposable
             Assert.NotNull(WaitFor(() => FindTabItem(window, "Controls"),
                 TimeSpan.FromSeconds(10), "controls tab"));
 
-            // Drag the last tab onto the first one. The modal OLE gesture
-            // cancels if this focus-contested desktop pulls foreground
-            // mid-drag (proven by traced runs: sequential cancelled drags,
-            // never a product-side drop failure), so the gesture gets a
-            // bounded retry with the order re-read each time. A genuinely
-            // broken drop fails every attempt and still fails the test.
-            var dragged = string.Empty;
+            // Pointer drag was prototyped and deferred (unreliable OLE
+            // gestures across automation runners; see 1.4.0 report): the
+            // detail-pane Move buttons are the reorder contract and are fully
+            // keyboard-operable. Move selected Controls left twice, then
+            // right once, asserting exact order each time.
+            window.Focus();
+            var moveLeft = WaitFor(() => FindButtonWithText(window, "Move document left"),
+                TimeSpan.FromSeconds(10), "move left button");
+            Assert.NotNull(moveLeft);
+            moveLeft.Patterns.Invoke.Pattern.Invoke();
+            window.Focus();
+            moveLeft = WaitFor(() => FindButtonWithText(window, "Move document left"),
+                TimeSpan.FromSeconds(10), "move left button");
+            Assert.NotNull(moveLeft);
+            moveLeft.Patterns.Invoke.Pattern.Invoke();
             var moved = false;
-            for (var attempt = 0; attempt < 2 && !moved; attempt++)
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(8);
+            while (!moved && DateTime.UtcNow < deadline)
             {
-                var titles = TabTitles(window);
-                if (titles.Count < 2)
+                try
                 {
-                    break;
+                    moved = string.Join(",", TabTitles(window)) == "Controls,Home,Data";
+                }
+                catch
+                {
+                    // Tree transient; retry.
                 }
 
-                dragged = titles[^1];
-                var dstTitle = titles[0];
-                window.Focus();
-                var source = WaitFor(() => FindTabItem(window, dragged),
-                    TimeSpan.FromSeconds(10), "drag source tab");
-                var target = WaitFor(() => FindTabItem(window, dstTitle),
-                    TimeSpan.FromSeconds(10), "drop target tab");
-                var from = source.GetClickablePoint();
-                var to = target.GetClickablePoint();
-                window.Focus();
-                FlaUI.Core.Input.Mouse.MoveTo(from);
-                Thread.Sleep(100);
-                FlaUI.Core.Input.Mouse.Down(FlaUI.Core.Input.MouseButton.Left);
-                Thread.Sleep(100);
-                FlaUI.Core.Input.Mouse.MoveTo(new System.Drawing.Point(from.X - 10, from.Y));
-                Thread.Sleep(100);
-                FlaUI.Core.Input.Mouse.MoveTo(to);
-                Thread.Sleep(150);
-                FlaUI.Core.Input.Mouse.Up(FlaUI.Core.Input.MouseButton.Left);
-
-                var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(8);
-                while (!moved && DateTime.UtcNow < deadline)
-                {
-                    try
-                    {
-                        moved = TabTitles(window).FirstOrDefault() == dragged;
-                    }
-                    catch
-                    {
-                        // Tree transient; retry.
-                    }
-
-                    Thread.Sleep(300);
-                }
+                Thread.Sleep(300);
             }
 
-            Assert.True(moved, $"Tab did not move first after drag: {string.Join(", ", TabTitles(window))}");
+            Assert.True(moved, $"Move left did not reorder tabs: {string.Join(", ", TabTitles(window))}");
 
-            // Keyboard reorder alternative (deterministic, no pointer
-            // gesture): the dragged tab is still selected, so moving it
-            // right restores Home first.
             window.Focus();
             var moveRight = WaitFor(() => FindButtonWithText(window, "Move document right"),
                 TimeSpan.FromSeconds(10), "move right button");
@@ -1172,7 +1148,7 @@ public sealed class ShellFlowsTests : IDisposable
             {
                 try
                 {
-                    reordered = TabTitles(window).FirstOrDefault() == "Home";
+                    reordered = string.Join(",", TabTitles(window)) == "Home,Controls,Data";
                 }
                 catch
                 {
@@ -1182,7 +1158,7 @@ public sealed class ShellFlowsTests : IDisposable
                 Thread.Sleep(300);
             }
 
-            Assert.True(reordered, $"Move right did not restore Home first: {string.Join(", ", TabTitles(window))}");
+            Assert.True(reordered, $"Move right did not reorder tabs: {string.Join(", ", TabTitles(window))}");
 
             // Restore the default shell so later runs start Sidebar-first.
             window.Focus();

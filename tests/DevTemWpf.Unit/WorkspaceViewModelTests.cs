@@ -246,9 +246,12 @@ public sealed class WorkspaceViewModelTests : IDisposable
         Assert.Single(vm.Documents);
         Assert.Equal("home", vm.SelectedDocument?.RouteKey);
 
-        var json = await File.ReadAllTextAsync(_settingsPath);
-        Assert.Contains("\"home\"", json, StringComparison.Ordinal);
-        Assert.DoesNotContain("\"controls\"", json, StringComparison.Ordinal);
+        // Reload through the service (never read the file directly: fired
+        // persists may still be flushing).
+        var settings = new SettingsService(_settingsPath);
+        await settings.LoadAsync(TestContext.Current.CancellationToken);
+        Assert.Equal(["home"], settings.Current.Workspace.OpenDocuments);
+        Assert.Equal("home", settings.Current.Workspace.SelectedDocument);
     }
 
     [WpfFact]
@@ -284,8 +287,9 @@ public sealed class WorkspaceViewModelTests : IDisposable
         await vm.MoveDocumentToAsync(vm.Documents[0], 99);
         Assert.Equal("data", vm.Documents[2].RouteKey);
 
-        var json = await File.ReadAllTextAsync(_settingsPath);
-        Assert.Contains("\"data\"", json, StringComparison.Ordinal);
+        var settings = new SettingsService(_settingsPath);
+        await settings.LoadAsync(TestContext.Current.CancellationToken);
+        Assert.Equal(["home", "controls", "data"], settings.Current.Workspace.OpenDocuments);
     }
 
     [WpfFact]

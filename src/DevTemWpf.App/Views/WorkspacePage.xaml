@@ -33,15 +33,12 @@
       </Grid.ColumnDefinitions>
 
       <!-- Document tabs: same page types as every other shell (registry).
-           Tabs reorder via drag (private format; keyboard: detail Move
-           buttons) - see code-behind. -->
+           Tabs reorder via the detail-pane Move buttons (keyboard-first).
+           Pointer drag was prototyped and deferred, not shipped: OLE
+           gestures proved unreliable across automation runners (see the 1.4.0
+           report and DEFERRED D14); the Move commands are the contract. -->
       <ui:TabView Grid.Column="0" x:Name="DocumentTabs" ItemsSource="{Binding ViewModel.Documents}"
                   SelectedItem="{Binding ViewModel.SelectedDocument, Mode=TwoWay}"
-                  AllowDrop="True"
-                  PreviewMouseLeftButtonDown="OnTabDragStart"
-                  PreviewMouseMove="OnTabDragMove"
-                  DragOver="OnTabDragOver"
-                  Drop="OnTabDrop"
                   AutomationProperties.Name="Open documents">
         <TabControl.ItemTemplate>
           <DataTemplate>

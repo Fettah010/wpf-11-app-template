@@ -57,9 +57,11 @@ kept per session.
 - Persistence (`ShellSettings.Workspace`): open keys in order, selected key,
   detail width, detail visibility. Malformed/stale state falls back to a
   single home document; startup never fails because of settings.
-- Reorder: drag tab headers (private `DevTemWpf.DocumentTab` format — never
-  leaves the workspace, Esc cancels, one gesture at a time) or the detail
-  pane Move buttons (the keyboard alternative, always available).
+- Reorder: detail-pane Move buttons (the contract — keyboard-operable,
+  unit + UI proven). Pointer drag was prototyped with a private in-workspace
+  format, Esc cancel, and a single-gesture guard, then deferred, not
+  shipped: OLE modal gestures proved unreliable across automation runners
+  (quiet-runner CI included). Revisit with a runner-proof gesture design.
 - Split: `GridSplitter` between tabs and the detail inspector; width
   persists on release; the toggle checkbox collapses the pane (keyboard
   reachable). The splitter itself is arrow-key operable when focused.
@@ -82,7 +84,7 @@ routes focus their nav item. In Tabbed mode commands open documents.
 Unit: registry completeness, mapping, workspace open/close/move/persist/
 recovery, palette filter/IDs/disabled, race guards. UI: navigate every page
 per shell, tab open/focus/close/persist across restart, palette keyboard
-round-trip + focus return, drag reorder, detail toggle, rapid navigation.
+round-trip + focus return, keyboard reorder, detail toggle, rapid navigation.
 Matrix: all four `--Shell` values generate + build + launch (source and
 packed `.nupkg`); presets keep full smoke; Full+Tabbed is the high-risk
 full smoke (charts inside tabs).

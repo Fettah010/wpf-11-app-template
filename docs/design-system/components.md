@@ -76,7 +76,7 @@ focus return. Shell selection applies at next launch (ADR-0015).
 |---|---|
 | Route registry | `Services/NavigationRoutes.cs`: stable keys shared by rail, palette, and documents; conditional entries. |
 | Workspace documents | `WorkspacePage` + singleton `WorkspaceViewModel`; pages hosted in per-tab chromeless `Frame`s (WPF parents `Page` only to `Window`/`Frame`). |
-| Tab reorder | Header drag with a private in-workspace format (single-gesture guard, Esc cancels) + detail Move buttons as the keyboard alternative. |
+| Tab reorder | Detail Move buttons (keyboard-operable, unit + UI proven). Pointer drag prototyped and deferred (unreliable OLE gestures across runners); see 1.4.0 report. |
 | Split/detail | `GridSplitter` (arrow-key operable when focused) + toggle checkbox; width/visibility persisted. |
 | Palette | `PaletteViewModel` (`nav.*` IDs, substring filter, enabled states) + shell overlay; Enter executes, Esc/scrim dismisses, focus returns to invoker. |
 

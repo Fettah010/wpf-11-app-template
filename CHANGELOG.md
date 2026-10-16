@@ -16,10 +16,11 @@ template parameter; `ShellMode` gains additive members).
   Settings documents the restart step and reuses the Restart button.
 - Tabbed workspace: route-keyed documents (same pages as every shell) in a
   `TabView`, open/focus/close, selection-synced rail, Back/Forward history,
-  tab drag-reorder (private format, single-gesture guard) + keyboard Move
-  buttons, resizable detail split with persisted width, state persistence
-  with malformed/stale recovery. Documents host pages in per-tab chromeless
-  `Frame`s (WPF parents `Page` only to `Window`/`Frame`).
+  keyboard-operable reorder (detail Move buttons) + resizable detail split
+  with persisted width, state persistence with malformed/stale recovery.
+  Documents host pages in per-tab chromeless `Frame`s (WPF parents `Page`
+  only to `Window`/`Frame`). Pointer drag prototyped and deferred (see
+  report); Move buttons are the reorder contract.
 - Command palette (Ctrl+K + header button): stable `nav.*` IDs, substring
   filter, enabled states, Enter/Esc/mouse contract, focus return to invoker.
 - Stale-guard rework: per-route-key independent opens (rapid opens all
