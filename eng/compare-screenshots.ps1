@@ -20,7 +20,10 @@ param(
   [string]$Pages = 'Home,Controls,Settings',
   [double]$TolerancePercent = 0.5,
   [int]$ChannelTolerance = 8,
-  [string]$Mask = ''
+  # Default mask: top window-border strip (1.4.0). Those pixels belong to DWM
+  # chrome, not product UI (proven by inspected diffs: maximized-border paint
+  # timing only); the app title text starts below. Documented, not hidden.
+  [string]$Mask = '0,0,2576,12'
 )
 
 $ErrorActionPreference = 'Stop'
