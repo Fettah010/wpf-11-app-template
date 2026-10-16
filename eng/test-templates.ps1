@@ -102,7 +102,7 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
   # Shell seed (1.4.0): the generated default must carry the chosen shell and
   # no unreplaced template token.
   $settingsCs = Get-Content (Join-Path $srcDir 'Services\ShellSettings.cs') -Raw
-  Assert-True ($settingsCs -match "Enum\.TryParse<ShellMode>\(`"$Shell`"\)") "$Preset/$Shell default seed"
+  Assert-True ($settingsCs -match "Enum\.TryParse<ShellMode>\(`"$Shell`"") "$Preset/$Shell default seed"
   Assert-True ($settingsCs -notmatch 'DevTemWpfShellDefault') "$Preset/$Shell no unreplaced token"
 
   if ($LaunchOnly) {

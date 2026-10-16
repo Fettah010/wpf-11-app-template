@@ -1390,6 +1390,11 @@ public sealed class ShellFlowsTests : IDisposable
                 TimeSpan.FromSeconds(10), "persisted home tab"));
             Assert.NotNull(WaitFor(() => FindTabItem(window, "Controls"),
                 TimeSpan.FromSeconds(10), "persisted controls tab"));
+            // The restored selection (settings) renders its full page
+            // content inside the tab frame.
+            var settingsContent = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Theme selector")),
+                TimeSpan.FromSeconds(10), "settings content inside restored document");
+            Assert.NotNull(settingsContent);
 
             // Restore the default shell so later runs start Sidebar-first.
             window.Focus();
