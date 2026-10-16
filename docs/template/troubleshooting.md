@@ -28,13 +28,18 @@ Reinstall first.
 1. Check `FEATURES.md` matches the intended preset.
 2. Confirm no `DevTemWpf` residue: `Get-ChildItem -Recurse -Filter *DevTemWpf*`
    and content grep — the matrix asserts both.
-3. Confirm no `#if (` / `#endif` residue in `src/`.
+3. Confirm no `#if (` / `#endif` residue in `src/`, and no `//#if` token at
+   all in generated `.cs`: a conditional token mentioned even inside a
+   comment silently truncates the generated file from that line on
+   (1.4.0 T08 evidence). The matrix asserts this.
 4. `dotnet --version` must be 10.0.x (pinned band in `global.json`).
 
 ## Shell/theme defaults
 
-There are no `--Shell`/`--ThemeDefault` flags by design (verified engine
-limitation, see presets.md). Switch at runtime in Settings; it persists.
+`--Shell Sidebar|Rail|Top|Tabbed` (1.4.0+) seeds the first-launch shell
+default; there is no `--ThemeDefault` by design. Runtime shell changes apply
+at next launch (see the Settings page note). Never write the literal text
+`//#if` in comments of template-processed files (see above).
 
 ## Rebrand / rename
 
