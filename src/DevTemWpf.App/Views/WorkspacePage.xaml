@@ -34,7 +34,7 @@
 
       <!-- Document tabs: same page types as every other shell (registry).
            Tabs reorder via drag (private format; keyboard: detail Move
-           buttons) — see code-behind. -->
+           buttons) - see code-behind. -->
       <ui:TabView Grid.Column="0" x:Name="DocumentTabs" ItemsSource="{Binding ViewModel.Documents}"
                   SelectedItem="{Binding ViewModel.SelectedDocument, Mode=TwoWay}"
                   AllowDrop="True"

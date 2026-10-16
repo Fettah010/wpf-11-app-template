@@ -890,7 +890,10 @@ public sealed class ShellFlowsTests : IDisposable
         {
             try
             {
-                var candidate = Process.GetProcessesByName("DevTemWpf.App")
+                // Exe name, not a constant: generated apps are renamed
+                // (sourceName substitution), and their smoke runs this suite.
+                var processName = Path.GetFileNameWithoutExtension(FindAppExe());
+                var candidate = Process.GetProcessesByName(processName)
                     .Where(p => p.Id != oldPid && p.StartTime.ToUniversalTime() >= since.AddSeconds(-2))
                     .OrderByDescending(p => p.StartTime)
                     .FirstOrDefault();
@@ -1101,31 +1104,75 @@ public sealed class ShellFlowsTests : IDisposable
             Assert.NotNull(WaitFor(() => FindTabItem(window, "Controls"),
                 TimeSpan.FromSeconds(10), "controls tab"));
 
-            // Drag the last tab ("Controls") onto the first ("Home").
-            window.Focus();
-            var source = WaitFor(() => FindTabItem(window, "Controls"),
-                TimeSpan.FromSeconds(10), "drag source tab");
-            var target = WaitFor(() => FindTabItem(window, "Home"),
-                TimeSpan.FromSeconds(10), "drop target tab");
-            var from = source.GetClickablePoint();
-            var to = target.GetClickablePoint();
-            FlaUI.Core.Input.Mouse.MoveTo(from);
-            Thread.Sleep(200);
-            FlaUI.Core.Input.Mouse.Down(FlaUI.Core.Input.MouseButton.Left);
-            Thread.Sleep(200);
-            FlaUI.Core.Input.Mouse.MoveTo(new System.Drawing.Point(from.X - 10, from.Y));
-            Thread.Sleep(200);
-            FlaUI.Core.Input.Mouse.MoveTo(to);
-            Thread.Sleep(300);
-            FlaUI.Core.Input.Mouse.Up(FlaUI.Core.Input.MouseButton.Left);
-
-            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+            // Drag the last tab onto the first one. The modal OLE gesture
+            // cancels if this focus-contested desktop pulls foreground
+            // mid-drag (proven by traced runs: sequential cancelled drags,
+            // never a product-side drop failure), so the gesture gets a
+            // bounded retry with the order re-read each time. A genuinely
+            // broken drop fails every attempt and still fails the test.
+            var dragged = string.Empty;
             var moved = false;
-            while (!moved && DateTime.UtcNow < deadline)
+            for (var attempt = 0; attempt < 2 && !moved; attempt++)
+            {
+                var titles = TabTitles(window);
+                if (titles.Count < 2)
+                {
+                    break;
+                }
+
+                dragged = titles[^1];
+                var dstTitle = titles[0];
+                window.Focus();
+                var source = WaitFor(() => FindTabItem(window, dragged),
+                    TimeSpan.FromSeconds(10), "drag source tab");
+                var target = WaitFor(() => FindTabItem(window, dstTitle),
+                    TimeSpan.FromSeconds(10), "drop target tab");
+                var from = source.GetClickablePoint();
+                var to = target.GetClickablePoint();
+                window.Focus();
+                FlaUI.Core.Input.Mouse.MoveTo(from);
+                Thread.Sleep(100);
+                FlaUI.Core.Input.Mouse.Down(FlaUI.Core.Input.MouseButton.Left);
+                Thread.Sleep(100);
+                FlaUI.Core.Input.Mouse.MoveTo(new System.Drawing.Point(from.X - 10, from.Y));
+                Thread.Sleep(100);
+                FlaUI.Core.Input.Mouse.MoveTo(to);
+                Thread.Sleep(150);
+                FlaUI.Core.Input.Mouse.Up(FlaUI.Core.Input.MouseButton.Left);
+
+                var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(8);
+                while (!moved && DateTime.UtcNow < deadline)
+                {
+                    try
+                    {
+                        moved = TabTitles(window).FirstOrDefault() == dragged;
+                    }
+                    catch
+                    {
+                        // Tree transient; retry.
+                    }
+
+                    Thread.Sleep(300);
+                }
+            }
+
+            Assert.True(moved, $"Tab did not move first after drag: {string.Join(", ", TabTitles(window))}");
+
+            // Keyboard reorder alternative (deterministic, no pointer
+            // gesture): the dragged tab is still selected, so moving it
+            // right restores Home first.
+            window.Focus();
+            var moveRight = WaitFor(() => FindButtonWithText(window, "Move document right"),
+                TimeSpan.FromSeconds(10), "move right button");
+            Assert.NotNull(moveRight);
+            moveRight.Patterns.Invoke.Pattern.Invoke();
+            var reordered = false;
+            var reorderDeadline = DateTime.UtcNow + TimeSpan.FromSeconds(8);
+            while (!reordered && DateTime.UtcNow < reorderDeadline)
             {
                 try
                 {
-                    moved = TabTitles(window).FirstOrDefault() == "Controls";
+                    reordered = TabTitles(window).FirstOrDefault() == "Home";
                 }
                 catch
                 {
@@ -1135,7 +1182,7 @@ public sealed class ShellFlowsTests : IDisposable
                 Thread.Sleep(300);
             }
 
-            Assert.True(moved, $"Controls tab did not move first: {string.Join(", ", TabTitles(window))}");
+            Assert.True(reordered, $"Move right did not restore Home first: {string.Join(", ", TabTitles(window))}");
 
             // Restore the default shell so later runs start Sidebar-first.
             window.Focus();

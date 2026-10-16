@@ -17,6 +17,7 @@ public partial class WorkspacePage : Page, INavigableView<WorkspaceViewModel>
     internal const string TabDragFormat = "DevTemWpf.DocumentTab";
 
     private Point _dragStart;
+    private bool _dragging;
 
     public WorkspacePage(WorkspaceViewModel viewModel)
     {
@@ -46,7 +47,9 @@ public partial class WorkspacePage : Page, INavigableView<WorkspaceViewModel>
     /// </summary>
     private void OnTabDragMove(object sender, MouseEventArgs e)
     {
-        if (e.LeftButton != MouseButtonState.Pressed)
+        // One gesture at a time: the modal drag loop pumps messages, so
+        // later moves would otherwise start nested drags with stale sources.
+        if (_dragging || e.LeftButton != MouseButtonState.Pressed)
         {
             return;
         }
@@ -63,10 +66,18 @@ public partial class WorkspacePage : Page, INavigableView<WorkspaceViewModel>
             return;
         }
 
-        _ = DragDrop.DoDragDrop(
-            DocumentTabs,
-            new DataObject(TabDragFormat, document.RouteKey),
-            DragDropEffects.Move);
+        _dragging = true;
+        try
+        {
+            _ = DragDrop.DoDragDrop(
+                DocumentTabs,
+                new DataObject(TabDragFormat, document.RouteKey),
+                DragDropEffects.Move);
+        }
+        finally
+        {
+            _dragging = false;
+        }
     }
 
     private void OnTabDragOver(object sender, DragEventArgs e)
