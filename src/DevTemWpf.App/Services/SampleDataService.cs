@@ -49,7 +49,22 @@ public sealed class SampleDataService
         return items;
     }
 
-    public IReadOnlyList<string> GetWeekdayLabels() => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    /// <summary>
+    /// Monday-first abbreviated day names in the CURRENT culture (real
+    /// localization for axis labels, not resx — the week rhythm differs
+    /// per culture, the demo values stay fixed).
+    /// </summary>
+    public IReadOnlyList<string> GetWeekdayLabels()
+    {
+        var names = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames;
+        var ordered = new List<string>(7);
+        for (var i = 0; i < 7; i++)
+        {
+            ordered.Add(names[((int)System.DayOfWeek.Monday + i) % 7]);
+        }
+
+        return ordered;
+    }
 
     public IReadOnlyList<double> GetWeeklyValues() => [42, 68, 55, 81, 63, 29, 74];
 }

@@ -7,7 +7,7 @@
       xmlns:res="clr-namespace:DevTemWpf.App.Resources"
       mc:Ignorable="d"
       d:DesignHeight="640" d:DesignWidth="720"
-      Title="Settings">
+      Title="{x:Static res:Strings.Settings_Title}">
   <ScrollViewer Padding="{StaticResource AppPageMargin}"
                 AutomationProperties.Name="Application settings">
     <StackPanel MaxWidth="{StaticResource AppContentMaxWidth}">
@@ -19,16 +19,16 @@
                 AutomationProperties.Name="Theme selector" Margin="{StaticResource AppGapGroup}" />
 
       <TextBlock Text="{x:Static res:Strings.Settings_Accent}" Style="{StaticResource AppBodyText}" Margin="{StaticResource AppGapTitle}" />
-      <CheckBox Content="Use a custom accent color"
+      <CheckBox Content="{x:Static res:Strings.Settings_CustomAccent}"
                 IsChecked="{Binding ViewModel.UseCustomAccent, Mode=TwoWay}"
                 AutomationProperties.Name="Custom accent toggle" Margin="{StaticResource AppGapTitle}" />
       <TextBox Text="{Binding ViewModel.AccentHex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                IsEnabled="{Binding ViewModel.UseCustomAccent}"
                AutomationProperties.Name="Custom accent hex value"
-               AutomationProperties.HelpText="Hex color like #4CC2FF"
+               AutomationProperties.HelpText="{x:Static res:Strings.Settings_AccentHexHelp}"
                Margin="{StaticResource AppGapGroup}" />
 
-      <CheckBox Content="Enable Mica backdrop (falls back to opaque when unsupported)"
+      <CheckBox Content="{x:Static res:Strings.Settings_BackdropToggle}"
                 IsChecked="{Binding ViewModel.BackdropEnabled, Mode=TwoWay}"
                 AutomationProperties.Name="Mica backdrop toggle" Margin="{StaticResource AppGapGroup}" />
 
@@ -47,11 +47,11 @@
                 SelectedItem="{Binding ViewModel.SelectedMotion, Mode=TwoWay}"
                 AutomationProperties.Name="Motion selector" Margin="{StaticResource AppGapGroup}" />
 
-      <CheckBox Content="Enable premium effects (ripple, animated surfaces)"
+      <CheckBox Content="{x:Static res:Strings.Settings_EffectsToggle}"
                 IsChecked="{Binding ViewModel.EffectsEnabled, Mode=TwoWay}"
                 AutomationProperties.Name="Effects toggle" Margin="{StaticResource AppGapGroup}" />
 
-      <CheckBox Content="Minimize to tray instead of the taskbar"
+      <CheckBox Content="{x:Static res:Strings.Settings_TrayToggle}"
                 IsChecked="{Binding ViewModel.MinimizeToTray, Mode=TwoWay}"
                 AutomationProperties.Name="Minimize to tray toggle" Margin="{StaticResource AppGapGroup}" />
 

@@ -16,9 +16,9 @@ post-1.0 unless marked **1.0**.
 | D13 | HLSL water-warp shader | Post-1.0 — needs toolchain + low-spec proof (D10). |
 | D14 | Drag-and-drop workspace patterns | Post-1.0 — no consumer. |
 | D15 | Top-nav + tabbed shells | Post-1.0 — needs real consumer + template surface. |
-| D16 | Full-gallery localization | Post-1.0 — pattern + proof shipped; mechanical remainder. |
-| D17 | Chart theming pass | Post-1.0 — defaults documented. |
-| D18 | TreeView / full DataGrid / TimePicker sample | Post-1.0 — gaps catalogued. |
+| D16 | Full-gallery localization | **1.3.0** — all gallery display copy in resx (en+de, parity-tested); automation names invariant; sample data + log text stay English by rule. |
+| D17 | Chart theming pass | **1.3.0** — transparent chart, theme/accent-following paints, SR summary; light + dark verified. Legends/tooltips remain library-default. |
+| D18 | TreeView / full DataGrid / TimePicker sample | **1.3.0** — native DataGrid + TreeView samples shipped with guides; WPF-UI TimePicker rejected after spike (broken popup reports + missing automation name on 4.3.0), gallery-scoped recipe instead. |
 | D19 | Per-service template flags | Post-1.0 candidate — bundles proven. |
 | D20 | Template NuGet package publishing | **1.0** — release mechanics (documented path exists). |
 | D21 | UI-test skip visibility (ShellFlowsTests `return`-on-skip reported passes) | **1.1.0** — fixed by `RequireUiOrSkip` + `Assert.Skip` and `eng/check-ui-tests.ps1` required gate (T04). |

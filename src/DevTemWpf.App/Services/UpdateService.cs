@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using DevTemWpf.App.Resources;
 using Microsoft.Extensions.Options;
 
 namespace DevTemWpf.App.Services;
@@ -48,12 +49,12 @@ public sealed partial class UpdateService : ObservableObject, IUpdateService
         if (string.IsNullOrEmpty(feed))
         {
             Status = UpdateStatus.Disabled;
-            Detail = "Updates are not configured (empty feed URL).";
+            Detail = Strings.Update_Disabled;
             return;
         }
 
         Status = UpdateStatus.Checking;
-        Detail = $"Checking {feed}…";
+        Detail = string.Format(Strings.Update_CheckingFormat, feed);
         _pending = null;
         try
         {
@@ -61,31 +62,31 @@ public sealed partial class UpdateService : ObservableObject, IUpdateService
             if (cancellationToken.IsCancellationRequested)
             {
                 Status = UpdateStatus.Idle;
-                Detail = "Check cancelled.";
+                Detail = Strings.Update_Cancelled;
                 return;
             }
 
             if (found is null)
             {
                 Status = UpdateStatus.UpToDate;
-                Detail = "You're up to date.";
+                Detail = Strings.Update_UpToDate;
             }
             else
             {
                 _pending = found;
                 Status = UpdateStatus.Available;
-                Detail = $"Version {found.Version} available ({found.SizeBytes / 1024} KB).";
+                Detail = string.Format(Strings.Update_AvailableFormat, found.Version, found.SizeBytes / 1024);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             Status = UpdateStatus.Idle;
-            Detail = "Check cancelled.";
+            Detail = Strings.Update_Cancelled;
         }
         catch (Exception ex)
         {
             Status = UpdateStatus.Failed;
-            Detail = $"Check failed: {ex.Message}";
+            Detail = string.Format(Strings.Update_FailedFormat, ex.Message);
         }
     }
 
@@ -93,7 +94,7 @@ public sealed partial class UpdateService : ObservableObject, IUpdateService
     {
         if (_pending is null)
         {
-            Detail = "Nothing to download — check for updates first.";
+            Detail = Strings.Update_NothingToDownload;
             return;
         }
 
@@ -106,18 +107,18 @@ public sealed partial class UpdateService : ObservableObject, IUpdateService
             await _engineFactory().DownloadAsync(feed, _pending, progress, cancellationToken).ConfigureAwait(false);
             Progress = 1.0;
             Status = UpdateStatus.ReadyToRestart;
-            Detail = $"Version {_pending.Version} ready — restarting…";
+            Detail = string.Format(Strings.Update_ReadyFormat, _pending.Version);
             _engineFactory().ApplyAndRestart(feed, _pending);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             Status = UpdateStatus.Idle;
-            Detail = "Download cancelled.";
+            Detail = Strings.Update_DownloadCancelled;
         }
         catch (Exception ex)
         {
             Status = UpdateStatus.Failed;
-            Detail = $"Download failed: {ex.Message}";
+            Detail = string.Format(Strings.Update_DownloadFailedFormat, ex.Message);
         }
     }
 }

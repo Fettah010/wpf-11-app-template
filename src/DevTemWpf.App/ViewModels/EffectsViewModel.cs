@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using DevTemWpf.App.Resources;
 using DevTemWpf.App.Services;
 using Wpf.Ui.Abstractions.Controls;
 
@@ -34,8 +35,11 @@ public sealed partial class EffectsViewModel : ObservableObject, INavigationAwar
     private void Reload()
     {
         var current = _settings.Current;
-        PolicyText = $"Effective motion: {_motion.CurrentPolicy} (preference: {current.Motion})";
-        EnvironmentText = $"OS animations: {(_motion.OsReducedMotion ? "off" : "on")}, " +
-            $"render tier {_motion.RenderTier}, effects: {(current.EffectsEnabled ? "on" : "off")}";
+        PolicyText = string.Format(Strings.Efx_PolicyFormat, _motion.CurrentPolicy, current.Motion);
+        EnvironmentText = string.Format(
+            Strings.Efx_EnvFormat,
+            _motion.OsReducedMotion ? Strings.Efx_Off : Strings.Efx_On,
+            _motion.RenderTier,
+            current.EffectsEnabled ? Strings.Efx_On : Strings.Efx_Off);
     }
 }

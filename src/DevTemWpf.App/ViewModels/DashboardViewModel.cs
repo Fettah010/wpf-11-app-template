@@ -1,10 +1,14 @@
 using System.ComponentModel;
+using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DevTemWpf.App.Resources;
 using DevTemWpf.App.Services;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
 using Wpf.Ui.Abstractions.Controls;
 
 namespace DevTemWpf.App.ViewModels;
@@ -12,39 +16,51 @@ namespace DevTemWpf.App.ViewModels;
 /// <summary>Dashboard: metrics, chart, sortable/filterable table, detail, stepper.</summary>
 public sealed partial class DashboardViewModel : ObservableObject, INavigationAware
 {
-    private static readonly string[] StepTitles = ["Connect", "Choose", "Review"];
+    private static readonly string[] StepTitles =
+    [
+        Strings.Dash_Step1Title,
+        Strings.Dash_Step2Title,
+        Strings.Dash_Step3Title,
+    ];
     private static readonly string[] StepBodies =
     [
-        "Step 1 of 3 — everything on this page is deterministic sample data.",
-        "Step 2 of 3 — filter or sort the activity table, then pick a row.",
-        "Step 3 of 3 — review the detail card. Done (nothing is provisioned).",
+        Strings.Dash_Step1Body,
+        Strings.Dash_Step2Body,
+        Strings.Dash_Step3Body,
     ];
 
     private readonly List<ActivityItem> _all;
     private readonly FavoritesStore _favorites;
+    private readonly ISettingsService? _settings;
+    private readonly Func<string, Color?> _resolveColor;
+    private readonly List<double> _weeklyValues;
+    private readonly List<string> _weekdayLabels;
     private string _sortColumn = nameof(ActivityItem.Timestamp);
     private ListSortDirection _sortDirection = ListSortDirection.Descending;
 
-    public DashboardViewModel(SampleDataService data, FavoritesStore favorites)
+    public DashboardViewModel(
+        SampleDataService data,
+        FavoritesStore favorites,
+        ISettingsService? settings = null,
+        Func<string, Color?>? resolveColor = null)
     {
         _favorites = favorites;
+        _settings = settings;
+        _resolveColor = resolveColor ?? DefaultResolveColor;
         Metrics = data.GetMetrics();
         _all = data.GetActivities().ToList();
         Activities = CollectionViewSource.GetDefaultView(_all);
         Activities.Filter = Matches;
         ApplySort();
 
-        Series =
-        [
-            new LineSeries<double>
-            {
-                Values = data.GetWeeklyValues(),
-                Fill = null,
-                GeometrySize = 8,
-                Name = "Completed tasks",
-            },
-        ];
-        XAxes = [new Axis { Labels = data.GetWeekdayLabels().ToList() }];
+        _weeklyValues = data.GetWeeklyValues().ToList();
+        _weekdayLabels = data.GetWeekdayLabels().ToList();
+        BuildChart();
+        if (_settings is not null)
+        {
+            _settings.Updated += OnSettingsUpdated;
+        }
+
         UpdateStep();
     }
 
@@ -52,9 +68,17 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
 
     public ICollectionView Activities { get; }
 
-    public ISeries[] Series { get; }
+    [ObservableProperty]
+    private ISeries[] series = [];
 
-    public Axis[] XAxes { get; }
+    [ObservableProperty]
+    private Axis[] xAxes = [];
+
+    [ObservableProperty]
+    private Axis[] yAxes = [];
+
+    [ObservableProperty]
+    private string chartSummary = string.Empty;
 
     [ObservableProperty]
     private string searchText = string.Empty;
@@ -63,7 +87,7 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
     private ActivityItem? selectedActivity;
 
     [ObservableProperty]
-    private string favoriteGlyph = "☆ Mark favorite";
+    private string favoriteGlyph = Strings.Dash_FavMark;
 
     [ObservableProperty]
     private string sortStatusText = string.Empty;
@@ -89,7 +113,88 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
 
     public Task OnNavigatedToAsync() => Task.CompletedTask;
 
-    public Task OnNavigatedFromAsync() => Task.CompletedTask;
+    public Task OnNavigatedFromAsync()
+    {
+        if (_settings is not null)
+        {
+            _settings.Updated -= OnSettingsUpdated;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private void OnSettingsUpdated(object? sender, ShellSettings settings) => BuildChart();
+
+    private static Color? DefaultResolveColor(string key) =>
+        Application.Current?.TryFindResource(key) as Color?;
+
+    /// <summary>
+    /// Rebuilds chart paints from the live theme (1.3.0). Colors resolve
+    /// from application resources with dark fallbacks, so light, dark,
+    /// high-contrast, and custom accents all flow through.
+    /// </summary>
+    private void BuildChart()
+    {
+        var text = _resolveColor("TextFillColorPrimary") ?? Color.FromRgb(0xF3, 0xF3, 0xF3);
+        var accent = _resolveColor("SystemAccentColorPrimary") ?? Color.FromRgb(0x4C, 0xC2, 0xFF);
+        var palette = ChartPalette.For(text, accent);
+
+        Series =
+        [
+            new LineSeries<double>
+            {
+                Values = _weeklyValues,
+                Fill = null,
+                Stroke = new SolidColorPaint(palette.Series, 2),
+                GeometryFill = new SolidColorPaint(palette.Series),
+                GeometrySize = 8,
+                Name = "Completed tasks",
+            },
+        ];
+        XAxes =
+        [
+            new Axis
+            {
+                Labels = _weekdayLabels,
+                LabelsPaint = new SolidColorPaint(palette.AxisText),
+                SeparatorsPaint = new SolidColorPaint(palette.GridLines),
+            },
+        ];
+        YAxes =
+        [
+            new Axis
+            {
+                LabelsPaint = new SolidColorPaint(palette.AxisText),
+                SeparatorsPaint = new SolidColorPaint(palette.GridLines),
+            },
+        ];
+        ChartSummary = DescribeTrend(_weeklyValues, _weekdayLabels);
+    }
+
+    internal static string DescribeTrend(IReadOnlyList<double> values, IReadOnlyList<string> labels)
+    {
+        if (values.Count == 0)
+        {
+            return "No data.";
+        }
+
+        var total = values.Sum();
+        var peak = values.Max();
+        var peakIndex = 0;
+        for (var i = 1; i < values.Count; i++)
+        {
+            if (values[i] > values[peakIndex])
+            {
+                peakIndex = i;
+            }
+        }
+
+        var peakLabel = labels.Count == values.Count ? labels[peakIndex] : $"point {peakIndex + 1}";
+        var trend = values[^1] > values[0] ? Strings.Dash_TrendUp
+            : values[^1] < values[0] ? Strings.Dash_TrendDown
+            : Strings.Dash_TrendFlat;
+        return string.Format(Strings.Dash_ChartSummaryFormat, $"{total:0}", peakLabel, $"{peak:0}", trend);
+    }
 
     partial void OnSearchTextChanged(string value)
     {
@@ -117,8 +222,8 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
     private void UpdateFavoriteGlyph()
     {
         FavoriteGlyph = SelectedActivity is not null && _favorites.IsFavorite(SelectedActivity.Id)
-            ? "★ Favorited — tap to remove"
-            : "☆ Mark favorite";
+            ? Strings.Dash_FavRemove
+            : Strings.Dash_FavMark;
     }
 
     [RelayCommand]
@@ -163,14 +268,29 @@ public sealed partial class DashboardViewModel : ObservableObject, INavigationAw
     {
         Activities.SortDescriptions.Clear();
         Activities.SortDescriptions.Add(new SortDescription(_sortColumn, _sortDirection));
-        SortStatusText = $"Sorted by {_sortColumn} {(_sortDirection == ListSortDirection.Ascending ? "↑" : "↓")} · {_all.Count} rows";
+        SortStatusText = string.Format(
+            Strings.Dash_SortStatusFormat,
+            DisplayColumnName(_sortColumn),
+            _sortDirection == ListSortDirection.Ascending ? "↑" : "↓",
+            _all.Count);
         UpdateResultFlags();
     }
+
+    /// <summary>Sort property names are technical; display the localized header.</summary>
+    private static string DisplayColumnName(string property) => property switch
+    {
+        nameof(ActivityItem.Timestamp) => Strings.Dash_ColTime,
+        nameof(ActivityItem.Name) => Strings.Dash_ColName,
+        nameof(ActivityItem.Category) => Strings.Dash_ColCategory,
+        nameof(ActivityItem.Status) => Strings.Dash_ColStatus,
+        nameof(ActivityItem.Value) => Strings.Dash_ColValue,
+        _ => property,
+    };
 
     private void UpdateResultFlags()
     {
         OnPropertyChanged(nameof(HasResults));
-        NoResultsMessage = HasResults ? null : $"No activities match \"{SearchText}\".";
+        NoResultsMessage = HasResults ? null : string.Format(Strings.Dash_NoResultsFormat, SearchText);
     }
 
     private bool Matches(object item)

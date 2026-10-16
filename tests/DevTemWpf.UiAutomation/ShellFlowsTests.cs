@@ -75,6 +75,9 @@ public sealed class ShellFlowsTests : IDisposable
         [DllImport("user32.dll")]
         public static extern bool GetWindowRect(IntPtr hWnd, out Rect rect);
 
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
+
         [StructLayout(LayoutKind.Sequential)]
         public struct Rect
         {
@@ -85,6 +88,118 @@ public sealed class ShellFlowsTests : IDisposable
             public readonly int Width => Right - Left;
             public readonly int Height => Bottom - Top;
         }
+    }
+
+    /// <summary>
+    /// Sets a named text box exactly like a user would (focus — which scrolls
+    /// it into view — select all, type), re-finding the box on every attempt
+    /// and verifying the effect by reading the value back. Retries while
+    /// desktop focus is contested; throws on persistent mismatch.
+    /// </summary>
+    private static void TypeIntoBox(Window window, string boxName, string text)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(30);
+        while (DateTime.UtcNow < deadline)
+        {
+            try
+            {
+                var box = window.FindFirstDescendant(cf => cf.ByName(boxName));
+                if (box is null)
+                {
+                    Thread.Sleep(300);
+                    continue;
+                }
+
+                box.Focus();
+                Thread.Sleep(200);
+                Keyboard.Press(VirtualKeyShort.CONTROL);
+                Keyboard.Press(VirtualKeyShort.KEY_A);
+                Keyboard.Release(VirtualKeyShort.CONTROL);
+                Keyboard.Press(VirtualKeyShort.BACK);
+                foreach (var ch in text)
+                {
+                    Keyboard.Type(ch.ToString());
+                    Thread.Sleep(30);
+                }
+
+                Thread.Sleep(500);
+                var current = window.FindFirstDescendant(cf => cf.ByName(boxName));
+                if (current?.Patterns.Value.Pattern.Value == text)
+                {
+                    return;
+                }
+            }
+            catch
+            {
+                // Tree transient; retry.
+            }
+
+            Thread.Sleep(300);
+        }
+
+        throw new InvalidOperationException($"Could not set '{boxName}' to '{text}' (desktop focus may be contested).");
+    }
+
+    /// <summary>
+    /// Finds a Button by its visible label. Some dialog buttons surface only
+    /// as inner text (no invokable peer carries the name); climb to the
+    /// owning Button in that case. Prefers enabled buttons: idle gallery
+    /// buttons (e.g. the busy-task Cancel) share labels with dialog buttons.
+    /// Returns null when nothing actionable exists yet (keeps WaitFor honest).
+    /// </summary>
+    private static AutomationElement? FindButtonWithText(AutomationElement scope, string label)
+    {
+        var matches = scope.FindAllDescendants(cf => cf.ByName(label));
+        foreach (var el in matches)
+        {
+            AutomationElement? button = el.ControlType == FlaUI.Core.Definitions.ControlType.Button
+                ? el
+                : ClimbToButton(el);
+            if (button is null)
+            {
+                continue;
+            }
+
+            try
+            {
+                if (button.IsEnabled)
+                {
+                    return button;
+                }
+            }
+            catch
+            {
+                // Stale peer; keep looking.
+            }
+        }
+
+        return null;
+    }
+
+    private static AutomationElement? ClimbToButton(AutomationElement el)
+    {
+        var current = el.Parent;
+        while (current is not null && current.ControlType != FlaUI.Core.Definitions.ControlType.Button)
+        {
+            current = current.Parent;
+        }
+
+        return current;
+    }
+
+    private static AutomationElement? FindTreeItem(AutomationElement scope, string label)
+    {
+        // TreeViewItem containers are unnamed (the label lives on the inner
+        // text); climb from the label to its owning TreeItem.
+        var text = scope.FindAllDescendants(cf => cf.ByName(label))
+            .FirstOrDefault(e => e.ControlType == FlaUI.Core.Definitions.ControlType.Text);
+        var current = text?.Parent;
+        while (current is not null && current.ControlType != FlaUI.Core.Definitions.ControlType.TreeItem)
+        {
+            current = current.Parent;
+        }
+
+        return current;
     }
 
     private static IntPtr MainHandle(Application app)
@@ -176,6 +291,24 @@ public sealed class ShellFlowsTests : IDisposable
         }
 
         window.Focus();
+        // Best-effort foreground: on contested desktops another window can
+        // steal activation between steps. Bounded wait; never fails here —
+        // later waits fail loudly with context if clicks truly miss.
+        try
+        {
+            var me = Process.GetProcessById(app.ProcessId).MainWindowHandle;
+            var until = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+            while (DateTime.UtcNow < until && NativeWindow.GetForegroundWindow() != me)
+            {
+                window.Focus();
+                Thread.Sleep(250);
+            }
+        }
+        catch
+        {
+            // Best effort only.
+        }
+
         return window;
     }
 
@@ -298,6 +431,7 @@ public sealed class ShellFlowsTests : IDisposable
             // Name replaces the text content in UIA lookups (verified).
             ("Home", "Home headline"),
             ("Controls", "Gallery dialog demo"),
+            ("Data", "Data grid"),
             ("Design Tokens", "Design token preview"),
             ("Effects", "Play standard preset"),
             ("Settings", "Theme selector"),
@@ -371,11 +505,17 @@ public sealed class ShellFlowsTests : IDisposable
             Thread.Sleep(300);
             demo.Patterns.Invoke.Pattern.Invoke();
 
-            var cancel = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Cancel")),
-                TimeSpan.FromSeconds(10), "dialog Cancel button");
+            var cancel = WaitFor(() =>
+            {
+                var button = FindButtonWithText(window, "Cancel");
+                return button is not null && button.IsEnabled ? button : null;
+            }, TimeSpan.FromSeconds(10), "dialog Cancel button");
+            Assert.NotNull(cancel);
             cancel.Patterns.Invoke.Pattern.Invoke();
 
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Cancel")) is null ? new object() : null,
+            // The busy demo button shares the "Cancel" label, so wait on the
+            // dialog window itself disappearing instead of the name.
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Delete sample item?")) is null ? new object() : null,
                 TimeSpan.FromSeconds(10), "dialog to close");
         }
         finally
@@ -428,6 +568,194 @@ public sealed class ShellFlowsTests : IDisposable
             }
 
             Assert.Equal("Inputs section heading", focused);
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    [WpfFact]
+    public void DataGrid_FilterSelectKeyboard_RoundTrip()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data")),
+                TimeSpan.FromSeconds(10), "nav item 'Data'").Click();
+            var grid = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid")),
+                TimeSpan.FromSeconds(10), "data grid");
+            Assert.NotNull(grid);
+
+            // Filter narrows the rows; the surviving cell proves it. (Label
+            // TextBlocks carry automation names instead of content, so the
+            // test asserts on cell presence, not label text.)
+            var filter = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid filter")),
+                TimeSpan.FromSeconds(10), "data grid filter");
+            TypeIntoBox(window, "Data grid filter", "Task 00001");
+            var cell = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Task 00001")),
+                TimeSpan.FromSeconds(10), "filtered cell");
+            Assert.NotNull(cell);
+
+            // Impossible filter shows the empty notice (collapsed = absent
+            // from the UIA tree, so presence proves visibility).
+            filter = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid filter")),
+                TimeSpan.FromSeconds(10), "data grid filter");
+            TypeIntoBox(window, "Data grid filter", "zzz-no-match");
+            var empty = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid empty notice")),
+                TimeSpan.FromSeconds(10), "empty notice");
+            Assert.NotNull(empty);
+
+            // Clearing restores rows; selecting the first one selects it.
+            window = app.GetMainWindow(automation, TimeSpan.FromSeconds(15))
+                ?? throw new InvalidOperationException("Main window lost.");
+            window.Focus();
+            filter = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid filter")),
+                TimeSpan.FromSeconds(10), "data grid filter");
+            TypeIntoBox(window, "Data grid filter", string.Empty);
+            cell = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Task 00001")),
+                TimeSpan.FromSeconds(10), "restored cell");
+            cell.Click();
+            // Selection is asserted on the grid: in FullRow mode cells do not
+            // carry SelectionItem themselves.
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+            var selected = false;
+            while (!selected && DateTime.UtcNow < deadline)
+            {
+                try
+                {
+                    selected = grid.Patterns.Selection.Pattern.Selection.Value.Length > 0;
+                }
+                catch
+                {
+                    // Tree is transient; retry.
+                }
+
+                Thread.Sleep(200);
+            }
+
+            Assert.True(selected, "Clicked grid row is selected.");
+
+            // Keyboard reaches grid content (focus moves across distinct elements).
+            filter = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid filter")),
+                TimeSpan.FromSeconds(10), "data grid filter");
+            filter.Click();
+            var seen = new HashSet<string>();
+            for (var i = 0; i < 10; i++)
+            {
+                Keyboard.Press(VirtualKeyShort.TAB);
+                Thread.Sleep(150);
+                var focused = automation.FocusedElement();
+                if (focused is not null)
+                {
+                    seen.Add($"{focused.ControlType}:{focused.Name}");
+                }
+            }
+
+            Assert.True(seen.Count >= 3, $"Focus visited {seen.Count} distinct elements.");
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    [WpfFact]
+    public void DataTree_ExpandSelectKeyboard_RoundTrip()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data")),
+                TimeSpan.FromSeconds(10), "nav item 'Data'").Click();
+            var tree = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data tree")),
+                TimeSpan.FromSeconds(10), "data tree");
+            Assert.NotNull(tree);
+
+            // Expand-all reveals deep nodes. Note: nodes surface twice in the
+            // tree (TreeItem container + inner text); interact with the
+            // TreeItem, which carries SelectionItem.
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Expand all nodes")),
+                TimeSpan.FromSeconds(10), "expand-all button").Patterns.Invoke.Pattern.Invoke();
+            var alice = WaitFor(() => FindTreeItem(window, "Alice"),
+                TimeSpan.FromSeconds(10), "tree leaf");
+            Assert.NotNull(alice);
+
+            // Selecting a node selects it (programmatic Select proves the
+            // selection plumbing + VM sync without depending on viewport
+            // coordinates; keyboard traversal below proves interaction).
+            alice.Patterns.SelectionItem.Pattern.Select();
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+            var selected = false;
+            while (!selected && DateTime.UtcNow < deadline)
+            {
+                try
+                {
+                    var current = FindTreeItem(window, "Alice");
+                    selected = current?.Patterns.SelectionItem.Pattern.IsSelected == true;
+                }
+                catch
+                {
+                    // Tree is transient; retry.
+                }
+
+                Thread.Sleep(200);
+            }
+
+            Assert.True(selected, "Selected tree node is selected.");
+
+            // Keyboard moves selection onward (Alice -> Bob) from a focused
+            // node; arrows auto-scroll, so this holds on any viewport.
+            alice.Focus();
+            Thread.Sleep(300);
+            Keyboard.Press(VirtualKeyShort.DOWN);
+            Thread.Sleep(300);
+            deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+            var moved = false;
+            while (!moved && DateTime.UtcNow < deadline)
+            {
+                try
+                {
+                    var bob = FindTreeItem(window, "Bob");
+                    moved = bob?.Patterns.SelectionItem.Pattern.IsSelected == true;
+                }
+                catch
+                {
+                    // Tree is transient; retry.
+                }
+
+                Thread.Sleep(200);
+            }
+
+            Assert.True(moved, "Keyboard DOWN moved tree selection to Bob.");
+
+            // Keyboard traverses the tree onward from Alice (Bob, Cara, …).
+            // TreeItems are unnamed, so key on each focused item's label text.
+            string LabelOf(AutomationElement? el) =>
+                el?.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text))?.Name ?? "<none>";
+            var seen = new HashSet<string>();
+            for (var i = 0; i < 6; i++)
+            {
+                Keyboard.Press(VirtualKeyShort.DOWN);
+                Thread.Sleep(200);
+                seen.Add(LabelOf(automation.FocusedElement()));
+            }
+
+            Assert.True(seen.Count >= 2, $"Keyboard visited {seen.Count} distinct tree elements.");
         }
         finally
         {
@@ -532,6 +860,99 @@ public sealed class ShellFlowsTests : IDisposable
                 combo = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Theme selector")),
                     TimeSpan.FromSeconds(10), "theme selector");
             }
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    [WpfFact]
+    public void TimeEditor_SetAndValidate_RoundTrip()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data")),
+                TimeSpan.FromSeconds(10), "nav item 'Data'").Click();
+            var hour = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Time hour input")),
+                TimeSpan.FromSeconds(10), "time hour input");
+            Assert.NotNull(hour);
+
+            // Invalid hour surfaces a text error (collapsed = absent, so
+            // presence proves visibility).
+            TypeIntoBox(window, "Time hour input", "99");
+            var error = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Time validation error")),
+                TimeSpan.FromSeconds(10), "time validation error");
+            Assert.NotNull(error);
+
+            // Valid input clears the error and updates the summary.
+            TypeIntoBox(window, "Time hour input", "14");
+            TypeIntoBox(window, "Time minute input", "30");
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+            var cleared = false;
+            while (!cleared && DateTime.UtcNow < deadline)
+            {
+                Thread.Sleep(300);
+                cleared = window.FindFirstDescendant(cf => cf.ByName("Time validation error")) is null;
+            }
+
+            Assert.True(cleared, "Time error cleared after valid input.");
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    [WpfFact]
+    public void BusyDemo_Cancel_StopsEarly()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                TimeSpan.FromSeconds(10), "nav item 'Controls'").Click();
+            var run = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Gallery busy demo button")),
+                TimeSpan.FromSeconds(10), "busy demo button");
+            run.Patterns.Invoke.Pattern.Invoke();
+
+            // Cancel while busy: the run button must re-enable long before
+            // the 5-second natural finish.
+            var cancel = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Cancel busy task")),
+                TimeSpan.FromSeconds(10), "cancel busy button");
+            cancel.Patterns.Invoke.Pattern.Invoke();
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(4);
+            var idle = false;
+            while (!idle && DateTime.UtcNow < deadline)
+            {
+                try
+                {
+                    idle = window.FindFirstDescendant(cf => cf.ByName("Gallery busy demo button"))?.IsEnabled == true;
+                }
+                catch
+                {
+                    // Tree transient; retry.
+                }
+
+                Thread.Sleep(200);
+            }
+
+            Assert.True(idle, "Run button re-enabled shortly after cancel (not after 5 s).");
         }
         finally
         {

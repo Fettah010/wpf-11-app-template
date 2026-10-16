@@ -21,6 +21,16 @@ public partial class App : Application
 
         try
         {
+            // Culture FIRST (1.3.0): every thread created afterwards (host,
+            // threadpool, page construction) must inherit it — applying it
+            // after StartAsync left page construction on en-US while VM
+            // lookups already saw German (see 1.3.0 report). No host needed.
+            var earlySettings = new DevTemWpf.App.Services.SettingsService();
+            await earlySettings.LoadAsync().ConfigureAwait(true);
+            DevTemWpf.App.Services.CultureService.ApplyCulture(earlySettings.Current.Culture);
+            DevTemWpf.App.Resources.Strings.OverrideCulture =
+                DevTemWpf.App.Services.CultureService.CultureOrNull(earlySettings.Current.Culture);
+
             var builder = Host.CreateApplicationBuilder(e.Args);
             builder.ConfigureForApp();
             //#if (IncludeServices)
@@ -47,7 +57,15 @@ public partial class App : Application
                 // Persist (creates the file on first run, repairs corrupt files).
                 await settings.UpdateAsync(static s => s).ConfigureAwait(true);
             }
-            if (!DevTemWpf.App.Services.CultureService.ApplyCulture(settings.Current.Culture))
+
+            // Re-assert the culture on the dispatcher thread: continuations
+            // may have resumed on a pool thread whose culture never saw the
+            // early application above.
+            var cultureOk = false;
+            Dispatcher.Invoke(() => cultureOk = DevTemWpf.App.Services.CultureService.ApplyCulture(settings.Current.Culture));
+            DevTemWpf.App.Resources.Strings.OverrideCulture =
+                DevTemWpf.App.Services.CultureService.CultureOrNull(settings.Current.Culture);
+            if (!cultureOk)
             {
                 startupLog.LogWarning("Unknown culture '{Culture}'; using system culture.", settings.Current.Culture);
             }

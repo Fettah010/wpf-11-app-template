@@ -49,6 +49,9 @@ public sealed record ShellSettings
 
     public UpdateChannel UpdateChannel { get; init; } = UpdateChannel.Stable;
 
+    /// <summary>Expanded data-tree node IDs (1.3.0 sample persistence).</summary>
+    public string[] ExpandedDataNodes { get; init; } = [];
+
     public bool MinimizeToTray { get; init; }
 
     /// <summary>UI culture name (e.g. "de"); empty = system culture.</summary>
