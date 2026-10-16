@@ -979,6 +979,185 @@ public sealed class ShellFlowsTests : IDisposable
         }
     }
 
+    /// <summary>Reads the detail toggle's check state (null when missing).</summary>
+    private static FlaUI.Core.Definitions.ToggleState? DetailToggleState(AutomationElement scope)
+    {
+        try
+        {
+            return scope.FindFirstDescendant(cf => cf.ByName("Toggle detail pane"))
+                ?.Patterns.Toggle.Pattern.ToggleState;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Reads tab header titles in tree order (proves visual reorder).
+    /// </summary>
+    private static List<string> TabTitles(AutomationElement scope)
+    {
+        var titles = new List<string>();
+        foreach (var tab in scope.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.TabItem)))
+        {
+            try
+            {
+                var text = tab.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text));
+                if (text is not null)
+                {
+                    titles.Add(text.Name);
+                }
+            }
+            catch
+            {
+                // Tree transient; skip.
+            }
+        }
+
+        return titles;
+    }
+
+    [WpfFact]
+    public void WorkspaceTab_Drag_Reorders()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
+                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
+            SelectShellOption(window, "Tabbed");
+            WaitForShellPersisted(3); // ShellMode.Tabbed
+            (window, app) = RelaunchAfterRestart(window, app, automation);
+
+            // Three documents: home (restored), data, controls.
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Open documents")),
+                TimeSpan.FromSeconds(10), "documents tab strip");
+
+            // Close everything first: persisted tabs from earlier runs would
+            // otherwise make the starting order nondeterministic.
+            for (var i = 0; i < 8; i++)
+            {
+                var any = window.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.TabItem))
+                    .FirstOrDefault();
+                if (any is null)
+                {
+                    break;
+                }
+
+                window.Focus();
+                var closeAny = WaitFor(() => FindButtonWithText(window, "Close document"),
+                    TimeSpan.FromSeconds(10), "close document button");
+                Assert.NotNull(closeAny);
+                closeAny.Patterns.Invoke.Pattern.Invoke();
+                Thread.Sleep(500); // let close + repersist settle
+            }
+
+            // Fresh opens append in order: home, data, controls.
+            // Each tab is awaited before the next click so the order is
+            // deterministic regardless of page-load latency.
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home")),
+                TimeSpan.FromSeconds(10), "nav item 'Home'").Click();
+            Assert.NotNull(WaitFor(() => FindTabItem(window, "Home"),
+                TimeSpan.FromSeconds(10), "home tab"));
+
+            // Detail pane toggles via keyboard-accessible checkbox (the
+            // keyboard alternative to splitter dragging). Toggled through
+            // the Toggle pattern (focus-independent on this contested
+            // desktop) and verified on peer-backed children: plain Borders
+            // expose no UIA peer, so the container's own name is not
+            // searchable — the Close button is the reliable hook.
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Toggle detail pane")),
+                TimeSpan.FromSeconds(10), "detail toggle").Patterns.Toggle.Pattern.Toggle();
+            WaitWhile(() => DetailToggleState(window) != FlaUI.Core.Definitions.ToggleState.Off,
+                TimeSpan.FromSeconds(10), "detail toggle to uncheck");
+            WaitWhile(() => FindButtonWithText(window, "Close document") is not null,
+                TimeSpan.FromSeconds(10), "detail pane to collapse");
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Toggle detail pane")),
+                TimeSpan.FromSeconds(10), "detail toggle").Patterns.Toggle.Pattern.Toggle();
+            WaitWhile(() => DetailToggleState(window) != FlaUI.Core.Definitions.ToggleState.On,
+                TimeSpan.FromSeconds(10), "detail toggle to check");
+            var closeAfter = WaitFor(() => FindButtonWithText(window, "Close document"),
+                TimeSpan.FromSeconds(10), "detail pane to expand");
+            Assert.NotNull(closeAfter);
+            Assert.NotNull(WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Detail splitter")),
+                TimeSpan.FromSeconds(10), "detail splitter"));
+
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data")),
+                TimeSpan.FromSeconds(10), "nav item 'Data'").Click();
+            Assert.NotNull(WaitFor(() => FindTabItem(window, "Data"),
+                TimeSpan.FromSeconds(10), "data tab"));
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                TimeSpan.FromSeconds(10), "nav item 'Controls'").Click();
+            Assert.NotNull(WaitFor(() => FindTabItem(window, "Controls"),
+                TimeSpan.FromSeconds(10), "controls tab"));
+
+            // Drag the last tab ("Controls") onto the first ("Home").
+            window.Focus();
+            var source = WaitFor(() => FindTabItem(window, "Controls"),
+                TimeSpan.FromSeconds(10), "drag source tab");
+            var target = WaitFor(() => FindTabItem(window, "Home"),
+                TimeSpan.FromSeconds(10), "drop target tab");
+            var from = source.GetClickablePoint();
+            var to = target.GetClickablePoint();
+            FlaUI.Core.Input.Mouse.MoveTo(from);
+            Thread.Sleep(200);
+            FlaUI.Core.Input.Mouse.Down(FlaUI.Core.Input.MouseButton.Left);
+            Thread.Sleep(200);
+            FlaUI.Core.Input.Mouse.MoveTo(new System.Drawing.Point(from.X - 10, from.Y));
+            Thread.Sleep(200);
+            FlaUI.Core.Input.Mouse.MoveTo(to);
+            Thread.Sleep(300);
+            FlaUI.Core.Input.Mouse.Up(FlaUI.Core.Input.MouseButton.Left);
+
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+            var moved = false;
+            while (!moved && DateTime.UtcNow < deadline)
+            {
+                try
+                {
+                    moved = TabTitles(window).FirstOrDefault() == "Controls";
+                }
+                catch
+                {
+                    // Tree transient; retry.
+                }
+
+                Thread.Sleep(300);
+            }
+
+            Assert.True(moved, $"Controls tab did not move first: {string.Join(", ", TabTitles(window))}");
+
+            // Restore the default shell so later runs start Sidebar-first.
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
+                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
+            SelectShellOption(window, "Sidebar");
+            WaitForShellPersisted(1); // ShellMode.Sidebar
+            (window, app) = RelaunchAfterRestart(window, app, automation);
+            window.Focus();
+            Assert.NotNull(WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home headline")),
+                TimeSpan.FromSeconds(10), "home content in Sidebar shell"));
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
     [WpfFact]
     public void TabbedShell_Documents_OpenFocusClose_And_Persist()
     {

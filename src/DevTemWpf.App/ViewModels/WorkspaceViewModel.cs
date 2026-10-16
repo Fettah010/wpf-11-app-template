@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -12,9 +13,11 @@ namespace DevTemWpf.App.ViewModels;
 /// Document-workspace state for the Tabbed shell (1.4.0). Documents are
 /// route-keyed pages shared with every other shell (no shell-specific page
 /// rewrites): opening resolves the same page type the rail would navigate to.
-/// Each open carries a generation token — completions from a superseded open
-/// (rapid switching, cancellation, disposal) are ignored, so no stale async
-/// work ever touches a document. Lifecycle hooks follow tab semantics:
+/// Opens are independent per route key: rapid opens of different documents
+/// all complete (each carries its own cancellation). A stale open can never
+/// surface a document — same-key double opens collapse into one, closing a
+/// document cancels its in-flight open, and leaving the page cancels every
+/// in-flight open. Lifecycle hooks follow tab semantics:
 /// <c>OnNavigatedToAsync</c> runs once when a document opens,
 /// <c>OnNavigatedFromAsync</c> once when it closes; switching tabs only
 /// changes selection (dormant tabs keep state — that is the point of tabs).
@@ -28,9 +31,8 @@ public sealed partial class WorkspaceViewModel : ObservableObject, INavigationAw
 
     private readonly ISettingsService _settings;
     private readonly Func<Type, object> _pageFactory;
-    private int _generation;
+    private readonly ConcurrentDictionary<string, CancellationTokenSource> _openTokens = new(StringComparer.Ordinal);
     private bool _loaded;
-    private CancellationTokenSource? _openCts;
     private readonly List<string> _history = [];
     private int _historyIndex = -1;
     private bool _navigatingHistory;
@@ -77,7 +79,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject, INavigationAw
 
     public Task OnNavigatedFromAsync()
     {
-        _openCts?.Cancel();
+        foreach (var token in _openTokens.Values)
+        {
+            token.Cancel();
+        }
+
         return Task.CompletedTask;
     }
 
@@ -90,72 +96,94 @@ public sealed partial class WorkspaceViewModel : ObservableObject, INavigationAw
     {
         EnsureLoaded();
         var route = NavigationRoutes.Find(routeKey) ?? NavigationRoutes.Find("home")!;
-        var existing = Documents.FirstOrDefault(d => d.RouteKey == route.Key);
-        if (existing is not null)
+        if (Documents.FirstOrDefault(d => d.RouteKey == route.Key) is { } focused)
         {
-            SelectDocument(existing);
+            SelectDocument(focused);
             return;
         }
 
-        var generation = ++_generation;
-        _openCts?.Cancel();
-        _openCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var token = _openCts.Token;
+        if (_openTokens.ContainsKey(route.Key))
+        {
+            // Same-key open already in flight: it selects on completion.
+            return;
+        }
 
-        FrameworkElement page;
+        var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        _openTokens[route.Key] = cts;
+        var token = cts.Token;
         try
         {
-            page = (FrameworkElement)_pageFactory(route.PageType);
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            // Unresolvable page (preset without that file): fall back to home
-            // instead of breaking the workspace.
-            if (!string.Equals(route.Key, "home", StringComparison.Ordinal))
-            {
-                await OpenDocumentAsync("home", cancellationToken).ConfigureAwait(false);
-            }
-
-            return;
-        }
-
-        var aware = TryGetNavigationAware(page);
-        if (aware is not null)
-        {
+            FrameworkElement page;
             try
             {
-                await aware.OnNavigatedToAsync().WaitAsync(token).ConfigureAwait(false);
+                page = (FrameworkElement)_pageFactory(route.PageType);
             }
-            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                // Unresolvable page (preset without that file): fall back to
+                // home instead of breaking the workspace.
+                if (!string.Equals(route.Key, "home", StringComparison.Ordinal))
+                {
+                    await OpenDocumentAsync("home", cancellationToken).ConfigureAwait(false);
+                }
+
+                return;
+            }
+
+            var aware = TryGetNavigationAware(page);
+            if (aware is not null)
+            {
+                try
+                {
+                    await aware.OnNavigatedToAsync().WaitAsync(token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (token.IsCancellationRequested)
+                {
+                    return;
+                }
+            }
+
+            if (token.IsCancellationRequested)
             {
                 return;
             }
-        }
 
-        if (generation != _generation || token.IsCancellationRequested)
-        {
-            // Superseded by a newer open (rapid switching): never surface a
-            // stale document.
-            return;
-        }
+            // The hook awaited above can resume on a threadpool thread, but the
+            // collection, selection, and persistence below are UI-bound (bindings
+            // + settings Updated subscribers), so rejoin the UI thread first.
+            // The existence re-check collapses same-key races into one document.
+            await RunOnUiThreadAsync(async () =>
+            {
+                var duplicate = Documents.FirstOrDefault(d => d.RouteKey == route.Key);
+                if (duplicate is not null)
+                {
+                    SelectDocument(duplicate);
+                    return;
+                }
 
-        // The hook awaited above can resume on a threadpool thread, but the
-        // collection, selection, and persistence below are UI-bound (bindings
-        // + settings Updated subscribers), so rejoin the UI thread first.
-        await RunOnUiThreadAsync(async () =>
+                var document = new Document(route.Key, route.Title(), page);
+                Documents.Add(document);
+                PushHistory(route.Key);
+                SelectDocument(document);
+                await PersistAsync().ConfigureAwait(false);
+            }).ConfigureAwait(false);
+        }
+        finally
         {
-            var document = new Document(route.Key, route.Title(), page);
-            Documents.Add(document);
-            PushHistory(route.Key);
-            SelectDocument(document);
-            await PersistAsync().ConfigureAwait(false);
-        }).ConfigureAwait(false);
+            _openTokens.TryRemove(route.Key, out _);
+            cts.Dispose();
+        }
     }
 
     /// <summary>Closes a document; selection moves to a neighbor.</summary>
     public async Task CloseDocumentAsync(Document document)
     {
-        _openCts?.Cancel();
+        if (_openTokens.TryRemove(document.RouteKey, out var inFlight))
+        {
+            inFlight.Cancel();
+            inFlight.Dispose();
+        }
+
         var page = document.Page;
         try
         {
@@ -219,14 +247,24 @@ public sealed partial class WorkspaceViewModel : ObservableObject, INavigationAw
     private async Task MoveAsync(Document document, int delta)
     {
         var from = Documents.IndexOf(document);
-        var to = from + delta;
-        if (from < 0 || to < 0 || to >= Documents.Count)
+        await MoveDocumentToAsync(document, from + delta).ConfigureAwait(false);
+    }
+
+    /// <summary>Moves a document to an absolute tab index (drag-drop target).</summary>
+    public async Task MoveDocumentToAsync(Document document, int toIndex)
+    {
+        var from = Documents.IndexOf(document);
+        toIndex = Math.Clamp(toIndex, 0, Documents.Count - 1);
+        if (from < 0 || from == toIndex)
         {
             return;
         }
 
-        Documents.Move(from, to);
-        await PersistAsync().ConfigureAwait(false);
+        await RunOnUiThreadAsync(async () =>
+        {
+            Documents.Move(from, toIndex);
+            await PersistAsync().ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     [RelayCommand]

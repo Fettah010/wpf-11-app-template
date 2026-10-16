@@ -138,7 +138,7 @@ public sealed class WorkspaceViewModelTests : IDisposable
     }
 
     [WpfFact]
-    public async Task RapidOpens_SecondWins_FirstNeverSurfaces()
+    public async Task RapidOpens_AllComplete_Independently()
     {
         var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var vm = Create(
@@ -151,15 +151,45 @@ public sealed class WorkspaceViewModelTests : IDisposable
             });
         vm.EnsureLoaded();
 
+        // Rapid opens of DIFFERENT documents are independent: none cancels
+        // another; the last completed selects.
         var first = vm.OpenDocumentAsync("controls");
         var second = vm.OpenDocumentAsync("data");
+        await second;
+        Assert.Contains(vm.Documents, d => d.RouteKey == "data");
+        gate.TrySetResult();
+        await first;
+
+        Assert.Contains(vm.Documents, d => d.RouteKey == "controls");
+        Assert.Contains(vm.Documents, d => d.RouteKey == "data");
+    }
+
+    [WpfFact]
+    public async Task DoubleOpen_SameKey_SurfacesOnce()
+    {
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var opens = 0;
+        var vm = Create(
+            t =>
+            {
+                opens++;
+                return new BlockingPage(gate.Task);
+            },
+            seed: new ShellSettings
+            {
+                Workspace = new WorkspaceState { OpenDocuments = ["home"] },
+            });
+        vm.EnsureLoaded();
+        opens = 0; // restore already consumed one factory call
+
+        var first = vm.OpenDocumentAsync("controls");
+        var second = vm.OpenDocumentAsync("controls");
         await second;
         gate.TrySetResult();
         await first;
 
-        Assert.DoesNotContain(vm.Documents, d => d.RouteKey == "controls");
-        Assert.Contains(vm.Documents, d => d.RouteKey == "data");
-        Assert.Equal("data", vm.SelectedDocument?.RouteKey);
+        Assert.Single(vm.Documents, d => d.RouteKey == "controls");
+        Assert.Equal(1, opens);
     }
 
     [WpfFact]
@@ -238,6 +268,24 @@ public sealed class WorkspaceViewModelTests : IDisposable
 
         vm.MoveSelectedLeftCommand.Execute(null);
         Assert.Equal("home", vm.Documents[0].RouteKey);
+    }
+
+    [WpfFact]
+    public async Task MoveDocumentTo_Reorders_And_Clamps()
+    {
+        var vm = Create();
+        await vm.OpenDocumentAsync("home");
+        await vm.OpenDocumentAsync("controls");
+        await vm.OpenDocumentAsync("data");
+
+        await vm.MoveDocumentToAsync(vm.Documents[2], 0);
+        Assert.Equal(["data", "home", "controls"], vm.Documents.Select(d => d.RouteKey));
+
+        await vm.MoveDocumentToAsync(vm.Documents[0], 99);
+        Assert.Equal("data", vm.Documents[2].RouteKey);
+
+        var json = await File.ReadAllTextAsync(_settingsPath);
+        Assert.Contains("\"data\"", json, StringComparison.Ordinal);
     }
 
     [WpfFact]

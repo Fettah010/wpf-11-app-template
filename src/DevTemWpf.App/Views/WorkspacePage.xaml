@@ -32,9 +32,16 @@
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
 
-      <!-- Document tabs: same page types as every other shell (registry). -->
-      <ui:TabView Grid.Column="0" ItemsSource="{Binding ViewModel.Documents}"
+      <!-- Document tabs: same page types as every other shell (registry).
+           Tabs reorder via drag (private format; keyboard: detail Move
+           buttons) — see code-behind. -->
+      <ui:TabView Grid.Column="0" x:Name="DocumentTabs" ItemsSource="{Binding ViewModel.Documents}"
                   SelectedItem="{Binding ViewModel.SelectedDocument, Mode=TwoWay}"
+                  AllowDrop="True"
+                  PreviewMouseLeftButtonDown="OnTabDragStart"
+                  PreviewMouseMove="OnTabDragMove"
+                  DragOver="OnTabDragOver"
+                  Drop="OnTabDrop"
                   AutomationProperties.Name="Open documents">
         <TabControl.ItemTemplate>
           <DataTemplate>
@@ -76,10 +83,12 @@
                     AutomationProperties.Name="Detail splitter"
                     Visibility="{Binding ViewModel.IsDetailOpen, Converter={StaticResource BoolToVisibility}}" />
 
-      <!-- Detail pane: inspector + keyboard alternatives for drag-reorder. -->
+      <!-- Detail pane: inspector + keyboard alternatives for drag-reorder.
+           Note: plain Borders expose no UIA peer, so automation probes use
+           the peer-backed buttons below (see UI tests). -->
       <Border Grid.Column="2" Width="{Binding ViewModel.DetailWidth, Mode=TwoWay}"
               Visibility="{Binding ViewModel.IsDetailOpen, Converter={StaticResource BoolToVisibility}}"
-              AutomationProperties.Name="Document details" Margin="{StaticResource AppGapItem}">
+              Margin="{StaticResource AppGapItem}">
         <StackPanel MinWidth="180">
           <TextBlock Text="{x:Static res:Strings.Wsp_Detail}" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
           <TextBlock Text="{Binding ViewModel.SelectedDocument.Title, FallbackValue=''}"
