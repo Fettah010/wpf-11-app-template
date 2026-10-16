@@ -695,21 +695,10 @@ public sealed class ShellFlowsTests : IDisposable
                 TimeSpan.FromSeconds(10), "tree leaf");
             Assert.NotNull(alice);
 
-            // Selecting a node selects it. Keyboard-driven from a visible node:
-            // arrow navigation auto-scrolls, so no manual scrolling is needed.
-            // Jump via the section index first: on small viewports (e.g. CI
-            // at 1024x768) the tree starts below the fold.
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Go to Tree section")),
-                TimeSpan.FromSeconds(10), "tree index button").Patterns.Invoke.Pattern.Invoke();
-            Thread.Sleep(800);
-            var engineering = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Engineering")),
-                TimeSpan.FromSeconds(10), "tree root label");
-            engineering.Click();
-            Thread.Sleep(300);
-            Keyboard.Press(VirtualKeyShort.DOWN); // Engineering -> Backend
-            Thread.Sleep(300);
-            Keyboard.Press(VirtualKeyShort.RIGHT); // Backend -> first child (Alice)
-            Thread.Sleep(300);
+            // Selecting a node selects it (programmatic Select proves the
+            // selection plumbing + VM sync without depending on viewport
+            // coordinates; keyboard traversal below proves interaction).
+            alice.Patterns.SelectionItem.Pattern.Select();
             var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
             var selected = false;
             while (!selected && DateTime.UtcNow < deadline)
@@ -727,7 +716,32 @@ public sealed class ShellFlowsTests : IDisposable
                 Thread.Sleep(200);
             }
 
-            Assert.True(selected, "Keyboard-selected tree node is selected.");
+            Assert.True(selected, "Selected tree node is selected.");
+
+            // Keyboard moves selection onward (Alice -> Bob) from a focused
+            // node; arrows auto-scroll, so this holds on any viewport.
+            alice.Focus();
+            Thread.Sleep(300);
+            Keyboard.Press(VirtualKeyShort.DOWN);
+            Thread.Sleep(300);
+            deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+            var moved = false;
+            while (!moved && DateTime.UtcNow < deadline)
+            {
+                try
+                {
+                    var bob = FindTreeItem(window, "Bob");
+                    moved = bob?.Patterns.SelectionItem.Pattern.IsSelected == true;
+                }
+                catch
+                {
+                    // Tree is transient; retry.
+                }
+
+                Thread.Sleep(200);
+            }
+
+            Assert.True(moved, "Keyboard DOWN moved tree selection to Bob.");
 
             // Keyboard traverses the tree onward from Alice (Bob, Cara, …).
             // TreeItems are unnamed, so key on each focused item's label text.
