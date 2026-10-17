@@ -52,6 +52,12 @@ public static class MotionTokens
     /// <summary>Scale an element pulses to during feedback (1.0 = rest).</summary>
     public const double FeedbackPeakScale = 1.03;
 
+    /// <summary>Opacity of a selected indicator.</summary>
+    public const double SelectionOnOpacity = 1.0;
+
+    /// <summary>Opacity of a deselected indicator.</summary>
+    public const double SelectionOffOpacity = 0.0;
+
     public static EasingFunctionBase EaseOutCubic() => new CubicEase { EasingMode = EasingMode.EaseOut };
 
     public static EasingFunctionBase EaseInOutCubic() => new CubicEase { EasingMode = EasingMode.EaseInOut };

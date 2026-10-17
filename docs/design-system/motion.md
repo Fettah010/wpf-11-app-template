@@ -57,6 +57,25 @@ queried through `IMotionService.AllowsEffect`:
 | Animated gradient | `GradientEffectEnabled` | on |
 | Backdrop warp prototype | `WarpEffectEnabled` | off |
 
+## Primitives
+
+`IMotionService` exposes reusable primitives; every one is cancellable and
+snaps to its final state on cancellation or failure, so callers may await
+without blocking a view.
+
+| Primitive | Movement-gated part | Notes |
+|---|---|---|
+| `PlayEntranceAsync` | 12px rise | fade always; accepts a duration override (presets) |
+| `PlayExitAsync` | 6px fall | fade to opacity 0 |
+| `PlaySelectionAsync` | — | indicator opacity for selected/deselected |
+| `PlayExpandAsync` / `PlayCollapseAsync` | ±6px | reveal/hide detail content |
+| `PlayFeedbackAsync` | 1.03 scale pulse | opacity flash always; transient acknowledgement |
+| `PlayPageTransitionAsync` | ±12px slide | directional (`forward`), reduced-motion-aware |
+
+Under Reduced the movement parts are dropped (fast fade only); under Off every
+primitive snaps. Primitives own the element's `RenderTransform` (appending to
+a `TransformGroup` when one already exists).
+
 ## Where motion plays
 
 - Page entrances: every page calls `PlayEntranceAsync` in `Loaded`

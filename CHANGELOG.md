@@ -11,6 +11,9 @@ breaking changes, no new packages.
   opt-in, so decorative effects never run by default (ADR-0016).
 - Motion tokens: added Stagger, exit distance, and opacity/scale values;
   reduced-motion still snaps.
+- Motion primitives: cancellable enter/exit, selection, expand/collapse,
+  feedback, and reduced-motion-aware page transitions (`IMotionService`); all
+  snap to their final state on cancellation or failure.
 - Effects: per-effect switches (ripple, gradient, warp) refine the master
   `EffectsEnabled` switch, all gated through `IMotionService.AllowsEffect`.
   The backdrop warp prototype is off by default and simulated only — no HLSL

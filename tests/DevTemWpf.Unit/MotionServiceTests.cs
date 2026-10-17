@@ -106,4 +106,80 @@ public sealed class MotionServiceTests : IDisposable
         });
         Assert.True(enabled.AllowsEffect(MotionEffect.Warp));
     }
+
+    [WpfFact]
+    public async Task Exit_OffPolicy_SnapsHidden()
+    {
+        var service = await CreateAsync(new ShellSettings { Motion = MotionMode.Off });
+        var element = new Border { Opacity = 1 };
+
+        await service.PlayExitAsync(element, TestContext.Current.CancellationToken);
+
+        Assert.Equal(MotionTokens.ExitToOpacity, element.Opacity);
+    }
+
+    [WpfFact]
+    public async Task Selection_OffPolicy_SnapsToRequestedState()
+    {
+        var service = await CreateAsync(new ShellSettings { Motion = MotionMode.Off });
+        var indicator = new Border { Opacity = 1 };
+
+        await service.PlaySelectionAsync(indicator, selected: false, TestContext.Current.CancellationToken);
+        Assert.Equal(MotionTokens.SelectionOffOpacity, indicator.Opacity);
+
+        await service.PlaySelectionAsync(indicator, selected: true, TestContext.Current.CancellationToken);
+        Assert.Equal(MotionTokens.SelectionOnOpacity, indicator.Opacity);
+    }
+
+    [WpfFact]
+    public async Task ExpandCollapse_OffPolicy_SnapFinalStates()
+    {
+        var service = await CreateAsync(new ShellSettings { Motion = MotionMode.Off });
+        var element = new Border { Opacity = 0 };
+
+        await service.PlayExpandAsync(element, TestContext.Current.CancellationToken);
+        Assert.Equal(MotionTokens.RestOpacity, element.Opacity);
+
+        await service.PlayCollapseAsync(element, TestContext.Current.CancellationToken);
+        Assert.Equal(MotionTokens.ExitToOpacity, element.Opacity);
+    }
+
+    [WpfFact]
+    public async Task Feedback_OffPolicy_SnapsToRest()
+    {
+        var service = await CreateAsync(new ShellSettings { Motion = MotionMode.Off });
+        var element = new Border { Opacity = 0.3 };
+
+        await service.PlayFeedbackAsync(element, TestContext.Current.CancellationToken);
+
+        Assert.Equal(MotionTokens.RestOpacity, element.Opacity);
+    }
+
+    [WpfFact]
+    public async Task PageTransition_OffPolicy_SnapsToRest()
+    {
+        var service = await CreateAsync(new ShellSettings { Motion = MotionMode.Off });
+        var element = new Border { Opacity = 0 };
+
+        await service.PlayPageTransitionAsync(element, forward: true, TestContext.Current.CancellationToken);
+
+        Assert.Equal(MotionTokens.RestOpacity, element.Opacity);
+    }
+
+    [WpfFact]
+    public async Task Primitives_RichPolicy_DoNotThrow()
+    {
+        var service = await CreateAsync(new ShellSettings { Motion = MotionMode.Full });
+        var element = new Border { Opacity = 0.5 };
+
+        // Not awaited: storyboards may never complete off a live visual tree,
+        // but they must never throw and must leave cancellation safe.
+        _ = service.PlayEntranceAsync(element, cancellationToken: TestContext.Current.CancellationToken);
+        _ = service.PlayExitAsync(element, TestContext.Current.CancellationToken);
+        _ = service.PlaySelectionAsync(element, true, TestContext.Current.CancellationToken);
+        _ = service.PlayFeedbackAsync(element, TestContext.Current.CancellationToken);
+        _ = service.PlayPageTransitionAsync(element, false, TestContext.Current.CancellationToken);
+
+        await Task.CompletedTask;
+    }
 }

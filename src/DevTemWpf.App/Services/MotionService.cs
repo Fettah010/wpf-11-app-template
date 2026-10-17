@@ -8,7 +8,11 @@ namespace DevTemWpf.App.Services;
 
 /// <summary>
 /// Lightweight storyboard motion (no shader/compositor dependencies).
-/// All failures degrade to the final state — motion never crashes a view.
+/// All primitives are policy-gated, cancellable, and snap to their final
+/// state on cancellation or any failure — motion never crashes a view and
+/// never leaves a surface stuck mid-transition (ADR-0009, ADR-0016).
+/// Primitives assume they own the element's <see cref="UIElement.RenderTransform"/>
+/// (creating or appending a transform as needed).
 /// </summary>
 public sealed class MotionService : IMotionService
 {
@@ -65,70 +69,138 @@ public sealed class MotionService : IMotionService
 
     public Task PlayEntranceAsync(FrameworkElement element, TimeSpan? durationOverride = null, CancellationToken cancellationToken = default)
     {
-        try
+        var policy = CurrentPolicy;
+        var move = MotionPolicy.AllowsMovement(policy);
+        var duration = durationOverride ?? FadeDuration(policy);
+        return RunAsync(element, duration, (sb, el, d) =>
         {
-            element.Dispatcher.VerifyAccess();
-            var policy = CurrentPolicy;
-            if (policy == EffectiveMotion.Off || cancellationToken.IsCancellationRequested)
+            AddFade(sb, el, el.Opacity, MotionTokens.RestOpacity, d);
+            if (move)
             {
-                SnapEntrance(element);
-                return Task.CompletedTask;
+                AddTranslate(sb, EnsureTransform<TranslateTransform>(el), TranslateTransform.YProperty, MotionTokens.SlideDistance, 0, d);
             }
-
-            var duration = durationOverride
-                ?? (policy == EffectiveMotion.Reduced ? MotionTokens.Fast : MotionTokens.Standard);
-            var storyboard = new Storyboard { FillBehavior = FillBehavior.Stop };
-
-            var fade = new DoubleAnimation(0, 1, duration);
-            Storyboard.SetTarget(fade, element);
-            Storyboard.SetTargetProperty(fade, new PropertyPath(UIElement.OpacityProperty));
-            storyboard.Children.Add(fade);
-
-            TranslateTransform? slide = null;
-            if (MotionPolicy.AllowsMovement(policy))
-            {
-                slide = element.RenderTransform as TranslateTransform;
-                if (slide is null)
-                {
-                    slide = new TranslateTransform();
-                    element.RenderTransform = slide;
-                }
-
-                var move = new DoubleAnimation(MotionTokens.SlideDistance, 0, duration)
-                {
-                    EasingFunction = MotionTokens.EaseOutCubic(),
-                };
-                Storyboard.SetTarget(move, slide);
-                Storyboard.SetTargetProperty(move, new PropertyPath(TranslateTransform.YProperty));
-                storyboard.Children.Add(move);
-            }
-
-            var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            storyboard.Completed += (_, _) =>
-            {
-                SnapEntrance(element);
-                completion.TrySetResult();
-            };
-
-            if (cancellationToken.CanBeCanceled)
-            {
-                cancellationToken.Register(() =>
-                    element.Dispatcher.BeginInvoke(() =>
-                    {
-                        storyboard.Stop(element);
-                        SnapEntrance(element);
-                        completion.TrySetResult();
-                    }));
-            }
-
-            storyboard.Begin(element, true);
-            return completion.Task;
-        }
-        catch
+        }, el =>
         {
-            TrySnap(element);
-            return Task.CompletedTask;
-        }
+            el.Opacity = MotionTokens.RestOpacity;
+            ResetTranslate(el);
+        }, cancellationToken);
+    }
+
+    public Task PlayExitAsync(FrameworkElement element, CancellationToken cancellationToken = default)
+    {
+        var policy = CurrentPolicy;
+        var move = MotionPolicy.AllowsMovement(policy);
+        return RunAsync(element, FadeDuration(policy), (sb, el, d) =>
+        {
+            AddFade(sb, el, el.Opacity, MotionTokens.ExitToOpacity, d);
+            if (move)
+            {
+                AddTranslate(sb, EnsureTransform<TranslateTransform>(el), TranslateTransform.YProperty, 0, MotionTokens.ExitDistance, d);
+            }
+        }, el =>
+        {
+            el.Opacity = MotionTokens.ExitToOpacity;
+            if (move)
+            {
+                SetTranslateY(el, MotionTokens.ExitDistance);
+            }
+            else
+            {
+                ResetTranslate(el);
+            }
+        }, cancellationToken);
+    }
+
+    public Task PlaySelectionAsync(FrameworkElement indicator, bool selected, CancellationToken cancellationToken = default)
+    {
+        var target = selected ? MotionTokens.SelectionOnOpacity : MotionTokens.SelectionOffOpacity;
+        var policy = CurrentPolicy;
+        return RunAsync(indicator, FadeDuration(policy), (sb, el, d) =>
+            AddFade(sb, el, el.Opacity, target, d, MotionTokens.EaseInOutCubic()),
+            el => el.Opacity = target, cancellationToken);
+    }
+
+    public Task PlayExpandAsync(FrameworkElement element, CancellationToken cancellationToken = default)
+    {
+        var policy = CurrentPolicy;
+        var move = MotionPolicy.AllowsMovement(policy);
+        return RunAsync(element, FadeDuration(policy), (sb, el, d) =>
+        {
+            AddFade(sb, el, el.Opacity, MotionTokens.RestOpacity, d);
+            if (move)
+            {
+                AddTranslate(sb, EnsureTransform<TranslateTransform>(el), TranslateTransform.YProperty, -MotionTokens.ExitDistance, 0, d);
+            }
+        }, el =>
+        {
+            el.Opacity = MotionTokens.RestOpacity;
+            ResetTranslate(el);
+        }, cancellationToken);
+    }
+
+    public Task PlayCollapseAsync(FrameworkElement element, CancellationToken cancellationToken = default)
+    {
+        var policy = CurrentPolicy;
+        var move = MotionPolicy.AllowsMovement(policy);
+        return RunAsync(element, FadeDuration(policy), (sb, el, d) =>
+        {
+            AddFade(sb, el, el.Opacity, MotionTokens.ExitToOpacity, d);
+            if (move)
+            {
+                AddTranslate(sb, EnsureTransform<TranslateTransform>(el), TranslateTransform.YProperty, 0, -MotionTokens.ExitDistance, d);
+            }
+        }, el =>
+        {
+            el.Opacity = MotionTokens.ExitToOpacity;
+            if (move)
+            {
+                SetTranslateY(el, -MotionTokens.ExitDistance);
+            }
+            else
+            {
+                ResetTranslate(el);
+            }
+        }, cancellationToken);
+    }
+
+    public Task PlayFeedbackAsync(FrameworkElement element, CancellationToken cancellationToken = default)
+    {
+        var policy = CurrentPolicy;
+        var move = MotionPolicy.AllowsMovement(policy);
+        var duration = policy == EffectiveMotion.Reduced ? MotionTokens.Fast : MotionTokens.Deliberate;
+        return RunAsync(element, duration, (sb, el, d) =>
+        {
+            AddPulse(sb, el, UIElement.OpacityProperty, el.Opacity, MotionTokens.FeedbackPeakOpacity, d);
+            if (move)
+            {
+                var scale = EnsureTransform<ScaleTransform>(el);
+                AddPulse(sb, scale, ScaleTransform.ScaleXProperty, 1.0, MotionTokens.FeedbackPeakScale, d);
+                AddPulse(sb, scale, ScaleTransform.ScaleYProperty, 1.0, MotionTokens.FeedbackPeakScale, d);
+            }
+        }, el =>
+        {
+            el.Opacity = MotionTokens.RestOpacity;
+            ResetScale(el);
+        }, cancellationToken);
+    }
+
+    public Task PlayPageTransitionAsync(FrameworkElement element, bool forward, CancellationToken cancellationToken = default)
+    {
+        var policy = CurrentPolicy;
+        var move = MotionPolicy.AllowsMovement(policy);
+        var offset = forward ? MotionTokens.SlideDistance : -MotionTokens.SlideDistance;
+        return RunAsync(element, FadeDuration(policy), (sb, el, d) =>
+        {
+            AddFade(sb, el, el.Opacity, MotionTokens.RestOpacity, d);
+            if (move)
+            {
+                AddTranslate(sb, EnsureTransform<TranslateTransform>(el), TranslateTransform.XProperty, offset, 0, d);
+            }
+        }, el =>
+        {
+            el.Opacity = MotionTokens.RestOpacity;
+            ResetTranslate(el);
+        }, cancellationToken);
     }
 
     public void PlayRipple(Panel host, Point origin)
@@ -198,6 +270,186 @@ public sealed class MotionService : IMotionService
         }
     }
 
+    private static TimeSpan FadeDuration(EffectiveMotion policy)
+        => policy == EffectiveMotion.Reduced ? MotionTokens.Fast : MotionTokens.Standard;
+
+    private Task RunAsync(
+        FrameworkElement element,
+        TimeSpan duration,
+        Action<Storyboard, FrameworkElement, TimeSpan> build,
+        Action<FrameworkElement> snap,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            element.Dispatcher.VerifyAccess();
+            if (CurrentPolicy == EffectiveMotion.Off || cancellationToken.IsCancellationRequested || duration <= TimeSpan.Zero)
+            {
+                snap(element);
+                return Task.CompletedTask;
+            }
+
+            if (duration > MotionTokens.MaxDuration)
+            {
+                duration = MotionTokens.MaxDuration;
+            }
+
+            var storyboard = new Storyboard { FillBehavior = FillBehavior.Stop };
+            build(storyboard, element, duration);
+
+            var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            storyboard.Completed += (_, _) =>
+            {
+                snap(element);
+                completion.TrySetResult();
+            };
+
+            if (cancellationToken.CanBeCanceled)
+            {
+                cancellationToken.Register(() =>
+                    element.Dispatcher.BeginInvoke(() =>
+                    {
+                        storyboard.Stop(element);
+                        snap(element);
+                        completion.TrySetResult();
+                    }));
+            }
+
+            storyboard.Begin(element, true);
+            return completion.Task;
+        }
+        catch
+        {
+            TryInvoke(element, snap);
+            return Task.CompletedTask;
+        }
+    }
+
+    private static void AddFade(
+        Storyboard sb,
+        FrameworkElement element,
+        double from,
+        double to,
+        TimeSpan duration,
+        EasingFunctionBase? easing = null)
+    {
+        var fade = new DoubleAnimation(from, to, duration) { EasingFunction = easing };
+        Storyboard.SetTarget(fade, element);
+        Storyboard.SetTargetProperty(fade, new PropertyPath(UIElement.OpacityProperty));
+        sb.Children.Add(fade);
+    }
+
+    private static void AddTranslate(
+        Storyboard sb,
+        TranslateTransform transform,
+        DependencyProperty property,
+        double from,
+        double to,
+        TimeSpan duration)
+    {
+        var move = new DoubleAnimation(from, to, duration) { EasingFunction = MotionTokens.EaseOutCubic() };
+        Storyboard.SetTarget(move, transform);
+        Storyboard.SetTargetProperty(move, new PropertyPath(property));
+        sb.Children.Add(move);
+    }
+
+    private static void AddPulse(
+        Storyboard sb,
+        DependencyObject target,
+        DependencyProperty property,
+        double rest,
+        double peak,
+        TimeSpan duration)
+    {
+        var pulse = new DoubleAnimationUsingKeyFrames();
+        var mid = TimeSpan.FromTicks(duration.Ticks / 2);
+        pulse.KeyFrames.Add(new EasingDoubleKeyFrame(rest, KeyTime.FromTimeSpan(TimeSpan.Zero), MotionTokens.EaseInOutCubic()));
+        pulse.KeyFrames.Add(new EasingDoubleKeyFrame(peak, KeyTime.FromTimeSpan(mid), MotionTokens.EaseInOutCubic()));
+        pulse.KeyFrames.Add(new EasingDoubleKeyFrame(rest, KeyTime.FromTimeSpan(duration), MotionTokens.EaseInOutCubic()));
+        Storyboard.SetTarget(pulse, target);
+        Storyboard.SetTargetProperty(pulse, new PropertyPath(property));
+        sb.Children.Add(pulse);
+    }
+
+    private static T EnsureTransform<T>(FrameworkElement element)
+        where T : Transform, new()
+    {
+        if (element.RenderTransform is T existing)
+        {
+            return existing;
+        }
+
+        var created = new T();
+        if (element.RenderTransform is null || element.RenderTransform == Transform.Identity)
+        {
+            element.RenderTransform = created;
+        }
+        else
+        {
+            var group = new TransformGroup();
+            group.Children.Add(element.RenderTransform);
+            group.Children.Add(created);
+            element.RenderTransform = group;
+        }
+
+        return created;
+    }
+
+    private static T? FindTransform<T>(FrameworkElement element)
+        where T : Transform
+        => FindTransform<T>(element.RenderTransform);
+
+    private static T? FindTransform<T>(Transform? transform)
+        where T : Transform
+    {
+        switch (transform)
+        {
+            case null:
+                return null;
+            case T match:
+                return match;
+            case TransformGroup group:
+                foreach (var child in group.Children)
+                {
+                    var found = FindTransform<T>(child);
+                    if (found is not null)
+                    {
+                        return found;
+                    }
+                }
+
+                return null;
+            default:
+                return null;
+        }
+    }
+
+    private static void ResetTranslate(FrameworkElement element)
+    {
+        if (FindTransform<TranslateTransform>(element) is TranslateTransform translate)
+        {
+            translate.X = 0;
+            translate.Y = 0;
+        }
+    }
+
+    private static void SetTranslateY(FrameworkElement element, double y)
+    {
+        if (FindTransform<TranslateTransform>(element) is TranslateTransform translate)
+        {
+            translate.Y = y;
+        }
+    }
+
+    private static void ResetScale(FrameworkElement element)
+    {
+        if (FindTransform<ScaleTransform>(element) is ScaleTransform scale)
+        {
+            scale.ScaleX = 1;
+            scale.ScaleY = 1;
+        }
+    }
+
     private static void RemoveRipple(Panel host, UIElement element)
     {
         try
@@ -210,21 +462,13 @@ public sealed class MotionService : IMotionService
         }
     }
 
-    private static void SnapEntrance(FrameworkElement element)    {
-        element.Opacity = 1;
-        if (element.RenderTransform is TranslateTransform slide)
-        {
-            slide.Y = 0;
-        }
-    }
-
-    private static void TrySnap(FrameworkElement element)
+    private static void TryInvoke(FrameworkElement element, Action<FrameworkElement> snap)
     {
         try
         {
             if (element.Dispatcher.CheckAccess())
             {
-                SnapEntrance(element);
+                snap(element);
             }
         }
         catch
