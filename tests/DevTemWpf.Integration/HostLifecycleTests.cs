@@ -54,6 +54,12 @@ public sealed class HostLifecycleTests
             //#if (IncludeTray)
             Assert.NotNull(host.Services.GetRequiredService<Wpf.Ui.Tray.INotifyIconService>());
             //#endif
+            //#if (IncludeAuth)
+            Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.IAuthService>());
+            //#endif
+            //#if (IncludeCrash)
+            Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.ICrashReporter>());
+            //#endif
             Assert.NotNull(host.Services.GetRequiredService<HomeViewModel>());
             Assert.NotNull(host.Services.GetRequiredService<SettingsViewModel>());
 
