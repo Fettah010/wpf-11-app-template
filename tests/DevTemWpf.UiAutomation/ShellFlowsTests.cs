@@ -982,6 +982,74 @@ public sealed class ShellFlowsTests : IDisposable
         }
     }
 
+    /// <summary>
+    /// 1.5.0: the Effects page exposes the master + per-effect switches and a
+    /// fallback-status line; toggling them (repeatedly) and leaving/returning
+    /// must not crash the shell or lose the page — the animated loops are
+    /// stopped by <c>MotionScope</c> on unload (AC02).
+    /// </summary>
+    [WpfFact]
+    public void EffectsPage_SwitchesAndFallback_AreWired_AndSurviveNavigation()
+    {
+        RequireUiOrSkip();
+
+        var window = Launch(out var app, out var automation);
+        try
+        {
+            OpenEffects(window);
+
+            foreach (var name in new[]
+            {
+                "Effects master switch",
+                "Ripple effect switch",
+                "Gradient effect switch",
+                "Warp effect switch",
+                "Warp fallback status",
+            })
+            {
+                Assert.NotNull(WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(name)),
+                    TimeSpan.FromSeconds(10), $"effects control '{name}'"));
+            }
+
+            // Stress: toggle the (off-by-default) warp switch several times.
+            for (var i = 0; i < 3; i++)
+            {
+                window.Focus();
+                WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Warp effect switch")),
+                    TimeSpan.FromSeconds(10), "warp effect switch").Patterns.Toggle.Pattern.Toggle();
+                Thread.Sleep(300);
+            }
+
+            // Leave mid-lifecycle, then return: no crash, content intact.
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home")),
+                TimeSpan.FromSeconds(10), "nav item 'Home'").Click();
+            Assert.NotNull(WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home headline")),
+                TimeSpan.FromSeconds(10), "home content after effects"));
+
+            OpenEffects(window);
+            Assert.NotNull(WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Warp fallback status")),
+                TimeSpan.FromSeconds(10), "warp fallback status after return"));
+        }
+        finally
+        {
+            automation.Dispose();
+            if (!app.HasExited)
+            {
+                app.Kill();
+            }
+        }
+    }
+
+    private static void OpenEffects(Window window)
+    {
+        window.Focus();
+        WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Effects")),
+            TimeSpan.FromSeconds(10), "nav item 'Effects'").Click();
+        WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Play standard preset")),
+            TimeSpan.FromSeconds(10), "effects page content");
+    }
+
     /// <summary>Reads the detail toggle's check state (null when missing).</summary>
     private static FlaUI.Core.Definitions.ToggleState? DetailToggleState(AutomationElement scope)
     {
