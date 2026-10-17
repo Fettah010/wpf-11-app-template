@@ -19,14 +19,22 @@
     <!--#if (IncludeDashboard) -->
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" />
     <!--#endif -->
-    <!-- Production services (ADR-0011); each removable per its module. -->
-    <!--#if (IncludeServices) -->
+    <!-- Production services (ADR-0011); each package is removed with its module. -->
+    <!--#if (IncludeLogging) -->
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Extensions.Hosting" />
     <PackageReference Include="Serilog.Sinks.File" />
+    <!--#endif -->
+    <!--#if (IncludeLocalData) -->
     <PackageReference Include="Microsoft.Data.Sqlite" />
+    <!--#endif -->
+    <!--#if (IncludeHttp) -->
     <PackageReference Include="Microsoft.Extensions.Http" />
+    <!--#endif -->
+    <!--#if (IncludeUpdates) -->
     <PackageReference Include="Velopack" />
+    <!--#endif -->
+    <!--#if (IncludeTray) -->
     <PackageReference Include="WPF-UI.Tray" />
     <!--#endif -->
     <PackageReference Include="CommunityToolkit.Mvvm" />

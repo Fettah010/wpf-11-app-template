@@ -41,4 +41,5 @@ that rots.
 
 ## Revisit triggers
 
-Per-service flags (0.9.0 candidate); template-package publishing (1.0).
+Per-service flags — **resolved in 1.6.0 by ADR-0017** (per-module flags + a
+`Custom` preset). Template-package publishing (1.0) — done.

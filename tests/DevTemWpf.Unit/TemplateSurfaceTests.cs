@@ -34,12 +34,34 @@ public sealed class TemplateSurfaceTests
         Assert.True(symbols.TryGetProperty("Preset", out var preset));
         Assert.True(symbols.TryGetProperty("IncludeDashboard", out _));
         Assert.True(symbols.TryGetProperty("IncludeDiagnostics", out _));
-        Assert.True(symbols.TryGetProperty("IncludeServices", out _));
         Assert.True(symbols.TryGetProperty("IncludeTests", out _));
+
+        // 1.6.0 (roadmap §8.6): the single IncludeServices flag is replaced by
+        // per-module flags; each module is independently selectable.
+        foreach (var module in new[]
+                 {
+                     "IncludeLogging", "IncludeLocalData", "IncludeHttp",
+                     "IncludeBackup", "IncludeUpdates", "IncludeTray",
+                 })
+        {
+            Assert.True(symbols.TryGetProperty(module, out _), $"{module} symbol missing");
+        }
+
+        foreach (var custom in new[]
+                 {
+                     "CustomLogging", "CustomLocalData", "CustomHttp",
+                     "CustomBackup", "CustomUpdates", "CustomTray", "CustomDiagnostics",
+                 })
+        {
+            Assert.True(symbols.TryGetProperty(custom, out _), $"{custom} parameter missing");
+        }
+
+        // Removed in 1.6.0 — must not silently return.
+        Assert.False(symbols.TryGetProperty("IncludeServices", out _));
 
         var choices = preset.GetProperty("choices").EnumerateArray()
             .Select(c => c.GetProperty("choice").GetString() ?? string.Empty).ToHashSet();
-        Assert.Equal(new HashSet<string> { "Clean", "Recommended", "Full" }, choices);
+        Assert.Equal(new HashSet<string> { "Clean", "Recommended", "Full", "Custom" }, choices);
         Assert.Equal("Recommended", preset.GetProperty("defaultValue").GetString());
 
         // Added in 1.4.0 (roadmap §8.4, ADR-0015): additive scaffold-time

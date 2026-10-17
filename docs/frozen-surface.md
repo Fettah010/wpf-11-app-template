@@ -6,12 +6,19 @@ by `TemplateSurfaceTests` where machine-checkable.
 ## Template CLI (frozen)
 
 - Short names: `devtemwpf-app`, `devtemwpf-page`, `devtemwpf-service`.
-- `devtemwpf-app` symbols: `Preset` {Clean, Recommended (default), Full},
-  `Shell` {Sidebar (default), Rail, Top, Tabbed} (added in 1.4.0,
+- `devtemwpf-app` symbols: `Preset` {Clean, Recommended (default), Full,
+  Custom}, `Shell` {Sidebar (default), Rail, Top, Tabbed} (added in 1.4.0,
   roadmap-authorized additive change — seeds the first-launch shell default
   via the `ShellDefaultValue` switch symbol; all shells ship in every
   scaffold), `IncludeTests` (bool, default true). Computed: `IncludeDashboard`
-  (Full only), `IncludeDiagnostics`/`IncludeServices` (non-Clean).
+  (Full only), `IncludeDiagnostics` (non-Clean, or Custom+`CustomDiagnostics`),
+  and the per-module `IncludeLogging` / `IncludeLocalData` / `IncludeHttp` /
+  `IncludeBackup` / `IncludeUpdates` / `IncludeTray` (non-Clean, or Custom with
+  the matching `Custom<Module>` flag). Added in 1.6.0 (roadmap §8.6,
+  roadmap-authorized): the single `IncludeServices` flag was replaced by these
+  per-module flags; the `Custom` preset + `Custom<Module>` bools are new
+  surface. Custom dependency edges: diagnostics → {logging, http, backup,
+  updates}; backup → localdata. Named presets are byte-identical to 1.5.0.
 - `sourceName`: `DevTemWpf`. No `--ThemeDefault` (cut in 0.8.0
   with reason; runtime switching is the supported path).
 - Item templates: `-n` names the item (`sourceName`), `--Namespace` sets the

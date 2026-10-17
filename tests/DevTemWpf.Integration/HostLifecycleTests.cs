@@ -36,14 +36,22 @@ public sealed class HostLifecycleTests
             Assert.NotNull(host.Services.GetRequiredService<Wpf.Ui.ISnackbarService>());
             Assert.NotNull(host.Services.GetRequiredService<Wpf.Ui.IContentDialogService>());
             Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.IMotionService>());
-            //#if (IncludeServices)
             //#if (IncludeDashboard)
             Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.SampleDataService>());
             //#endif
+            //#if (IncludeLocalData)
             Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.FavoritesStore>());
+            //#endif
+            //#if (IncludeBackup)
             Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.IBackupService>());
+            //#endif
+            //#if (IncludeUpdates)
             Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.IUpdateService>());
+            //#endif
+            //#if (IncludeHttp)
             Assert.NotNull(host.Services.GetRequiredService<DevTemWpf.App.Services.StatusClient>());
+            //#endif
+            //#if (IncludeTray)
             Assert.NotNull(host.Services.GetRequiredService<Wpf.Ui.Tray.INotifyIconService>());
             //#endif
             Assert.NotNull(host.Services.GetRequiredService<HomeViewModel>());

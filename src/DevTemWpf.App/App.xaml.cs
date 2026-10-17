@@ -33,9 +33,11 @@ public partial class App : Application
 
             var builder = Host.CreateApplicationBuilder(e.Args);
             builder.ConfigureForApp();
-            //#if (IncludeServices)
+            //#if (IncludeLogging)
             builder.AddAppLogging();
+            //#endif
 
+            //#if (IncludeUpdates)
             // Velopack install/update hooks (safe when not installed).
             Velopack.VelopackApp.Build().Run();
             //#endif
