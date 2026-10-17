@@ -3,6 +3,7 @@
 - Status: Accepted
 - Date: 2026-10-17
 - Milestone: 1.6.0
+- Amended: 2026-10-18 (optional auth/crash samples; notifications go/no-go)
 
 ## Context
 
@@ -30,6 +31,29 @@ comparisons and `&&`/`||`/`!`/parentheses — no method calls — so an
   remains only where a whole line must disappear (`App.xaml.cs` logging +
   Velopack hooks, `AppComposition` registrations, `MainWindow` tray).
 - Named presets keep byte-identical output.
+
+### Amendment (2026-10-18): optional samples and Windows integration
+
+- Two opt-in samples are added as `Custom`-preset-only modules
+  (`IncludeAuth` / `CustomAuth`, `IncludeCrash` / `CustomCrash`), never in
+  Clean/Recommended/Full:
+  - **Auth**: `Microsoft.Identity.Client` (MSAL, Entra ID public client; MIT,
+    4.91.0). No client secret; config from the `Auth` section/environment;
+    every path short-circuits without a provider call when unconfigured.
+  - **Crash**: local-first redacted capture under `%LOCALAPPDATA%` with an
+    `ICrashSink` adapter seam; no vendor, no telemetry by default.
+- Dependency edge: `crash → logging` (reuses `LogPrivacy.Redact` so the
+  redaction policy is single-sourced).
+- **Windows app notifications: NO-GO for 1.6.0.** `AppNotificationManager`
+  (`Microsoft.WindowsAppSDK`) is the only current first-party path; the spike
+  proved build + unpackaged `Register()`/`Show()` + AUMID/COM registration on
+  a machine with `Microsoft.WindowsAppRuntime.2` 2.5.1. It is deferred because
+  interactive cold-start activation could not be exercised headlessly, and
+  shipping the dependency into the template's own build (which every gate
+  measures) adds a per-machine runtime plus unmeasured startup/working-set
+  cost — forbidden to advertise without per-preset evidence. The in-app
+  Snackbar surface is the fallback. Recorded in `docs/DEFERRED.md` D07t.
+  (App Center remains excluded — retired 2025-03-31.)
 
 ## Evidence
 

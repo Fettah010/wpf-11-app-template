@@ -73,8 +73,15 @@ low-spec/low-tier adapter:
 
 ![Effects and motion showcase](docs/images/gallery-effects.png)
 
+Diagnostics (`1.6.0`) — bounded/redacted logs, support bundle, backup/restore,
+and the update surface (installed vs available version, delta/full, retry,
+cancel, restart prompt, and an opt-in downgrade switch):
+
+![Diagnostics page](docs/images/gallery-diagnostics.png)
+
 Captured 2026-10-17 on Windows 11 build 26300.9711, 2560×1440 display,
-maximized app window, Dark theme unless noted. Recapture gallery pages with
+maximized app window, Dark theme unless noted (`gallery-diagnostics.png`
+captured 2026-10-18). Recapture gallery pages with
 `powershell -ExecutionPolicy Bypass -File eng/capture-screenshots.ps1`; the
 shell plates (`shell-top.png`, `shell-tabbed.png`) come from
 `eng/verify-shell-surfaces.ps1 -SaveAs`, which captures deterministically and

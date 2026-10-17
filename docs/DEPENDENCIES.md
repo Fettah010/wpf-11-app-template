@@ -20,6 +20,21 @@ package has a live consumer (0.9.0 review).
 
 Single version source: `Directory.Packages.props` (CPM + transitive pinning).
 
+## 1.6.0 re-audit and additions (2026-10-18, `work/1.6.0`)
+
+- `dotnet list package --vulnerable --include-transitive`: **0 vulnerable**
+  (all 4 projects). `--deprecated`: **0 deprecated** (all 4 projects).
+- **Added** (module-gated, Custom preset only):
+  `Microsoft.Identity.Client` 4.91.0 (MIT, verified in the nuspec on
+  2026-10-18) for the opt-in auth sample. Public-client only — no secret.
+  Excluded (with its module) from Clean/Recommended/Full and from any scaffold
+  without `--CustomAuth`, so it is never in the default app output.
+- **Not added**: `Microsoft.WindowsAppSDK` (notifications). The 1.6.0 spike
+  proved build + unpackaged `Register()`/`Show()` succeed, but the module is
+  deferred (D07t) — see `docs/DEFERRED.md`. `Microsoft.ApplicationInsights`
+  remains **test-projects-only** (D12 intact; no product telemetry).
+- No other pins changed (Serilog/Sqlite/Velopack/WPF-UI re-verified at build).
+
 ## Direct dependencies
 
 | Package | Version | Purpose | Upstream | License | TFM fit | Maintenance |
@@ -38,6 +53,7 @@ Single version source: `Directory.Packages.props` (CPM + transitive pinning).
 | `Microsoft.Extensions.Http` | 10.0.12 | Typed `HttpClient` factory | `github.com/dotnet/runtime` | MIT | Matches Hosting 10.x | Same release train |
 | `Velopack` | 1.2.161 | Installer/update engine (explicit flow) | `github.com/velopack/velopack` | MIT | `net10.0` asset, zero net10 deps | Stable 2026-09-29; heavy WPF adoption |
 | `WPF-UI.Tray` | 4.3.0 | Tray icon + menu (same vendor) | `github.com/lepoco/wpfui` | MIT (same repo) | `net10.0-windows7.0` asset | Stable 2026-05-04, same 4.3.0 line |
+| `Microsoft.Identity.Client` | 4.91.0 | Opt-in MSAL (Entra ID) auth sample, Custom-only (ADR-0017/D-2) | `github.com/AzureAD/microsoft-authentication-library-for-dotnet` | MIT (verified in nuspec 2026-10-18) | `net8.0`/`netstandard2.0` → net10 compatible | Stable 2026-10-18 |
 | `FlaUI.Core` | 5.0.0 | UI automation driver, test-only (ADR-0013) | `github.com/FlaUI/FlaUI` | MIT (verified in nupkg LICENSE.txt) | `net8.0-windows` → net10 compatible | Stable; version parity with UIA3 |
 | `FlaUI.UIA3` | 5.0.0 | UIA3 automation backend, test-only (ADR-0013) | `github.com/FlaUI/FlaUI` | MIT (same repo) | Inbox Windows UIA, no driver install | Stable |
 

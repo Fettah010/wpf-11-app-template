@@ -20,6 +20,18 @@ hand-edit (re-scaffold to change presets).
 <!--#if (!IncludeLogging) -->
 - [ ] Logging (excluded by preset)
 <!--#endif -->
+<!--#if (IncludeAuth) -->
+- [x] Auth sample (opt-in MSAL / Entra ID; disabled without configuration)
+<!--#endif -->
+<!--#if (!IncludeAuth) -->
+- [ ] Auth sample (opt-in; not selected)
+<!--#endif -->
+<!--#if (IncludeCrash) -->
+- [x] Crash capture (local-first, redacted; no vendor or telemetry)
+<!--#endif -->
+<!--#if (!IncludeCrash) -->
+- [ ] Crash capture (opt-in; not selected)
+<!--#endif -->
 <!--#if (IncludeLocalData) -->
 - [x] Local data (SQLite FavoritesStore)
 <!--#endif -->

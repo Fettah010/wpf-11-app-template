@@ -18,7 +18,9 @@ by `TemplateSurfaceTests` where machine-checkable.
   roadmap-authorized): the single `IncludeServices` flag was replaced by these
   per-module flags; the `Custom` preset + `Custom<Module>` bools are new
   surface. Custom dependency edges: diagnostics → {logging, http, backup,
-  updates}; backup → localdata. Named presets are byte-identical to 1.5.0.
+  updates}; backup → localdata; crash → logging. Opt-in samples added in 1.6.0
+  (Custom preset only, never named presets): `IncludeAuth` / `CustomAuth` and
+  `IncludeCrash` / `CustomCrash`. Named presets are byte-identical to 1.5.0.
 - `sourceName`: `DevTemWpf`. No `--ThemeDefault` (cut in 0.8.0
   with reason; runtime switching is the supported path).
 - Item templates: `-n` names the item (`sourceName`), `--Namespace` sets the
@@ -42,7 +44,8 @@ by `TemplateSurfaceTests` where machine-checkable.
   Culture, plus 1.5.0 additions RippleEffectEnabled, GradientEffectEnabled,
   WarpEffectEnabled. Additive only — unknown fields ignored, missing fields
   default. `Motion` enum values are append-only (`Balanced = 4`, 1.5.0).
-- `appsettings.json` sections: `App`, `Http`, `Update`.
+- `appsettings.json` sections: `App`, `Http`, `Update`, plus 1.6.0 additive
+  empty-default sections `Auth` (public-client ids) and `Crash`.
 
 ## Generated structure (frozen)
 

@@ -26,6 +26,8 @@ packages, each under its own license:
 - **Velopack 1.2.161** — MIT, © Velopack contributors.
 - **WPF-UI.Tray 4.3.0** — MIT, © 2021–2026 Leszek Pomianowski and WPF UI
   Contributors (same repo as WPF-UI).
+- **Microsoft.Identity.Client 4.91.0** (MSAL; opt-in auth sample, Custom
+  preset only) — MIT, © Microsoft Corporation.
 - **FlaUI.Core / FlaUI.UIA3 5.0.0** (test use only, never shipped) — MIT,
   © FlaUI contributors.
 

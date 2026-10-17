@@ -18,12 +18,16 @@ dotnet new devtemwpf-app -n MyApp --Preset Full
 
 In **Custom**, each production module is selected with a `bool` flag.
 `Diagnostics` implies `logging`, `http`, `backup`, and `updates`; `backup`
-implies `localdata` (it protects the local database). The named presets are
-unaffected by the `Custom<Module>` flags.
+implies `localdata` (it protects the local database); `crash` implies
+`logging` (shared redaction). The named presets are unaffected by the
+`Custom<Module>` flags. The opt-in **auth** and **crash** samples are reachable
+**only** through `Custom` — they are never in Clean/Recommended/Full.
 
 Module map: dashboard files + LiveCharts + sample data; diagnostics page + VM;
-per-module service files + packages + tray/logging/update hooks.
-Localization, tokens, motion, and feedback stay in every preset.
+per-module service files + packages + tray/logging/update hooks; opt-in auth
+(MSAL) and crash (local file) samples. Localization, tokens, motion, and
+feedback stay in every preset. Windows app notifications (`AppNotificationManager`)
+were evaluated in 1.6.0 and deferred (no-go) — no package or flag ships (D07t).
 
 ## Flags
 
@@ -37,6 +41,8 @@ Localization, tokens, motion, and feedback stay in every preset.
 | `--CustomUpdates` | true/false | false | Custom only: Velopack update engine. |
 | `--CustomTray` | true/false | false | Custom only: system tray icon. |
 | `--CustomDiagnostics` | true/false | false | Custom only: Diagnostics page (implies logging, HTTP, backup, updates). |
+| `--CustomAuth` | true/false | false | Custom only: opt-in MSAL (Entra ID) auth sample; disabled without `Auth` config. |
+| `--CustomCrash` | true/false | false | Custom only: local-first redacted crash capture (implies logging); no vendor. |
 | `--IncludeTests` | true/false | true | Excludes `tests/**` + solution entries when false. |
 | `-n/--name` | text | directory name | Renames namespaces, files (`DevTemWpf.slnx`), and content via `sourceName`. |
 
