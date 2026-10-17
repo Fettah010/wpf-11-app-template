@@ -7,17 +7,22 @@ by `TemplateSurfaceTests` where machine-checkable.
 
 - Short names: `devtemwpf-app`, `devtemwpf-page`, `devtemwpf-service`.
 - `devtemwpf-app` symbols: `Preset` {Clean, Recommended (default), Full},
-  `IncludeTests` (bool, default true). Computed: `IncludeDashboard`
+  `Shell` {Sidebar (default), Rail, Top, Tabbed} (added in 1.4.0,
+  roadmap-authorized additive change — seeds the first-launch shell default
+  via the `ShellDefaultValue` switch symbol; all shells ship in every
+  scaffold), `IncludeTests` (bool, default true). Computed: `IncludeDashboard`
   (Full only), `IncludeDiagnostics`/`IncludeServices` (non-Clean).
-- `sourceName`: `DevTemWpf`. No `--Shell`/`--ThemeDefault` (cut in 0.8.0
+- `sourceName`: `DevTemWpf`. No `--ThemeDefault` (cut in 0.8.0
   with reason; runtime switching is the supported path).
 - Item templates: `-n` names the item (`sourceName`), `--Namespace` sets the
   root namespace.
 
 ## Shell contracts (frozen)
 
-- `ShellMode` {Rail, Sidebar}; `NavigationView` pane mapping
-  (Rail→LeftMinimal, Sidebar→Left); responsive collapse <800px.
+- `ShellMode` {Rail, Sidebar} plus 1.4.0 additions {Top, Tabbed};
+  `NavigationView` pane mapping (Rail→LeftMinimal, Sidebar→Left, Top→Top,
+  Tabbed→LeftMinimal + workspace); responsive collapse <800px. Shell
+  selection applies at next launch (ADR-0015).
 - Pages: `INavigableView<T>` + `INavigationAware`; registration as
   transients in `AppComposition`; nav items in `MainViewModel`.
 - Composition root shape: `AppComposition.ConfigureForApp` + `AddAppLogging`

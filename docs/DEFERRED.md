@@ -1,4 +1,4 @@
-# Deferred work backlog — 1.0 scope freeze (0.9.0); 1.1.0 additions appended (D21–D24)
+# Deferred work backlog — 1.0 scope freeze (0.9.0); 1.1.0 additions appended (D21–D24); 1.4.0 dispositions appended (D09r/D14/D15 closed, D25–D27 opened)
 
 Rule: 1.0-rc takes bug fixes + release mechanics only. Everything below is
 post-1.0 unless marked **1.0**.
@@ -25,6 +25,12 @@ post-1.0 unless marked **1.0**.
 | D22 | Template-test isolation (global `dotnet new` hive, shared TEMP logs) | **1.1.0** — in progress (T06: per-run `DOTNET_CLI_HOME`, per-run logs, `finally` restore). |
 | D23 | Fixed exe path in `eng/measure-startup.ps1` | **1.1.0** — in progress (T08: dynamic `*App.exe` resolution like `smoke.ps1`). |
 | D24 | Stale README (screenshot placeholder, duplicate 1.0.0 row, legacy roadmap links) + stale in-app Home subline | **1.1.0** — fixed (T02/T03: real screenshots in `docs/images/`, version-agnostic copy). |
+| D09r | Visual regression required gate | **1.4.0 decision: stays ADVISORY.** Evidence across 1.2 (0.03% same-UI noise), 1.3 (deliberate re-baseline, Dashboard excluded for volatility), 1.4 (deliberate re-baseline for palette button + shell note; Controls scroll noise 9%; DWM border strip masked with documented 12px mask). The CopyFromScreen harness is occlusion/scroll/animation-sensitive. Required-gate needs a deterministic capture harness (PrintWindow-based + scroll pinning); revisit then. |
+| D14 | Drag-and-drop workspace patterns | **1.4.0 — feature shipped, gesture deferred.** Reorder/split ship via keyboard-operable Move buttons + GridSplitter + persisted width (unit + UI proven). The pointer-drag gesture (private format, Esc cancel, single-gesture guard) was prototyped and **deferred**: OLE modal gestures failed across automation runners including the quiet CI runner (traced sequential cancels; no product-side drop defect found, but the gate requires proven reliability). Revisit with a runner-proof gesture design. |
+| D15 | Top-nav + tabbed shells | **1.4.0 — SHIPPED.** Four presets (Sidebar/Rail/Top/Tabbed) via shared route registry; `--Shell` scaffold default; runtime changes restart-apply (ADR-0015). Multi-window explicitly deferred (no testable consumer) — see D26. |
+| D25 | Live shell hot-switch (runtime `PaneDisplayMode` swap) | Post-1.4 — WPF-UI 4.3.0 crashes intermittently (NaN `DoubleAnimation` during re-template; upstream PR #1012/#1015 fixed only the load path). Four mitigations exhausted with UI-run evidence (settle delay, transitionless close + animation defuse, control recreation with unbind-first). Revisit only with a passing hot-switch UI test on a fixed toolkit version; re-check every WPF-UI upgrade. |
+| D26 | Window tear-out / cross-window or cross-process drag / multi-window | Post-1.4 — no testable consumer; drag stays in-workspace by construction (private format). |
+| D27 | 8 GB low-spec reference validation | Still pending (unchanged, D10 standing). 1.4.0 numbers are proxy-hardware only; Tabbed + 3 documents measured 150.9 MB working set (accepted variance, per-document cost documented). |
 
 Done: D02 (0.2.0), D03 (0.3.0), D04 (0.4.0), D05 (0.5.0), D06 dashboard+charts (0.6.0),
 D07 core services/CI (0.7.0), D08 templates/generators (0.8.0), D09 CI+FlaUI (0.7.0/0.9.0),

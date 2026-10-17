@@ -6,6 +6,22 @@ on:
   pull_request:
     branches: [main]
 
+# A new push supersedes previous runs on the same ref: cancel them so slow
+# template matrices never stack up and burn runner minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# A workspace-local NuGet cache folder (instead of ~/.nuget/packages) so the
+# cache path is deterministic across jobs and always exists for save/restore.
+env:
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+  # One-shot generated-app builds: never let MSBuild/Roslyn servers linger and
+  # hold the redirected handle the template harness waits on (see
+  # eng/test-templates.ps1 for the measured 906 s -> 10 s impact).
+  MSBUILDDISABLENODEREUSE: "1"
+  DOTNET_CLI_USE_MSBUILD_SERVER: "0"
+
 jobs:
   build-test:
     runs-on: windows-latest
@@ -16,6 +32,14 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: nuget-${{ hashFiles('Directory.Packages.props', 'global.json') }}
+          restore-keys: nuget-
+
 
       - name: Pinned SDK check
         run: dotnet --version
@@ -36,8 +60,15 @@ jobs:
       - name: List packages (audit trail)
         run: dotnet list package --include-transitive
 
-  template-matrix:
+  # Template gates split into parallel jobs (presets vs shells, source vs
+  # packed package). The union of shards is the full gate defined in
+  # eng/test-templates.ps1 (defaults run everything). Before the harness fix
+  # each generated-app build blocked ~15 min on lingering MSBuild/Roslyn
+  # servers (~30 min/combo); combos now build in seconds, so the whole matrix
+  # finishes in minutes.
+  template-matrix-presets:
     runs-on: windows-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -46,12 +77,20 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Full preset matrix (source folder)
-        run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1
-        timeout-minutes: 120
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: nuget-${{ hashFiles('Directory.Packages.props', 'global.json') }}
+          restore-keys: nuget-
 
-  template-package:
+      - name: Preset matrix (source folder)
+        run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Shells Sidebar
+        timeout-minutes: 45
+
+  template-matrix-shells:
     runs-on: windows-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -59,10 +98,64 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: nuget-${{ hashFiles('Directory.Packages.props', 'global.json') }}
+          restore-keys: nuget-
+
+      - name: Shell matrix (source folder)
+        run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -NoPresets
+        timeout-minutes: 45
+
+  template-package-presets:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: nuget-${{ hashFiles('Directory.Packages.props', 'global.json') }}
+          restore-keys: nuget-
 
       - name: Pack template package
         run: dotnet pack templates/pack/DevTemWPF.Templates.csproj -c Release -o artifacts/packages
 
-      - name: Full preset matrix (packed .nupkg)
-        run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -PackagePath (Get-ChildItem artifacts/packages/*.nupkg | Select-Object -First 1 -ExpandProperty FullName)
-        timeout-minutes: 120
+      - name: Preset matrix (packed .nupkg)
+        run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -PackagePath (Get-ChildItem artifacts/packages/*.nupkg | Select-Object -First 1 -ExpandProperty FullName) -Shells Sidebar
+        timeout-minutes: 45
+
+  template-package-shells:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: nuget-${{ hashFiles('Directory.Packages.props', 'global.json') }}
+          restore-keys: nuget-
+
+      - name: Pack template package
+        run: dotnet pack templates/pack/DevTemWPF.Templates.csproj -c Release -o artifacts/packages
+
+      - name: Shell matrix (packed .nupkg)
+        run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -PackagePath (Get-ChildItem artifacts/packages/*.nupkg | Select-Object -First 1 -ExpandProperty FullName) -NoPresets
+        timeout-minutes: 45

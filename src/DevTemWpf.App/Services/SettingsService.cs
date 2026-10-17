@@ -11,6 +11,14 @@ public sealed class SettingsService : ISettingsService
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
+    /// <summary>
+    /// Serializes settings IO (1.4.0): workspace selection changes fire
+    /// overlapping persists, and concurrent writes to the same file throw
+    /// IOException on Windows. Readers join the same gate so they never
+    /// observe a torn write.
+    /// </summary>
+    private readonly SemaphoreSlim _ioGate = new(1, 1);
+
     private readonly string _filePath;
 
     public SettingsService(string? filePath = null)
@@ -31,31 +39,47 @@ public sealed class SettingsService : ISettingsService
     /// </summary>
     public async Task<bool> LoadAsync(CancellationToken cancellationToken = default)
     {
+        await _ioGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            var json = await File.ReadAllTextAsync(_filePath, cancellationToken).ConfigureAwait(false);
-            Current = JsonSerializer.Deserialize<ShellSettings>(json, JsonOptions) ?? new ShellSettings();
-            return false;
+            try
+            {
+                var json = await File.ReadAllTextAsync(_filePath, cancellationToken).ConfigureAwait(false);
+                Current = JsonSerializer.Deserialize<ShellSettings>(json, JsonOptions) ?? new ShellSettings();
+                return false;
+            }
+            catch
+            {
+                // Missing, unreadable, or corrupt → safe defaults (resilience rule).
+                Current = new ShellSettings();
+                return true;
+            }
         }
-        catch
+        finally
         {
-            // Missing, unreadable, or corrupt → safe defaults (resilience rule).
-            Current = new ShellSettings();
-            return true;
+            _ioGate.Release();
         }
     }
 
     public async Task UpdateAsync(Func<ShellSettings, ShellSettings> mutate, CancellationToken cancellationToken = default)
     {
-        Current = mutate(Current);
-        var dir = Path.GetDirectoryName(_filePath);
-        if (!string.IsNullOrEmpty(dir))
+        await _ioGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
         {
-            Directory.CreateDirectory(dir);
-        }
+            Current = mutate(Current);
+            var dir = Path.GetDirectoryName(_filePath);
+            if (!string.IsNullOrEmpty(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
 
-        var json = JsonSerializer.Serialize(Current, JsonOptions);
-        await File.WriteAllTextAsync(_filePath, json, cancellationToken).ConfigureAwait(false);
-        Updated?.Invoke(this, Current);
+            var json = JsonSerializer.Serialize(Current, JsonOptions);
+            await File.WriteAllTextAsync(_filePath, json, cancellationToken).ConfigureAwait(false);
+            Updated?.Invoke(this, Current);
+        }
+        finally
+        {
+            _ioGate.Release();
+        }
     }
 }

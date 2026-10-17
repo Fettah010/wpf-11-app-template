@@ -2,14 +2,23 @@
 <#
 .SYNOPSIS
   Template matrix gate: installs the repo template, generates each supported
-  preset outside the repo tree, and verifies restore/build/test/launch plus
-  module presence/absence. See docs/releases/0.8.0-plan.md.
+  preset/shell outside the repo tree, and verifies restore/build/test/launch
+  plus module presence/absence. See docs/releases/0.8.0-plan.md (1.4.0 adds
+  the Shell dimension: every shell generates + builds + launches; presets
+  keep full smoke; Full+Tabbed is the high-risk full smoke).
+  CI splits the gate into parallel jobs (presets vs shells, source vs
+  package) to bound wall time; defaults run everything (the full gate).
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1
   powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Presets Clean
+  powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Shells Top, Tabbed
+  powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Shells Sidebar
+  powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -NoPresets
 #>
 param(
   [string[]]$Presets = @('Clean', 'Recommended', 'Full'),
+  [string[]]$Shells = @('Sidebar', 'Rail', 'Top', 'Tabbed'),
+  [switch]$NoPresets,
   [string]$PackagePath = ''
 )
 
@@ -28,6 +37,9 @@ $logOut = Join-Path $work 'invoke.out.log'
 $logErr = Join-Path $work 'invoke.err.log'
 $oldCliHome = $env:DOTNET_CLI_HOME
 $oldNugetPackages = $env:NUGET_PACKAGES
+$oldNodeReuse = $env:MSBUILDDISABLENODEREUSE
+$oldMsBuildServer = $env:DOTNET_CLI_USE_MSBUILD_SERVER
+$oldSharedCompilation = $env:UseSharedCompilation
 
 function Assert-True([bool]$Condition, [string]$Message) {
   if (-not $Condition) {
@@ -37,23 +49,32 @@ function Assert-True([bool]$Condition, [string]$Message) {
 }
 
 function Invoke-Native([string]$Exe, [string[]]$Arguments, [string]$WorkDir) {
+  $sw = [System.Diagnostics.Stopwatch]::StartNew()
   $p = Start-Process -FilePath $Exe -ArgumentList $Arguments -WorkingDirectory $WorkDir `
     -NoNewWindow -Wait -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
+  $secs = [math]::Round($sw.Elapsed.TotalSeconds, 1)
   if ($p.ExitCode -ne 0) {
-    Write-Host "COMMAND FAILED ($($p.ExitCode)): $Exe $($Arguments -join ' ')" -ForegroundColor Red
-    Get-Content $logErr | Select-Object -First 15
+    Write-Host "COMMAND FAILED ($($p.ExitCode)) after ${secs}s: $Exe $($Arguments -join ' ')" -ForegroundColor Red
+    # Both streams are tailed: the generated smoke/build scripts report through
+    # stdout (Write-Host), so stderr alone hid the real failure.
+    Write-Host '--- stderr (tail) ---' -ForegroundColor DarkYellow
+    Get-Content $logErr -Tail 25 -ErrorAction SilentlyContinue
+    Write-Host '--- stdout (tail) ---' -ForegroundColor DarkYellow
+    Get-Content $logOut -Tail 40 -ErrorAction SilentlyContinue
     $script:failures++
     return $false
   }
+  Write-Host "  $($Arguments[0]) ${secs}s" -ForegroundColor DarkGray
   return $true
 }
 
-function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [string]$DirName) {
-  $name = "Tmpl$Preset"
+function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [string]$DirName, [string]$Shell = 'Sidebar', [bool]$LaunchOnly = $false) {
+  $name = "Tmpl$Preset$Shell"
+  if ($Shell -eq 'Sidebar') { $name = "Tmpl$Preset" }
   $dir = Join-Path $work $DirName
-  Write-Host "`n===== $Preset ($ExtraArgs) =====" -ForegroundColor Cyan
+  Write-Host "`n===== $Preset / $Shell ($ExtraArgs) =====" -ForegroundColor Cyan
 
-  $genArgs = @('new', 'devtemwpf-app', '-n', $name, '-o', $dir, '--Preset', $Preset) + ($ExtraArgs -split ' ' | Where-Object { $_ })
+  $genArgs = @('new', 'devtemwpf-app', '-n', $name, '-o', $dir, '--Preset', $Preset, '--Shell', $Shell) + ($ExtraArgs -split ' ' | Where-Object { $_ })
   if (-not (Invoke-Native 'dotnet' $genArgs $work)) { return }
 
   $appDir = $dir
@@ -72,6 +93,12 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
   $ifHits = @(Get-ChildItem -LiteralPath (Join-Path $appDir 'src') -Recurse -File -Include *.cs, *.xaml, *.csproj, *.slnx -ErrorAction SilentlyContinue |
     Select-String -Pattern '#if \(|#endif' -ErrorAction SilentlyContinue)
   Assert-True ($ifHits.Count -eq 0) "Template directive residue"
+  # Stray conditional tokens in comments (1.4.0 T08: a `//#if` mention inside
+  # a comment silently truncates the generated file from that line on). Real
+  # directives are removed by the engine, so ANY remaining token is a defect.
+  $strayIf = @(Get-ChildItem -LiteralPath (Join-Path $appDir 'src') -Recurse -File -Include *.cs -ErrorAction SilentlyContinue |
+    Select-String -Pattern '//#(if|else|endif)' -ErrorAction SilentlyContinue)
+  Assert-True ($strayIf.Count -eq 0) "Stray template directive tokens: $($strayIf -join '; ')"
 
   # Module presence/absence.
   $hasDashboard = Test-Path (Join-Path $srcDir 'Views\DashboardPage.xaml')
@@ -88,7 +115,37 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
   $dashChecked = $features -match '- \[x\] Dashboard'
   Assert-True ($dashChecked -eq ($Preset -eq 'Full')) "$Preset FEATURES dashboard row"
 
-  if ($WithTests) {
+  # Shell seed (1.4.0): the generated default must carry the chosen shell and
+  # no unreplaced template token.
+  $settingsCs = Get-Content (Join-Path $srcDir 'Services\ShellSettings.cs') -Raw
+  Assert-True ($settingsCs -match "Enum\.TryParse<ShellMode>\(`"$Shell`"") "$Preset/$Shell default seed"
+  Assert-True ($settingsCs -notmatch 'DevTemWpfShellDefault') "$Preset/$Shell no unreplaced token"
+
+  if ($LaunchOnly) {
+    if (-not (Invoke-Native 'dotnet' @('restore') $appDir)) { return }
+    if (-not (Invoke-Native 'dotnet' @('build', '-c', 'Release', '--no-restore', '--warnaserror') $appDir)) { return }
+    $exe = Get-ChildItem -LiteralPath $appDir -Recurse -Filter "$name.App.exe" -ErrorAction SilentlyContinue |
+      Where-Object { $_.FullName -match 'Release' } | Select-Object -First 1
+    Assert-True ($null -ne $exe) "$Preset/$Shell exe built"
+    if ($null -eq $exe) { return }
+    $p = Start-Process -FilePath $exe.FullName -PassThru
+    # Poll for the window (up to 20 s) instead of a fixed sleep: launches
+    # usually complete in ~1 s, so the fixed wait was dead time in the matrix.
+    $deadline = (Get-Date).AddSeconds(20)
+    $hwnd = 0
+    while ((Get-Date) -lt $deadline) {
+      Start-Sleep -Milliseconds 500
+      try { $p.Refresh() } catch { }
+      if ($p.HasExited) { break }
+      try { $hwnd = $p.MainWindowHandle } catch { }
+      if ($hwnd -ne 0) { break }
+    }
+    Assert-True ((-not $p.HasExited) -and ($hwnd -ne 0)) "$Preset/$Shell launched with window"
+    try { Stop-Process -Id $p.Id -Force -ErrorAction Stop } catch { }
+    try { $p.WaitForExit(5000) | Out-Null } catch { }
+    if ($script:failures -eq 0) { Write-Host "OK: $Preset/$Shell build+launch" -ForegroundColor Green }
+  }
+  elseif ($WithTests) {
     if (-not (Invoke-Native 'powershell' @('-ExecutionPolicy', 'Bypass', '-File', (Join-Path $appDir 'eng\smoke.ps1')) $appDir)) { return }
     Write-Host "OK: $Preset smoke (restore/build/test/launch)" -ForegroundColor Green
   }
@@ -103,26 +160,50 @@ try {
   New-Item -ItemType Directory -Path $work -Force | Out-Null
   New-Item -ItemType Directory -Path $cliHome -Force | Out-Null
   $env:DOTNET_CLI_HOME = $cliHome
-  $userPackages = Join-Path $env:USERPROFILE '.nuget\packages'
-  if (Test-Path -LiteralPath $userPackages) { $env:NUGET_PACKAGES = $userPackages }
+  # Long-lived MSBuild/Roslyn servers inherit the redirected handle that
+  # Invoke-Native waits on, so `Start-Process -Wait` blocks for each server's
+  # ~15 min idle timeout even after the build finishes (~30 min per combo on
+  # CI; measured: 906 s vs 10 s). Generated-app builds are one-shot, so disable
+  # node reuse, the MSBuild server, and the shared compiler.
+  $env:MSBUILDDISABLENODEREUSE = '1'
+  $env:DOTNET_CLI_USE_MSBUILD_SERVER = '0'
+  $env:UseSharedCompilation = 'false'
+  # Respect a CI-provided NUGET_PACKAGES (a cacheable path); otherwise reuse the
+  # user-profile cache when it exists.
+  if (-not $env:NUGET_PACKAGES) {
+    $userPackages = Join-Path $env:USERPROFILE '.nuget\packages'
+    if (Test-Path -LiteralPath $userPackages) { $env:NUGET_PACKAGES = $userPackages }
+  }
   $installSource = if ($PackagePath) { $PackagePath } else { $root }
   $uninstallId = if ($PackagePath) { 'DevTemWPF.Templates' } else { $root }
   try { & dotnet new uninstall $uninstallId 2>&1 | Out-Null } catch { }
   if (-not (Invoke-Native 'dotnet' @('new', 'install', $installSource) $root)) { throw 'template install failed' }
 
-  if ($Presets -contains 'Clean') {
-    Test-Combo 'Clean' '' $true 'Clean'
+  if (-not $NoPresets) {
+    if ($Presets -contains 'Clean') {
+      Test-Combo 'Clean' '' $true 'Clean'
+    }
+    if ($Presets -contains 'Recommended') {
+      Test-Combo 'Recommended' '' $true 'Recommended'
+    }
+    if ($Presets -contains 'Full') {
+      Test-Combo 'Full' '' $true 'Full'
+      Test-Combo 'Full' '--IncludeTests false' $false 'FullNoTests'
+    }
   }
-  if ($Presets -contains 'Recommended') {
-    Test-Combo 'Recommended' '' $true 'Recommended'
+
+  # Shell dimension (1.4.0): every non-default shell generates + builds +
+  # launches (preset matrix above already smokes the Sidebar default), plus
+  # the high-risk Full+Tabbed full smoke (dashboard/charts inside tabs).
+  foreach ($shell in @($Shells | Where-Object { $_ -ne 'Sidebar' })) {
+    Test-Combo 'Recommended' '' $false "Rec$shell" $shell $true
   }
-  if ($Presets -contains 'Full') {
-    Test-Combo 'Full' '' $true 'Full'
-    Test-Combo 'Full' '--IncludeTests false' $false 'FullNoTests'
+  if ($Shells -contains 'Tabbed') {
+    Test-Combo 'Full' '' $true 'FullTabbed' 'Tabbed' $false
   }
 
   # Item templates (into the Full app).
-  if ($Presets -contains 'Full') {
+  if ((-not $NoPresets) -and ($Presets -contains 'Full')) {
   Write-Host "`n===== item templates =====" -ForegroundColor Cyan
   $fullApp = Join-Path $work 'Full'
   $pageDir = Join-Path $root 'templates\items\devtemwpf-page'
@@ -151,6 +232,9 @@ finally {
   else { $env:DOTNET_CLI_HOME = $oldCliHome }
   if ($null -eq $oldNugetPackages) { [Environment]::SetEnvironmentVariable('NUGET_PACKAGES', $null, 'Process') }
   else { $env:NUGET_PACKAGES = $oldNugetPackages }
+  $env:MSBUILDDISABLENODEREUSE = $oldNodeReuse
+  $env:DOTNET_CLI_USE_MSBUILD_SERVER = $oldMsBuildServer
+  $env:UseSharedCompilation = $oldSharedCompilation
   if (($script:failures -eq 0) -and (Test-Path $work)) {
     # Long-path-safe removal (generated bin/obj trees nest deeply); warn —
     # never fail the product gate — with the cause when removal struggles.

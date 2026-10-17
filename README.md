@@ -60,6 +60,10 @@ with section index, Data gallery, and Settings in the Light theme:
 |---|---|
 | ![Data gallery](docs/images/gallery-data.png) | ![Settings in Light theme](docs/images/gallery-settings-light.png) |
 
+| Top navigation shell | Tabbed document workspace |
+|---|---|
+| ![Top navigation](docs/images/shell-top.png) | ![Tabbed workspace](docs/images/shell-tabbed.png) |
+
 Captured 2026-10-14 on Windows 11 build 26300.9711, 2560×1440 display,
 maximized app window, system theme unless noted. Recapture with
 `powershell -ExecutionPolicy Bypass -File eng/capture-screenshots.ps1`

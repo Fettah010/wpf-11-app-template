@@ -1,44 +1,35 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using DevTemWpf.App.Resources;
 using DevTemWpf.App.Services;
-using DevTemWpf.App.Views;
 using Microsoft.Extensions.Options;
 using Wpf.Ui.Controls;
 
 namespace DevTemWpf.App;
 
-/// <summary>Shell ViewModel: navigation items + pane state (ADR-0005).</summary>
+/// <summary>Shell ViewModel: navigation items + pane state (ADR-0005, ADR-0015).</summary>
 public sealed partial class MainViewModel : ObservableObject
 {
     public const double CompactWidthThreshold = 800;
 
-    private readonly ISettingsService _settings;
+    /// <summary>
+    /// Shell applied to the live chrome (launch value). A persisted shell
+    /// change takes effect at next launch (ADR-0015): WPF-UI 4.3.0 crashes
+    /// when PaneDisplayMode is swapped on a live NavigationView (NaN
+    /// DoubleAnimationException during re-template; upstream PR #1012/#1015
+    /// fixed only the load path — proven by UI runs in 1.4.0). The settings
+    /// page documents the restart requirement next to the selector.
+    /// </summary>
+    private readonly ShellMode _appliedShell;
 
     public MainViewModel(ISettingsService settings, IOptions<AppOptions> options)
     {
-        _settings = settings;
         AppTitle = options.Value.Title;
-        MenuItems = new ObservableCollection<object>
-        {
-            new NavigationViewItem(Strings.Nav_Home, SymbolRegular.Home24, typeof(HomePage)),
-            //#if (IncludeDashboard)
-            new NavigationViewItem(Strings.Nav_Dashboard, SymbolRegular.Board24, typeof(DashboardPage)),
-            //#endif
-            new NavigationViewItem(Strings.Nav_Controls, SymbolRegular.DataHistogram24, typeof(ControlsPage)),
-            new NavigationViewItem(Strings.Nav_Data, SymbolRegular.TableSimple24, typeof(DataPage)),
-            new NavigationViewItem(Strings.Nav_Tokens, SymbolRegular.PaintBrush24, typeof(TokensPage)),
-            new NavigationViewItem(Strings.Nav_Effects, SymbolRegular.Fluent24, typeof(EffectsPage)),
-            //#if (IncludeDiagnostics)
-            new NavigationViewItem(Strings.Nav_Diagnostics, SymbolRegular.Shield24, typeof(DiagnosticsPage)),
-            //#endif
-        };
-        FooterMenuItems = new ObservableCollection<object>
-        {
-            new NavigationViewItem(Strings.Nav_Settings, SymbolRegular.Settings24, typeof(SettingsPage)),
-        };
-        RefreshShell(_settings.Current);
-        _settings.Updated += (_, s) => RefreshShell(s);
+        MenuItems = new ObservableCollection<object>(
+            NavigationRoutes.Menu.Select(r => new NavigationViewItem(r.Title(), r.Icon, r.PageType)));
+        FooterMenuItems = new ObservableCollection<object>(
+            NavigationRoutes.Footer.Select(r => new NavigationViewItem(r.Title(), r.Icon, r.PageType)));
+        _appliedShell = settings.Current.Shell;
+        RefreshShell();
     }
 
     public ObservableCollection<object> MenuItems { get; }
@@ -53,7 +44,7 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool isPaneOpen = true;
 
-    /// <summary>Narrow windows collapse the pane; widening restores the preference.</summary>
+    /// <summary>Narrow windows collapse the pane; widening restores the applied shell.</summary>
     public void ApplyResponsiveWidth(double width)
     {
         if (width < CompactWidthThreshold)
@@ -62,17 +53,21 @@ public sealed partial class MainViewModel : ObservableObject
             return;
         }
 
-        RefreshShell(_settings.Current);
+        RefreshShell();
     }
 
-    private void RefreshShell(ShellSettings s)
+    private void RefreshShell()
     {
-        PaneMode = MapMode(s.Shell);
-        IsPaneOpen = s.Shell == ShellMode.Sidebar;
+        PaneMode = MapMode(_appliedShell);
+        IsPaneOpen = _appliedShell == ShellMode.Sidebar;
     }
 
     private static NavigationViewPaneDisplayMode MapMode(ShellMode shell)
-        => shell == ShellMode.Rail
-            ? NavigationViewPaneDisplayMode.LeftMinimal
-            : NavigationViewPaneDisplayMode.Left;
+        => shell switch
+        {
+            ShellMode.Rail => NavigationViewPaneDisplayMode.LeftMinimal,
+            ShellMode.Top => NavigationViewPaneDisplayMode.Top,
+            ShellMode.Tabbed => NavigationViewPaneDisplayMode.LeftMinimal,
+            _ => NavigationViewPaneDisplayMode.Left,
+        };
 }

@@ -16,11 +16,26 @@
   <data name="Settings_Theme" xml:space="preserve"><value>Design</value></data>
   <data name="Settings_Accent" xml:space="preserve"><value>Akzentfarbe</value></data>
   <data name="Settings_NavigationStyle" xml:space="preserve"><value>Navigation</value></data>
+  <data name="Settings_ShellNote" xml:space="preserve"><value>Die Navigation wird nach einem Neustart übernommen.</value></data>
   <data name="Settings_Density" xml:space="preserve"><value>Dichte</value></data>
   <data name="Settings_Motion" xml:space="preserve"><value>Bewegung</value></data>
   <data name="Settings_Language" xml:space="preserve"><value>Sprache</value></data>
   <data name="Settings_LanguageNote" xml:space="preserve"><value>Die Sprache wird nach einem Neustart übernommen.</value></data>
   <data name="Settings_RestartNow" xml:space="preserve"><value>Jetzt neu starten</value></data>
+  <data name="Wsp_Title" xml:space="preserve"><value>Arbeitsbereich</value></data>
+  <data name="Wsp_Description" xml:space="preserve"><value>Seiten als Dokumente öffnen, anordnen und dort fortfahren, wo Sie aufgehört haben — Tabs bleiben über Neustarts erhalten.</value></data>
+  <data name="Wsp_Empty" xml:space="preserve"><value>Keine offenen Dokumente. Wählen Sie eine Seite in der Navigation.</value></data>
+  <data name="Wsp_Detail" xml:space="preserve"><value>Details</value></data>
+  <data name="Wsp_ShowDetails" xml:space="preserve"><value>Details anzeigen</value></data>
+  <data name="Wsp_Close" xml:space="preserve"><value>Schließen</value></data>
+  <data name="Wsp_MoveLeft" xml:space="preserve"><value>Nach links</value></data>
+  <data name="Wsp_MoveRight" xml:space="preserve"><value>Nach rechts</value></data>
+  <data name="Wsp_Back" xml:space="preserve"><value>Zurück</value></data>
+  <data name="Wsp_Forward" xml:space="preserve"><value>Vor</value></data>
+  <data name="Pal_Title" xml:space="preserve"><value>Befehlspalette</value></data>
+  <data name="Pal_Filter" xml:space="preserve"><value>Befehl oder Seite eingeben</value></data>
+  <data name="Pal_Empty" xml:space="preserve"><value>Keine passenden Befehle</value></data>
+  <data name="Pal_Open" xml:space="preserve"><value>Befehlspalette (Strg+K)</value></data>
   <data name="Ctl_Title" xml:space="preserve"><value>Steuerelemente</value></data>
   <data name="Ctl_Description" xml:space="preserve"><value>Alltagssteuerelemente, ihre Zustände und Verwendungsmuster. Vollständiger Katalog: docs/design-system/components.md. Tab erreicht jedes Steuerelement und jede Abschnittsüberschrift; der Index unten springt zwischen Abschnitten.</value></data>
   <data name="Ctl_Buttons" xml:space="preserve"><value>Schaltflächen</value></data>

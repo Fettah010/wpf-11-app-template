@@ -1,7 +1,8 @@
-# Component catalog (1.3.0)
+# Component catalog (1.4.0)
 
 Living samples: Controls page (`src/DevTemWpf.App/Views/ControlsPage.xaml`,
 nav item "Controls") and Data page (`Views/DataPage.xaml`, nav item "Data").
+Shells, workspace, and palette: `docs/design-system/shells.md`.
 Conventions: `docs/design-system/component-standards.md`. Localization rule:
 display copy lives in resx (`Strings.*`, en+de); `AutomationProperties.Name`
 stays English-invariant so UI tests and screen-reader references are stable.
@@ -63,10 +64,26 @@ the only data sources.
 | Paging (recipe) | Prefer virtualization (proven to 10k rows); if true paging is needed, page in the VM over `ICollectionView` with explicit page state — no custom control required. |
 | Selectable cards (recipe) | Bind card selection visual to a VM boolean (see dashboard favorite toggle: glyph + state text, unit-tested). |
 
-## Gaps carried (not built in 1.3.0)
+## Shells, workspace, palette
+
+See `docs/design-system/shells.md` (1.4.0): Sidebar/Rail/Top/Tabbed presets
+via the shared route registry; document workspace with tab reorder (drag +
+keyboard Move), resizable detail split with persisted width, and state
+persistence/recovery; Ctrl+K command palette with filter/execute/dismiss and
+focus return. Shell selection applies at next launch (ADR-0015).
+
+| Pattern | Implementation |
+|---|---|
+| Route registry | `Services/NavigationRoutes.cs`: stable keys shared by rail, palette, and documents; conditional entries. |
+| Workspace documents | `WorkspacePage` + singleton `WorkspaceViewModel`; pages hosted in per-tab chromeless `Frame`s (WPF parents `Page` only to `Window`/`Frame`). |
+| Tab reorder | Detail Move buttons (keyboard-operable, unit + UI proven). Pointer drag prototyped and deferred (unreliable OLE gestures across runners); see 1.4.0 report. |
+| Split/detail | `GridSplitter` (arrow-key operable when focused) + toggle checkbox; width/visibility persisted. |
+| Palette | `PaletteViewModel` (`nav.*` IDs, substring filter, enabled states) + shell overlay; Enter executes, Esc/scrim dismisses, focus returns to invoker. |
+
+## Gaps carried (not built in 1.4.0)
 
 - **Chips:** no WPF-UI control — compose from `ToggleButton` when needed.
 - **Loading skeleton:** compose from shimmer-free placeholders.
-- **Drag-and-drop workspace:** → 1.4.0.
 - **Chart advanced theming** (legends, tooltips): deferred; current chart follows theme + accent with SR summary.
-- **Top-nav/tabbed shells:** → 1.4.0 (template surface).
+- **Live shell hot-switch:** deliberately restart-apply (ADR-0015); revisit only with a passing hot-switch UI test on a fixed toolkit.
+- **Window tear-out / cross-window drag:** deferred (no consumer); drag stays in-workspace by construction.

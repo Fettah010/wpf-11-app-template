@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.4.0 (2026-10-16)
+
+Shells and workspaces. No new packages, no breaking changes (one additive
+template parameter; `ShellMode` gains additive members).
+
+- Four shell presets sharing one route registry (`Services/NavigationRoutes`):
+  Sidebar, Rail, Top-navigation bar, and Tabbed document workspace.
+  `dotnet new --Shell Sidebar|Rail|Top|Tabbed` seeds the first-launch
+  default (all shells ship in every scaffold); template surface amended
+  (`frozen-surface.md` + `TemplateSurfaceTests`).
+- Shell changes apply at next launch (ADR-0015): swapping `PaneDisplayMode`
+  on a live WPF-UI 4.3.0 `NavigationView` crashes intermittently (NaN
+  `DoubleAnimation` during re-template; upstream fixed only the load path).
+  Settings documents the restart step and reuses the Restart button.
+- Tabbed workspace: route-keyed documents (same pages as every shell) in a
+  `TabView`, open/focus/close, selection-synced rail, Back/Forward history,
+  keyboard-operable reorder (detail Move buttons) + resizable detail split
+  with persisted width, state persistence with malformed/stale recovery.
+  Documents host pages in per-tab chromeless `Frame`s (WPF parents `Page`
+  only to `Window`/`Frame`). Pointer drag prototyped and deferred (see
+  report); Move buttons are the reorder contract.
+- Command palette (Ctrl+K + header button): stable `nav.*` IDs, substring
+  filter, enabled states, Enter/Esc/mouse contract, focus return to invoker.
+- Stale-guard rework: per-route-key independent opens (rapid opens all
+  complete; same-key doubles collapse; close/leave cancels); UI-bound
+  continuations rejoin the dispatcher.
+- Template engine lesson: a literal `//#if` inside comments silently
+  truncates generated files (matrix now asserts zero tokens); directives
+  belong at statement level.
+- Template package `DevTemWPF.Templates 1.4.0` (attached to the release).
+- Perf (proxy hardware): cold-start 0.9 s / working set 134.6 MB Sidebar
+  (budgets hold); Tabbed + 3 documents 0.92 s / 150.9 MB (per-document cost
+  documented, no 8 GB claim); idle 0%.
+
 ## 1.3.0 (2026-10-15)
 
 Core control and data completion. No new packages, no breaking changes.

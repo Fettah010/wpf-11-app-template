@@ -70,6 +70,50 @@ public sealed class MainViewModelTests : IDisposable
     }
 
     [WpfFact]
+    public void Top_UsesTopPane()
+    {
+        var vm = Create(new ShellSettings { Shell = ShellMode.Top });
+
+        Assert.Equal(NavigationViewPaneDisplayMode.Top, vm.PaneMode);
+    }
+
+    [WpfFact]
+    public void Tabbed_UsesMinimalRailChrome()
+    {
+        var vm = Create(new ShellSettings { Shell = ShellMode.Tabbed });
+
+        Assert.Equal(NavigationViewPaneDisplayMode.LeftMinimal, vm.PaneMode);
+        Assert.False(vm.IsPaneOpen);
+    }
+
+    [WpfFact]
+    public void MenuItems_MatchRegistry_InOrder()
+    {
+        var vm = Create();
+
+        var expectedMenu = DevTemWpf.App.Services.NavigationRoutes.Menu.Select(r => r.PageType).ToList();
+        var actualMenu = vm.MenuItems.OfType<NavigationViewItem>().Select(i => i.TargetPageType!).ToList();
+        Assert.Equal(expectedMenu, actualMenu);
+
+        var expectedFooter = DevTemWpf.App.Services.NavigationRoutes.Footer.Select(r => r.PageType).ToList();
+        var actualFooter = vm.FooterMenuItems.OfType<NavigationViewItem>().Select(i => i.TargetPageType!).ToList();
+        Assert.Equal(expectedFooter, actualFooter);
+    }
+
+    [WpfFact]
+    public void ShellAppliesOnce_AtConstruction_NotFromLaterSettings()
+    {
+        // Restart-apply (ADR-0015): the live chrome follows the launch shell.
+        // A later persisted change must not move the pane until relaunch.
+        var vm = Create(new ShellSettings { Shell = ShellMode.Sidebar });
+
+        Assert.Equal(NavigationViewPaneDisplayMode.Left, vm.PaneMode);
+
+        var relaunched = Create(new ShellSettings { Shell = ShellMode.Top });
+        Assert.Equal(NavigationViewPaneDisplayMode.Top, relaunched.PaneMode);
+    }
+
+    [WpfFact]
     public void NarrowWidth_CollapsesPane_And_Widening_Restores()
     {
         var vm = Create(new ShellSettings { Shell = ShellMode.Sidebar });

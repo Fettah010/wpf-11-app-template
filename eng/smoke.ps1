@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  0.1.0 smoke gate: restore, build (Debug+Release), test, launch check.
+  0.1.0 smoke gate: restore, build (Release), test, launch check.
   Fails fast with a non-zero exit code; prints each step's outcome.
 #>
 $ErrorActionPreference = 'Stop'
@@ -21,7 +21,9 @@ Set-Location -LiteralPath $root
 
 Invoke-Step 'dotnet --version' { dotnet --version }
 Invoke-Step 'restore' { dotnet restore }
-Invoke-Step 'build Debug' { dotnet build -c Debug --no-restore }
+# Release only (1.4.0): the repo contains no DEBUG-conditional code, and the
+# required gates build Release with warnings as errors — a second Debug build
+# doubles combo time for no additional signal.
 Invoke-Step 'build Release' { dotnet build -c Release --no-restore }
 Invoke-Step 'test Release' { dotnet test -c Release --no-build }
 
