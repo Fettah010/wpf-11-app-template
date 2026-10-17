@@ -37,6 +37,11 @@
     <!--#if (IncludeTray) -->
     <PackageReference Include="WPF-UI.Tray" />
     <!--#endif -->
+    <!-- Optional auth sample (1.6.0); Custom preset only. No secret: MSAL
+         public client, config from Auth section / environment. -->
+    <!--#if (IncludeAuth) -->
+    <PackageReference Include="Microsoft.Identity.Client" />
+    <!--#endif -->
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
   </ItemGroup>

@@ -18,4 +18,8 @@ public static class AppPaths
     public static string DbPath { get; } = Path.Combine(BaseDir, "app.db");
 
     public static string BackupsDir { get; } = Path.Combine(BaseDir, "backups");
+
+    //#if (IncludeCrash)
+    public static string CrashDir { get; } = Path.Combine(BaseDir, "crashes");
+    //#endif
 }

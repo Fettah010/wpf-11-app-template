@@ -72,6 +72,18 @@ public static class AppComposition
         //#if (IncludeTray)
         builder.Services.AddSingleton<Wpf.Ui.Tray.INotifyIconService, Wpf.Ui.Tray.NotifyIconService>();
         //#endif
+        // Optional samples (ADR-0017; Custom preset only). Both are inert
+        // without configuration and never phone home by default.
+        //#if (IncludeAuth)
+        builder.Services.Configure<AuthOptions>(
+            builder.Configuration.GetSection(AuthOptions.SectionName));
+        builder.Services.AddSingleton<IAuthService, AuthService>();
+        //#endif
+        //#if (IncludeCrash)
+        builder.Services.Configure<CrashOptions>(
+            builder.Configuration.GetSection(CrashOptions.SectionName));
+        builder.Services.AddSingleton<ICrashReporter, CrashReporterService>();
+        //#endif
 
         // Shell + pages
         builder.Services.AddSingleton<MainViewModel>();

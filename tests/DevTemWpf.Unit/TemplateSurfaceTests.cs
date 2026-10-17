@@ -42,6 +42,7 @@ public sealed class TemplateSurfaceTests
                  {
                      "IncludeLogging", "IncludeLocalData", "IncludeHttp",
                      "IncludeBackup", "IncludeUpdates", "IncludeTray",
+                     "IncludeAuth", "IncludeCrash",
                  })
         {
             Assert.True(symbols.TryGetProperty(module, out _), $"{module} symbol missing");
@@ -51,6 +52,7 @@ public sealed class TemplateSurfaceTests
                  {
                      "CustomLogging", "CustomLocalData", "CustomHttp",
                      "CustomBackup", "CustomUpdates", "CustomTray", "CustomDiagnostics",
+                     "CustomAuth", "CustomCrash",
                  })
         {
             Assert.True(symbols.TryGetProperty(custom, out _), $"{custom} parameter missing");

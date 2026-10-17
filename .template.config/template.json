@@ -80,6 +80,18 @@
       "defaultValue": "false",
       "description": "Custom preset: Diagnostics page (implies logging, HTTP, backup, and updates)."
     },
+    "CustomAuth": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Custom preset: opt-in MSAL (Entra ID) auth sample; disabled without Auth configuration."
+    },
+    "CustomCrash": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Custom preset: local-first crash capture, no vendor or telemetry (implies logging for redaction)."
+    },
     "IncludeDashboard": {
       "type": "computed",
       "value": "(Preset == \"Full\")"
@@ -90,7 +102,7 @@
     },
     "IncludeLogging": {
       "type": "computed",
-      "value": "(Preset == \"Full\") || (Preset == \"Recommended\") || (Preset == \"Custom\" && (CustomLogging || CustomDiagnostics))"
+      "value": "(Preset == \"Full\") || (Preset == \"Recommended\") || (Preset == \"Custom\" && (CustomLogging || CustomDiagnostics || CustomCrash))"
     },
     "IncludeLocalData": {
       "type": "computed",
@@ -111,6 +123,14 @@
     "IncludeTray": {
       "type": "computed",
       "value": "(Preset == \"Full\") || (Preset == \"Recommended\") || (Preset == \"Custom\" && CustomTray)"
+    },
+    "IncludeAuth": {
+      "type": "computed",
+      "value": "(Preset == \"Custom\" && CustomAuth)"
+    },
+    "IncludeCrash": {
+      "type": "computed",
+      "value": "(Preset == \"Custom\" && CustomCrash)"
     },
     "IncludeTests": {
       "type": "parameter",
@@ -219,6 +239,25 @@
           "condition": "(!IncludeTray)",
           "exclude": [
             "src/DevTemWpf.App/TrayGlyph.cs"
+          ]
+        },
+        {
+          "condition": "(!IncludeAuth)",
+          "exclude": [
+            "src/DevTemWpf.App/Services/AuthOptions.cs",
+            "src/DevTemWpf.App/Services/IAuthService.cs",
+            "src/DevTemWpf.App/Services/AuthService.cs",
+            "src/DevTemWpf.App/Services/MsalTokenProvider.cs",
+            "tests/DevTemWpf.Unit/AuthServiceTests.cs"
+          ]
+        },
+        {
+          "condition": "(!IncludeCrash)",
+          "exclude": [
+            "src/DevTemWpf.App/Services/ICrashReporter.cs",
+            "src/DevTemWpf.App/Services/CrashOptions.cs",
+            "src/DevTemWpf.App/Services/CrashReporterService.cs",
+            "tests/DevTemWpf.Unit/CrashReporterServiceTests.cs"
           ]
         },
         {

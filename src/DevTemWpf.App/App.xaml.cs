@@ -45,6 +45,19 @@ public partial class App : Application
             _host = builder.Build();
             await _host.StartAsync().ConfigureAwait(true);
 
+            //#if (IncludeCrash)
+            // Local-first crash capture (ADR-0017/D-1): redacted per-user file,
+            // no vendor/telemetry. No-op when Crash:Enabled is false.
+            _host.Services.GetRequiredService<DevTemWpf.App.Services.ICrashReporter>().Install();
+            //#endif
+
+            //#if (IncludeAuth)
+            // Silent, cache-only session restore (ADR-0017/D-2): no interaction
+            // and no network unless Auth is configured.
+            await _host.Services.GetRequiredService<DevTemWpf.App.Services.IAuthService>()
+                .TryRestoreAsync().ConfigureAwait(true);
+            //#endif
+
             var startupLog = _host.Services.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>()
                 .CreateLogger("Startup");
             startupLog.LogInformation(
