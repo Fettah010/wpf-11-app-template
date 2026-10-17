@@ -12,15 +12,6 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
-    public void ShellDefault_FallsBackToSidebar_InRepo()
-    {
-        // The DevTemWpfShellDefault token is never replaced in-repo, so the
-        // scaffold default resolves Sidebar here; generated apps carry the
-        // --Shell choice instead (verified by the template matrix).
-        Assert.Equal(ShellMode.Sidebar, new ShellSettings().Shell);
-    }
-
-    [Fact]
     public async Task RoundTrip_PreservesValues()
     {
         var service = new SettingsService(_path);

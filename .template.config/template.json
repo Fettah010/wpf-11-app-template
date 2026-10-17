@@ -80,7 +80,8 @@
         "tmp/**",
         "temp/**",
         "tests/DevTemWpf.Unit/TemplateSurfaceTests.cs",
-        "tests/DevTemWpf.Unit/NoChartLeakTests.cs"
+        "tests/DevTemWpf.Unit/NoChartLeakTests.cs",
+        "tests/DevTemWpf.Unit/ScaffoldDefaultTests.cs"
       ],
       "rename": {
         "templates/support/APP-README.md": "README.md",
