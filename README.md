@@ -4,13 +4,13 @@
 [![Windows 11](https://img.shields.io/badge/Windows-11-0078D4)](https://www.microsoft.com/windows/windows-11)
 [![WPF-UI 4.3.0](https://img.shields.io/badge/WPF--UI-4.3.0-8A2BE2)](https://github.com/lepoco/wpfui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![Stable 1.4.1](https://img.shields.io/badge/release-1.4.1-green)](https://github.com/Fettah010/wpf-11-app-template/releases)
+[![Stable 1.5.0](https://img.shields.io/badge/release-1.5.0-green)](https://github.com/Fettah010/wpf-11-app-template/releases)
 
 A premium, Windows 11-first **WPF application template** and reusable **UI
 foundation** — Fluent design, MVVM, dependency injection, modular production
 services, and `dotnet new` scaffolding with clean / recommended / full presets.
 
-> **Status:** `1.4.1` — stable. Install the template, generate your app,
+> **Status:** `1.5.0` — stable. Install the template, generate your app,
 > and ship it: `dotnet new install DevTemWPF.Templates` (see
 > [Roadmap](#roadmap--milestones) for what's next).
 >
@@ -49,9 +49,10 @@ powershell -ExecutionPolicy Bypass -File eng/smoke.ps1
 
 ## 🖼️ Screenshots
 
-Reference app (`1.4.1`, Comfortable density, Dark theme unless noted) — Home
+Reference app (`1.5.0`, Comfortable density, Dark theme unless noted) — Home
 shell, Controls gallery with section index, Data gallery, Settings in the
-Light theme, and the Top + Tabbed navigation shells:
+Light theme, the Effects & motion showcase, and the Top + Tabbed navigation
+shells:
 
 | Home | Controls gallery |
 |---|---|
@@ -64,6 +65,13 @@ Light theme, and the Top + Tabbed navigation shells:
 | Top navigation shell | Tabbed document workspace |
 |---|---|
 | ![Top navigation](docs/images/shell-top.png) | ![Tabbed workspace](docs/images/shell-tabbed.png) |
+
+Effects & motion showcase (`1.5.0`) — the master + per-effect switches
+(ripple, gradient, and the off-by-default simulated backdrop-distortion
+prototype) and the honest static fallback used under Reduced/Off or a
+low-spec/low-tier adapter:
+
+![Effects and motion showcase](docs/images/gallery-effects.png)
 
 Captured 2026-10-17 on Windows 11 build 26300.9711, 2560×1440 display,
 maximized app window, Dark theme unless noted. Recapture gallery pages with
@@ -92,6 +100,7 @@ also asserts the theme-surface invariants. Keep this provenance line accurate.
 | `1.3.0` | Core control and data completion | ✅ Released |
 | `1.4.0` | Navigation shells & Tabbed document workspace | ✅ Released |
 | `1.4.1` | Tabbed shell themed-surface fix | ✅ Released |
+| `1.5.0` | Advanced motion system & effects prototype | ✅ Released |
 
 Full product plan: [`WPF-11-App-Template-Roadmap-1.0-to-2.0.md`](WPF-11-App-Template-Roadmap-1.0-to-2.0.md) ·
 per-version plans/reports: [`docs/releases/`](docs/releases/) ·
@@ -116,7 +125,8 @@ Dependency inventory & licenses: [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md)
 src/DevTemWpf.App/   # reference app (embryo of the clean preset)
 tests/               # unit + integration (xUnit v3, MTP mode)
 docs/                # decisions, guides, per-release plans/reports
-eng/                 # smoke.ps1 gate, measure-startup.ps1 baselines
+eng/                 # smoke/UI/perf gates (smoke, check-ui-tests,
+                     # measure-startup, measure-motion, …)
 ```
 
 Conventions: central package management, pinned SDK (`global.json`),

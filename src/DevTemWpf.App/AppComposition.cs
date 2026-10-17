@@ -30,6 +30,7 @@ public static class AppComposition
         builder.Services.AddSingleton<IThemeApplier, WpfUiThemeApplier>();
         builder.Services.AddSingleton<IThemeService, ThemeService>();
         builder.Services.AddSingleton<IMotionService, MotionService>();
+        builder.Services.AddSingleton<MotionScope>();
 
         // WPF-UI navigation (ADR-0005): v4 resolves pages through
         // INavigationViewPageProvider; no IPageService/ PageService types ship

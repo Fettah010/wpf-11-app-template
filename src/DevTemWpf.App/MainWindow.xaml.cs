@@ -19,6 +19,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 {
     private readonly ISettingsService _settings;
     private readonly WorkspaceViewModel _workspace;
+    private readonly MotionScope _motionScope;
+    private Services.ThemeMode _lastTheme;
     private IInputElement? _paletteInvoker;
     //#if (IncludeServices)
     private readonly Wpf.Ui.Tray.INotifyIconService _tray;
@@ -35,10 +37,13 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         Wpf.Ui.Tray.INotifyIconService tray,
         //#endif
         ISettingsService settings,
-        IBackdropService backdrop)
+        IBackdropService backdrop,
+        MotionScope motionScope)
     {
         _settings = settings;
         _workspace = workspace;
+        _motionScope = motionScope;
+        _lastTheme = settings.Current.Theme;
         //#if (IncludeServices)
         _tray = tray;
         //#endif
@@ -71,8 +76,20 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
         SizeChanged += (_, e) => ViewModel.ApplyResponsiveWidth(e.NewSize.Width);
         Loaded += (_, _) => OnFirstLoaded();
-        _settings.Updated += (_, s) => DesignTokenBootstrap.ApplyDensity(s.Density);
+        _settings.Updated += (_, s) =>
+        {
+            DesignTokenBootstrap.ApplyDensity(s.Density);
+            if (s.Theme != _lastTheme)
+            {
+                _lastTheme = s.Theme;
+                _motionScope.StopAll();
+            }
+        };
         PreviewKeyDown += OnWindowPreviewKeyDown;
+
+        // Motion must not outlive the window's focus or lifetime (ADR-0016).
+        Deactivated += (_, _) => _motionScope.StopAll();
+        Closing += (_, _) => _motionScope.StopAll();
 
         Palette = new PaletteViewModel();
         Palette.NavigateRoute = GoToRoute;

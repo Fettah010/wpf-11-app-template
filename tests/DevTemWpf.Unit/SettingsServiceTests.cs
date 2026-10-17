@@ -48,6 +48,45 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task RoundTrip_PreservesEffectSwitches()
+    {
+        var service = new SettingsService(_path);
+        await service.LoadAsync(TestContext.Current.CancellationToken);
+
+        await service.UpdateAsync(
+            _ => new ShellSettings
+            {
+                RippleEffectEnabled = false,
+                GradientEffectEnabled = true,
+                WarpEffectEnabled = true,
+            },
+            TestContext.Current.CancellationToken);
+
+        var reloaded = new SettingsService(_path);
+        await reloaded.LoadAsync(TestContext.Current.CancellationToken);
+
+        Assert.False(reloaded.Current.RippleEffectEnabled);
+        Assert.True(reloaded.Current.GradientEffectEnabled);
+        Assert.True(reloaded.Current.WarpEffectEnabled);
+    }
+
+    [Fact]
+    public async Task Load_LegacyMotionIntegers_MapToExpectedModes()
+    {
+        // 1.4.x persisted Full as integer 1 and Auto as 0; 1.5.0 appends
+        // Balanced as 4. Old files must keep resolving Rich (Full).
+        await File.WriteAllTextAsync(_path, "{\"Motion\":1}", TestContext.Current.CancellationToken);
+        var rich = new SettingsService(_path);
+        await rich.LoadAsync(TestContext.Current.CancellationToken);
+        Assert.Equal(MotionMode.Full, rich.Current.Motion);
+
+        await File.WriteAllTextAsync(_path, "{\"Motion\":4}", TestContext.Current.CancellationToken);
+        var balanced = new SettingsService(_path);
+        await balanced.LoadAsync(TestContext.Current.CancellationToken);
+        Assert.Equal(MotionMode.Balanced, balanced.Current.Motion);
+    }
+
+    [Fact]
     public async Task LoadAsync_ReportsWhetherPersistIsNeeded()
     {
         var missing = new SettingsService(_path);

@@ -45,7 +45,8 @@
 
       <TextBlock Text="{x:Static res:Strings.Settings_Motion}" Style="{StaticResource AppBodyText}" Margin="{StaticResource AppGapTitle}" />
       <ComboBox ItemsSource="{Binding ViewModel.MotionOptions}"
-                SelectedItem="{Binding ViewModel.SelectedMotion, Mode=TwoWay}"
+                DisplayMemberPath="Display" SelectedValuePath="Value"
+                SelectedValue="{Binding ViewModel.SelectedMotion, Mode=TwoWay}"
                 AutomationProperties.Name="Motion selector" Margin="{StaticResource AppGapGroup}" />
 
       <CheckBox Content="{x:Static res:Strings.Settings_EffectsToggle}"

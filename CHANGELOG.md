@@ -1,5 +1,38 @@
 # Changelog
 
+## 1.5.0 (2026-10-17)
+
+Motion system and effects prototype (roadmap §8.5). Additive only — no
+breaking changes, no new packages.
+
+- Motion profiles: new `Balanced` level between Reduced and Rich, appended as
+  `MotionMode.Balanced = 4` (existing values unchanged; `Motion=1` still
+  resolves to Rich). `Auto` now settles on Balanced; Rich stays an explicit
+  opt-in, so decorative effects never run by default (ADR-0016).
+- Motion tokens: added Stagger, exit distance, and opacity/scale values;
+  reduced-motion still snaps.
+- Motion primitives: cancellable enter/exit, selection, expand/collapse,
+  feedback, and reduced-motion-aware page transitions (`IMotionService`); all
+  snap to their final state on cancellation or failure.
+- Motion lifecycle: shared `MotionScope` cancels in-flight motion and runs
+  cleanup on navigation-away, unload, theme change, deactivation, and
+  shutdown; no `CompositionTarget.Rendering` hooks (repo-only guard test).
+- Effects showcase: the Effects page now controls the master switch and each
+  effect (ripple, gradient, warp) live, reports the warp fallback reason, and
+  (development builds only) prints the resolved tokens and render tier. Each
+  switch is gated through `IMotionService.AllowsEffect`.
+- Accessibility guards: repo-only tests fail if motion adds a
+  `CompositionTarget.Rendering` hook or any render-target `Effect`
+  (Blur/DropShadow/Shader), keeping ClearType/hit-testing intact; reduced
+  motion and Off are covered per primitive.
+- Backdrop warp prototype: a simulated, backdrop-only radial-highlight drift —
+  no HLSL shader, no text or controls inside; off by default with a static
+  fallback (ADR-0016 records the shader no-go).
+- Docs: README status/badge/roadmap, recaptured `gallery-home.png` + new
+  `gallery-effects.png`; `motion.md`, `frozen-surface.md`, ADR-0016; HLSL
+  shader deferred in `docs/DEFERRED.md` (D13).
+- Template package `DevTemWPF.Templates 1.5.0` (attached to the release).
+
 ## 1.4.1 (2026-10-17)
 
 Tabbed shell themed-surface fix. No new packages, no breaking changes, no

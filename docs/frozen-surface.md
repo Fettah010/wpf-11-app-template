@@ -32,7 +32,9 @@ by `TemplateSurfaceTests` where machine-checkable.
 
 - `ShellSettings` JSON fields: Theme, BackdropEnabled, Shell, Density,
   AccentOverride, Motion, EffectsEnabled, UpdateChannel, MinimizeToTray,
-  Culture. Additive only — unknown fields ignored, missing fields default.
+  Culture, plus 1.5.0 additions RippleEffectEnabled, GradientEffectEnabled,
+  WarpEffectEnabled. Additive only — unknown fields ignored, missing fields
+  default. `Motion` enum values are append-only (`Balanced = 4`, 1.5.0).
 - `appsettings.json` sections: `App`, `Http`, `Update`.
 
 ## Generated structure (frozen)
