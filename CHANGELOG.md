@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.4.1 (2026-10-17)
+
+Tabbed shell themed-surface fix. No new packages, no breaking changes, no
+template-surface change.
+
+- Fixed: the Tabbed shell's document area rendered a pure-white panel (67.9%
+  of the window in Dark) because WPF-UI's implicit `TabControl` style is not
+  applied to the derived `ui:TabView`; the built-in WPF (white) template was
+  used instead. `ui:TabView` now applies the WPF-UI `TabControl` style
+  explicitly, so the document surface matches the themed host (`#272727`) with
+  no seam (dark and light verified).
+- Fixed: the detail `GridSplitter` used the default bright `#F0F0F0` paint; it
+  now uses the `AppDividerBrush` token (`#3A3A3A`).
+- Regression guard: repo-only `TabbedShellSurfaceTests` fails on the pre-fix
+  revision and passes after. New `eng/verify-shell-surfaces.ps1` captures the
+  maximized shell deterministically (PrintWindow) and asserts the
+  theme-surface invariants (white-fraction threshold, splitter color); fault
+  injection on the pre-fix build fails as expected.
+- Docs: README status/badge + roadmap rows, recaptured `shell-tabbed.png` and
+  `shell-top.png`; `docs/releases/1.4.1-report.md` with root cause and A/B
+  evidence.
+- Template package `DevTemWPF.Templates 1.4.1` (attached to the release).
+
 ## 1.4.0 (2026-10-16)
 
 Shells and workspaces. No new packages, no breaking changes (one additive
