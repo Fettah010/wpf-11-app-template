@@ -19,7 +19,8 @@ breaking changes, no new packages.
   shutdown; no `CompositionTarget.Rendering` hooks (repo-only guard test).
 - Effects showcase: the Effects page now controls the master switch and each
   effect (ripple, gradient, warp) live, reports the warp fallback reason, and
-  (development builds only) prints the resolved tokens and render tier.
+  (development builds only) prints the resolved tokens and render tier. Each
+  switch is gated through `IMotionService.AllowsEffect`.
 - Accessibility guards: repo-only tests fail if motion adds a
   `CompositionTarget.Rendering` hook or any render-target `Effect`
   (Blur/DropShadow/Shader), keeping ClearType/hit-testing intact; reduced
@@ -27,10 +28,6 @@ breaking changes, no new packages.
 - Backdrop warp prototype: a simulated, backdrop-only radial-highlight drift —
   no HLSL shader, no text or controls inside; off by default with a static
   fallback (ADR-0016 records the shader no-go).
-- Effects: per-effect switches (ripple, gradient, warp) refine the master
-  `EffectsEnabled` switch, all gated through `IMotionService.AllowsEffect`.
-  The backdrop warp prototype is off by default and simulated only — no HLSL
-  shader (ADR-0016).
 
 ## 1.4.1 (2026-10-17)
 

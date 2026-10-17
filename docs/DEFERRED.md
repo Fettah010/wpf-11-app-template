@@ -1,4 +1,4 @@
-# Deferred work backlog — 1.0 scope freeze (0.9.0); 1.1.0 additions appended (D21–D24); 1.4.0 dispositions appended (D09r/D14/D15 closed, D25–D27 opened); 1.4.1 D09r note appended
+# Deferred work backlog — 1.0 scope freeze (0.9.0); 1.1.0 additions appended (D21–D24); 1.4.0 dispositions appended (D09r/D14/D15 closed, D25–D27 opened); 1.4.1 D09r note appended; 1.5.0 D13 no-go note appended
 
 Rule: 1.0-rc takes bug fixes + release mechanics only. Everything below is
 post-1.0 unless marked **1.0**.
@@ -13,7 +13,7 @@ post-1.0 unless marked **1.0**.
 | D09r | Visual regression snapshots | **1.2.0 (partial)** — dependency-free spike shipped (`eng/compare-screenshots.ps1` + baselines, advisory-only, 0.03% noise floor proven). Required-gate decision → 1.3.0 with this evidence. |
 | D10 | Low-spec reference machine | Post-1.0 — no hardware; modern-HW budgets ratified. |
 | D12 | `Microsoft.ApplicationInsights` test-only transitive | Watch each audit — still test-only, still harmless. |
-| D13 | HLSL water-warp shader | Post-1.0 — needs toolchain + low-spec proof (D10). |
+| D13 | HLSL water-warp shader | Post-1.0 — needs toolchain + low-spec proof (D10). **1.5.0 — assessed and NO-GO (still deferred).** `ShaderEffect` requires a compiled `.ps` (`fxc.exe`, ≤ `ps_3_0`) and any `Effect` forces an intermediate render target that disables ClearType for its whole subtree; the low-spec gate condition can't be proven without the 8 GB machine (D10/D27). Shipped a simulated, backdrop-only drift prototype instead (off by default, static fallback; ADR-0016). Revisit with the D10 hardware + a `ps_3_0` toolchain decision. |
 | D14 | Drag-and-drop workspace patterns | Post-1.0 — no consumer. |
 | D15 | Top-nav + tabbed shells | Post-1.0 — needs real consumer + template surface. |
 | D16 | Full-gallery localization | **1.3.0** — all gallery display copy in resx (en+de, parity-tested); automation names invariant; sample data + log text stay English by rule. |
