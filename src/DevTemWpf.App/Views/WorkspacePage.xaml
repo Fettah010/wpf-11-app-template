@@ -39,6 +39,7 @@
            report and DEFERRED D14); the Move commands are the contract. -->
       <ui:TabView Grid.Column="0" x:Name="DocumentTabs" ItemsSource="{Binding ViewModel.Documents}"
                   SelectedItem="{Binding ViewModel.SelectedDocument, Mode=TwoWay}"
+                  Style="{StaticResource {x:Type TabControl}}"
                   AutomationProperties.Name="Open documents">
         <TabControl.ItemTemplate>
           <DataTemplate>
@@ -77,6 +78,7 @@
 
       <GridSplitter Grid.Column="1" Width="4" Margin="4,0" HorizontalAlignment="Center" VerticalAlignment="Stretch"
                     ResizeBehavior="PreviousAndNext" DragCompleted="OnSplitterDragCompleted"
+                    Background="{DynamicResource AppDividerBrush}"
                     AutomationProperties.Name="Detail splitter"
                     Visibility="{Binding ViewModel.IsDetailOpen, Converter={StaticResource BoolToVisibility}}" />
 
