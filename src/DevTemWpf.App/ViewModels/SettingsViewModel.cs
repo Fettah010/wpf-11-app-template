@@ -16,7 +16,14 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
         ThemeOptions = [ThemeMode.System, ThemeMode.Light, ThemeMode.Dark];
         ShellOptions = [ShellMode.Sidebar, ShellMode.Rail, ShellMode.Top, ShellMode.Tabbed];
         DensityOptions = [DensityMode.Comfortable, DensityMode.Compact];
-        MotionOptions = [MotionMode.Auto, MotionMode.Full, MotionMode.Reduced, MotionMode.Off];
+        MotionOptions =
+        [
+            new(MotionMode.Auto, "Auto"),
+            new(MotionMode.Full, "Rich"),
+            new(MotionMode.Balanced, "Balanced"),
+            new(MotionMode.Reduced, "Reduced"),
+            new(MotionMode.Off, "Off"),
+        ];
         Reload();
     }
 
@@ -26,7 +33,7 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
 
     public IReadOnlyList<DensityMode> DensityOptions { get; }
 
-    public IReadOnlyList<MotionMode> MotionOptions { get; }
+    public IReadOnlyList<MotionOption> MotionOptions { get; }
 
     public IReadOnlyList<CultureOption> CultureOptions { get; } =
     [
@@ -201,3 +208,6 @@ public sealed partial class SettingsViewModel : ObservableObject, INavigationAwa
 
 /// <summary>Culture selector entry (code = BCP-47 or empty for system).</summary>
 public sealed record CultureOption(string Code, string Display);
+
+/// <summary>Motion profile selector entry; display label maps Full to "Rich".</summary>
+public sealed record MotionOption(MotionMode Value, string Display);

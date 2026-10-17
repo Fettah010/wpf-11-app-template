@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased (1.5.0)
+
+Motion system and effects prototype (roadmap §8.5). Additive only — no
+breaking changes, no new packages.
+
+- Motion profiles: new `Balanced` level between Reduced and Rich, appended as
+  `MotionMode.Balanced = 4` (existing values unchanged; `Motion=1` still
+  resolves to Rich). `Auto` now settles on Balanced; Rich stays an explicit
+  opt-in, so decorative effects never run by default (ADR-0016).
+- Motion tokens: added Stagger, exit distance, and opacity/scale values;
+  reduced-motion still snaps.
+- Effects: per-effect switches (ripple, gradient, warp) refine the master
+  `EffectsEnabled` switch, all gated through `IMotionService.AllowsEffect`.
+  The backdrop warp prototype is off by default and simulated only — no HLSL
+  shader (ADR-0016).
+
 ## 1.4.1 (2026-10-17)
 
 Tabbed shell themed-surface fix. No new packages, no breaking changes, no

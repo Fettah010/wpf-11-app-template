@@ -67,7 +67,7 @@ public partial class EffectsPage : Page, INavigableView<EffectsViewModel>
         StopGradient();
         try
         {
-            if (_motion.CurrentPolicy != EffectiveMotion.Full)
+            if (!_motion.AllowsEffect(MotionEffect.Gradient))
             {
                 GradientToggle.IsChecked = false;
                 return;

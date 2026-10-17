@@ -88,6 +88,16 @@ public sealed record ShellSettings
     /// <summary>Master switch for premium effects (ripple, animated surfaces).</summary>
     public bool EffectsEnabled { get; init; } = true;
 
+    /// <summary>Per-effect switch: click ripple (1.5.0, additive).</summary>
+    public bool RippleEffectEnabled { get; init; } = true;
+
+    /// <summary>Per-effect switch: looping animated gradient (1.5.0, additive).</summary>
+    public bool GradientEffectEnabled { get; init; } = true;
+
+    /// <summary>Per-effect switch: backdrop distortion prototype; off by
+    /// default (1.5.0, additive).</summary>
+    public bool WarpEffectEnabled { get; init; }
+
     public UpdateChannel UpdateChannel { get; init; } = UpdateChannel.Stable;
 
     /// <summary>Expanded data-tree node IDs (1.3.0 sample persistence).</summary>

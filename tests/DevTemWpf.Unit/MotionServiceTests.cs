@@ -70,4 +70,40 @@ public sealed class MotionServiceTests : IDisposable
 
         Assert.Empty(canvas.Children);
     }
+
+    [WpfFact]
+    public async Task AllowsEffect_Ripple_FalseAtBalanced_TrueAtRich()
+    {
+        var balanced = await CreateAsync(new ShellSettings { Motion = MotionMode.Balanced });
+        Assert.False(balanced.AllowsEffect(MotionEffect.Ripple));
+
+        var rich = await CreateAsync(new ShellSettings { Motion = MotionMode.Full });
+        Assert.True(rich.AllowsEffect(MotionEffect.Ripple));
+    }
+
+    [WpfFact]
+    public async Task AllowsEffect_Ripple_RespectsPerEffectSwitch()
+    {
+        var service = await CreateAsync(new ShellSettings
+        {
+            Motion = MotionMode.Full,
+            RippleEffectEnabled = false,
+        });
+
+        Assert.False(service.AllowsEffect(MotionEffect.Ripple));
+    }
+
+    [WpfFact]
+    public async Task AllowsEffect_Warp_OffUntilExplicitlyEnabled()
+    {
+        var service = await CreateAsync(new ShellSettings { Motion = MotionMode.Full });
+        Assert.False(service.AllowsEffect(MotionEffect.Warp));
+
+        var enabled = await CreateAsync(new ShellSettings
+        {
+            Motion = MotionMode.Full,
+            WarpEffectEnabled = true,
+        });
+        Assert.True(enabled.AllowsEffect(MotionEffect.Warp));
+    }
 }

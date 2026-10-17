@@ -46,6 +46,23 @@ public sealed class MotionService : IMotionService
         }
     }
 
+    public bool AllowsEffect(MotionEffect effect)
+    {
+        var settings = _settings.Current;
+        if (!settings.EffectsEnabled || !MotionPolicy.AllowsDecorative(CurrentPolicy))
+        {
+            return false;
+        }
+
+        return effect switch
+        {
+            MotionEffect.Ripple => settings.RippleEffectEnabled,
+            MotionEffect.Gradient => settings.GradientEffectEnabled,
+            MotionEffect.Warp => settings.WarpEffectEnabled,
+            _ => false,
+        };
+    }
+
     public Task PlayEntranceAsync(FrameworkElement element, TimeSpan? durationOverride = null, CancellationToken cancellationToken = default)
     {
         try
@@ -68,7 +85,7 @@ public sealed class MotionService : IMotionService
             storyboard.Children.Add(fade);
 
             TranslateTransform? slide = null;
-            if (policy == EffectiveMotion.Full)
+            if (MotionPolicy.AllowsMovement(policy))
             {
                 slide = element.RenderTransform as TranslateTransform;
                 if (slide is null)
@@ -119,7 +136,7 @@ public sealed class MotionService : IMotionService
         try
         {
             host.Dispatcher.VerifyAccess();
-            if (CurrentPolicy != EffectiveMotion.Full || !_settings.Current.EffectsEnabled)
+            if (!AllowsEffect(MotionEffect.Ripple))
             {
                 return;
             }
