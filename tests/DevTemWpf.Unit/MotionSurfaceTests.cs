@@ -5,7 +5,7 @@ namespace DevTemWpf.Unit;
 /// interruptible storyboards owned by <c>MotionScope</c>. Nothing may subscribe
 /// to <c>CompositionTarget.Rendering</c> (a per-frame hook that would survive
 /// navigation), and the lifecycle scope must stay registered and used.
-/// Repository-only (excluded from the template).
+/// Paths resolve through <c>sourceName</c> like every other app-level test.
 /// </summary>
 public sealed class MotionSurfaceTests
 {
