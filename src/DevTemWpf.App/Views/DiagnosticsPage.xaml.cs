@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using DevTemWpf.App.Resources;
 using DevTemWpf.App.Services;
 using DevTemWpf.App.ViewModels;
 using Microsoft.Win32;
@@ -55,6 +56,27 @@ public partial class DiagnosticsPage : Page, INavigableView<DiagnosticsViewModel
         if (dialog.ShowDialog() == true)
         {
             ViewModel.RestoreBackup(dialog.FileName);
+        }
+    }
+
+    /// <summary>
+    /// Downgrade is destructive-adjacent, so enabling it always asks first
+    /// (1.6.0). Declining reverts the switch.
+    /// </summary>
+    private void OnAllowDowngradeChecked(object sender, RoutedEventArgs e)
+    {
+        var message = string.Format(
+            Strings.Update_DowngradeConfirmBody,
+            ViewModel.Update.AvailableVersion ?? "—",
+            ViewModel.Update.CurrentVersion);
+        var result = MessageBox.Show(
+            message,
+            Strings.Update_DowngradeConfirmTitle,
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+        if (result != MessageBoxResult.Yes)
+        {
+            ViewModel.AllowDowngrade = false;
         }
     }
 }

@@ -259,7 +259,19 @@
   <data name="Update_NothingToDownload" xml:space="preserve"><value>Nothing to download — check for updates first.</value></data>
   <data name="Update_DownloadCancelled" xml:space="preserve"><value>Download cancelled.</value></data>
   <data name="Update_DownloadFailedFormat" xml:space="preserve"><value>Download failed: {0}</value></data>
-  <data name="Update_ReadyFormat" xml:space="preserve"><value>Version {0} ready — restarting…</value></data>
+  <data name="Update_ReadyFormat" xml:space="preserve"><value>Version {0} ready to install.</value></data>
+  <data name="Update_AvailableDeltaFormat" xml:space="preserve"><value>Version {0} available ({1} KB, delta).</value></data>
+  <data name="Update_AvailableFullFormat" xml:space="preserve"><value>Version {0} available ({1} KB, full download).</value></data>
+  <data name="Update_DowngradeFormat" xml:space="preserve"><value>Version {0} is older than the installed {1}.</value></data>
+  <data name="Update_CurrentFormat" xml:space="preserve"><value>Installed version {0}.</value></data>
+  <data name="Update_RestartPrompt" xml:space="preserve"><value>Restart to apply the update.</value></data>
+  <data name="Update_RestartNow" xml:space="preserve"><value>Restart now</value></data>
+  <data name="Update_Retry" xml:space="preserve"><value>Retry</value></data>
+  <data name="Update_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Update_AllowDowngrade" xml:space="preserve"><value>Allow switching to an older version</value></data>
+  <data name="Update_DowngradeConfirmTitle" xml:space="preserve"><value>Switch to an older version?</value></data>
+  <data name="Update_DowngradeConfirmBody" xml:space="preserve"><value>The selected channel offers version {0}, older than the installed {1}. Downgrading may change app data. Continue?</value></data>
+  <data name="Dia_AppVersionsFormat" xml:space="preserve"><value>Installed: {0}   |   Available: {1}</value></data>
   <data name="Data_CountFormat" xml:space="preserve"><value>{0} of {1} rows</value></data>
   <data name="Data_NewItem" xml:space="preserve"><value>New item</value></data>
   <data name="Dia_LogCountFormat" xml:space="preserve"><value>{0} lines from {1} file(s).</value></data>
