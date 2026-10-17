@@ -37,6 +37,9 @@ $logOut = Join-Path $work 'invoke.out.log'
 $logErr = Join-Path $work 'invoke.err.log'
 $oldCliHome = $env:DOTNET_CLI_HOME
 $oldNugetPackages = $env:NUGET_PACKAGES
+$oldNodeReuse = $env:MSBUILDDISABLENODEREUSE
+$oldMsBuildServer = $env:DOTNET_CLI_USE_MSBUILD_SERVER
+$oldSharedCompilation = $env:UseSharedCompilation
 
 function Assert-True([bool]$Condition, [string]$Message) {
   if (-not $Condition) {
@@ -46,14 +49,22 @@ function Assert-True([bool]$Condition, [string]$Message) {
 }
 
 function Invoke-Native([string]$Exe, [string[]]$Arguments, [string]$WorkDir) {
+  $sw = [System.Diagnostics.Stopwatch]::StartNew()
   $p = Start-Process -FilePath $Exe -ArgumentList $Arguments -WorkingDirectory $WorkDir `
     -NoNewWindow -Wait -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
+  $secs = [math]::Round($sw.Elapsed.TotalSeconds, 1)
   if ($p.ExitCode -ne 0) {
-    Write-Host "COMMAND FAILED ($($p.ExitCode)): $Exe $($Arguments -join ' ')" -ForegroundColor Red
-    Get-Content $logErr | Select-Object -First 15
+    Write-Host "COMMAND FAILED ($($p.ExitCode)) after ${secs}s: $Exe $($Arguments -join ' ')" -ForegroundColor Red
+    # Both streams are tailed: the generated smoke/build scripts report through
+    # stdout (Write-Host), so stderr alone hid the real failure.
+    Write-Host '--- stderr (tail) ---' -ForegroundColor DarkYellow
+    Get-Content $logErr -Tail 25 -ErrorAction SilentlyContinue
+    Write-Host '--- stdout (tail) ---' -ForegroundColor DarkYellow
+    Get-Content $logOut -Tail 40 -ErrorAction SilentlyContinue
     $script:failures++
     return $false
   }
+  Write-Host "  $($Arguments[0]) ${secs}s" -ForegroundColor DarkGray
   return $true
 }
 
@@ -118,12 +129,20 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
     Assert-True ($null -ne $exe) "$Preset/$Shell exe built"
     if ($null -eq $exe) { return }
     $p = Start-Process -FilePath $exe.FullName -PassThru
-    Start-Sleep 20
-    $p.Refresh()
+    # Poll for the window (up to 20 s) instead of a fixed sleep: launches
+    # usually complete in ~1 s, so the fixed wait was dead time in the matrix.
+    $deadline = (Get-Date).AddSeconds(20)
     $hwnd = 0
-    try { $hwnd = $p.MainWindowHandle } catch { }
+    while ((Get-Date) -lt $deadline) {
+      Start-Sleep -Milliseconds 500
+      try { $p.Refresh() } catch { }
+      if ($p.HasExited) { break }
+      try { $hwnd = $p.MainWindowHandle } catch { }
+      if ($hwnd -ne 0) { break }
+    }
     Assert-True ((-not $p.HasExited) -and ($hwnd -ne 0)) "$Preset/$Shell launched with window"
     try { Stop-Process -Id $p.Id -Force -ErrorAction Stop } catch { }
+    try { $p.WaitForExit(5000) | Out-Null } catch { }
     if ($script:failures -eq 0) { Write-Host "OK: $Preset/$Shell build+launch" -ForegroundColor Green }
   }
   elseif ($WithTests) {
@@ -141,8 +160,20 @@ try {
   New-Item -ItemType Directory -Path $work -Force | Out-Null
   New-Item -ItemType Directory -Path $cliHome -Force | Out-Null
   $env:DOTNET_CLI_HOME = $cliHome
-  $userPackages = Join-Path $env:USERPROFILE '.nuget\packages'
-  if (Test-Path -LiteralPath $userPackages) { $env:NUGET_PACKAGES = $userPackages }
+  # Long-lived MSBuild/Roslyn servers inherit the redirected handle that
+  # Invoke-Native waits on, so `Start-Process -Wait` blocks for each server's
+  # ~15 min idle timeout even after the build finishes (~30 min per combo on
+  # CI; measured: 906 s vs 10 s). Generated-app builds are one-shot, so disable
+  # node reuse, the MSBuild server, and the shared compiler.
+  $env:MSBUILDDISABLENODEREUSE = '1'
+  $env:DOTNET_CLI_USE_MSBUILD_SERVER = '0'
+  $env:UseSharedCompilation = 'false'
+  # Respect a CI-provided NUGET_PACKAGES (a cacheable path); otherwise reuse the
+  # user-profile cache when it exists.
+  if (-not $env:NUGET_PACKAGES) {
+    $userPackages = Join-Path $env:USERPROFILE '.nuget\packages'
+    if (Test-Path -LiteralPath $userPackages) { $env:NUGET_PACKAGES = $userPackages }
+  }
   $installSource = if ($PackagePath) { $PackagePath } else { $root }
   $uninstallId = if ($PackagePath) { 'DevTemWPF.Templates' } else { $root }
   try { & dotnet new uninstall $uninstallId 2>&1 | Out-Null } catch { }
@@ -201,6 +232,9 @@ finally {
   else { $env:DOTNET_CLI_HOME = $oldCliHome }
   if ($null -eq $oldNugetPackages) { [Environment]::SetEnvironmentVariable('NUGET_PACKAGES', $null, 'Process') }
   else { $env:NUGET_PACKAGES = $oldNugetPackages }
+  $env:MSBUILDDISABLENODEREUSE = $oldNodeReuse
+  $env:DOTNET_CLI_USE_MSBUILD_SERVER = $oldMsBuildServer
+  $env:UseSharedCompilation = $oldSharedCompilation
   if (($script:failures -eq 0) -and (Test-Path $work)) {
     # Long-path-safe removal (generated bin/obj trees nest deeply); warn —
     # never fail the product gate — with the cause when removal struggles.
