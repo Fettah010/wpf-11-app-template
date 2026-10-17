@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using DevTemWpf.App.Services;
 
 namespace DevTemWpf.Unit;
@@ -164,6 +165,32 @@ public sealed class MotionServiceTests : IDisposable
         await service.PlayPageTransitionAsync(element, forward: true, TestContext.Current.CancellationToken);
 
         Assert.Equal(MotionTokens.RestOpacity, element.Opacity);
+    }
+
+    [WpfFact]
+    public async Task Entrance_ReducedPolicy_DoesNotAddMovement()
+    {
+        var service = await CreateAsync(new ShellSettings { Motion = MotionMode.Reduced });
+        var element = new Border { Opacity = 0 };
+
+        // Not awaited (storyboards need a live tree): the policy decision is
+        // what we assert — Reduced gets a fade with no slide transform.
+        _ = service.PlayEntranceAsync(element, cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.IsNotType<TranslateTransform>(element.RenderTransform);
+        await Task.CompletedTask;
+    }
+
+    [WpfFact]
+    public async Task Entrance_RichPolicy_AddsMovement()
+    {
+        var service = await CreateAsync(new ShellSettings { Motion = MotionMode.Full });
+        var element = new Border { Opacity = 0 };
+
+        _ = service.PlayEntranceAsync(element, cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.IsType<TranslateTransform>(element.RenderTransform);
+        await Task.CompletedTask;
     }
 
     [WpfFact]

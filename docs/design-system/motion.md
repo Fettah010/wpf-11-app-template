@@ -103,6 +103,11 @@ Reduced motion (OS or setting) skips movement/ripple/gradient; Off skips all.
 effect. Storyboard exceptions snap final state — motion never crashes a view.
 High contrast is orthogonal.
 
+Repo-only guards keep the accessibility contract honest: nothing subscribes to
+`CompositionTarget.Rendering`, and no render-target `Effect`
+(Blur/DropShadow/Shader) ships — effects are storyboard/brush-only and never
+sit over text, so ClearType, hit-testing, and legibility are unaffected.
+
 ## Backdrop warp: prototype, not a shader
 
 A true water-warp/distortion shader is **not shipped**. It needs a pinned
