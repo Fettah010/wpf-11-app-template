@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (1.5.0)
+## 1.5.0 (2026-10-17)
 
 Motion system and effects prototype (roadmap §8.5). Additive only — no
 breaking changes, no new packages.
@@ -28,6 +28,10 @@ breaking changes, no new packages.
 - Backdrop warp prototype: a simulated, backdrop-only radial-highlight drift —
   no HLSL shader, no text or controls inside; off by default with a static
   fallback (ADR-0016 records the shader no-go).
+- Docs: README status/badge/roadmap, recaptured `gallery-home.png` + new
+  `gallery-effects.png`; `motion.md`, `frozen-surface.md`, ADR-0016; HLSL
+  shader deferred in `docs/DEFERRED.md` (D13).
+- Template package `DevTemWPF.Templates 1.5.0` (attached to the release).
 
 ## 1.4.1 (2026-10-17)
 
