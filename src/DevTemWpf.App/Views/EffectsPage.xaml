@@ -18,7 +18,23 @@
       <TextBlock Text="{Binding ViewModel.EnvironmentText}" Style="{StaticResource AppCaptionText}"
                  TextWrapping="Wrap" Margin="{StaticResource AppGapSection}" />
 
-      <TextBlock Text="{x:Static res:Strings.Efx_Presets}" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{x:Static res:Strings.Efx_Switches}" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{x:Static res:Strings.Efx_SwitchesNote}"
+                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
+      <CheckBox Content="{x:Static res:Strings.Settings_EffectsToggle}"
+                IsChecked="{Binding ViewModel.EffectsEnabled, Mode=TwoWay}"
+                AutomationProperties.Name="Effects master switch" Margin="{StaticResource AppGapItem}" />
+      <CheckBox Content="{x:Static res:Strings.Efx_RippleSwitch}"
+                IsChecked="{Binding ViewModel.RippleEnabled, Mode=TwoWay}"
+                AutomationProperties.Name="Ripple effect switch" Margin="{StaticResource AppGapItem}" />
+      <CheckBox Content="{x:Static res:Strings.Efx_GradientSwitch}"
+                IsChecked="{Binding ViewModel.GradientEnabled, Mode=TwoWay}"
+                AutomationProperties.Name="Gradient effect switch" Margin="{StaticResource AppGapItem}" />
+      <CheckBox Content="{x:Static res:Strings.Efx_WarpSwitch}"
+                IsChecked="{Binding ViewModel.WarpEnabled, Mode=TwoWay}"
+                AutomationProperties.Name="Warp effect switch" Margin="{StaticResource AppGapItem}" />
+
+      <TextBlock Text="{x:Static res:Strings.Efx_Presets}" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapSection}" />
       <TextBlock Text="{x:Static res:Strings.Efx_PresetsNote}"
                  Style="{StaticResource AppCaptionText}" Margin="{StaticResource AppGapItem}" />
       <WrapPanel Margin="{StaticResource AppGapItem}">
@@ -38,7 +54,7 @@
 
       <TextBlock Text="{x:Static res:Strings.Efx_Ripple}" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
       <TextBlock Text="{x:Static res:Strings.Efx_RippleNote}"
-                 Style="{StaticResource AppCaptionText}" Margin="{StaticResource AppGapItem}" />
+                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
       <Border Background="{DynamicResource AppSubtleBackgroundBrush}"
               BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="{StaticResource AppBorderThickness}"
               CornerRadius="{StaticResource AppCornerRadiusMedium}" Height="160" Margin="{StaticResource AppGapSection}">
@@ -49,7 +65,7 @@
 
       <TextBlock Text="{x:Static res:Strings.Efx_Surface}" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
       <TextBlock Text="{x:Static res:Strings.Efx_SurfaceNote}"
-                 Style="{StaticResource AppCaptionText}" Margin="{StaticResource AppGapItem}" />
+                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
       <Border Height="96" CornerRadius="{StaticResource AppCornerRadiusMedium}"
               BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="{StaticResource AppBorderThickness}"
               Margin="{StaticResource AppGapItem}" AutomationProperties.Name="Animated gradient surface">
@@ -60,9 +76,29 @@
           </LinearGradientBrush>
         </Border.Background>
       </Border>
-      <CheckBox x:Name="GradientToggle" Content="{x:Static res:Strings.Efx_AnimateGradient}"
-                Checked="OnGradientToggled" Unchecked="OnGradientToggled"
-                AutomationProperties.Name="Animated gradient toggle" />
+
+      <TextBlock Text="{x:Static res:Strings.Efx_Warp}" Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapTitle}" />
+      <TextBlock Text="{x:Static res:Strings.Efx_WarpNote}"
+                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" Margin="{StaticResource AppGapItem}" />
+      <Border Height="96" CornerRadius="{StaticResource AppCornerRadiusMedium}"
+              BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="{StaticResource AppBorderThickness}"
+              ClipToBounds="True" Margin="{StaticResource AppGapItem}"
+              AutomationProperties.Name="Backdrop warp prototype surface">
+        <Border.Background>
+          <RadialGradientBrush x:Name="WarpBrush" Center="0.25,0.5" GradientOrigin="0.25,0.5"
+                               RadiusX="0.7" RadiusY="0.9">
+            <GradientStop Offset="0" Color="{DynamicResource SystemAccentColorSecondary}" />
+            <GradientStop Offset="1" Color="{DynamicResource SolidBackgroundFillColorTertiary}" />
+          </RadialGradientBrush>
+        </Border.Background>
+      </Border>
+      <TextBlock Text="{Binding ViewModel.FallbackText}" Style="{StaticResource AppCaptionText}"
+                 TextWrapping="Wrap" AutomationProperties.Name="Warp fallback status" Margin="{StaticResource AppGapItem}" />
+
+      <TextBlock Text="{Binding ViewModel.ProfileDetailTitle}"
+                 Style="{StaticResource AppSectionHeadingText}" Margin="{StaticResource AppGapSection}" />
+      <TextBlock Text="{Binding ViewModel.ProfileDetailText}"
+                 Style="{StaticResource AppCaptionText}" TextWrapping="Wrap" />
     </StackPanel>
   </ScrollViewer>
 </Page>

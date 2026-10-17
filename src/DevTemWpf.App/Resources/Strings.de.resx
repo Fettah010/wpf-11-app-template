@@ -95,14 +95,29 @@
   <data name="Efx_PresetExpressive" xml:space="preserve"><value>Ausdrucksstark (380 ms + Folie)</value></data>
   <data name="Efx_PreviewText" xml:space="preserve"><value>Der Eingang spielt hier.</value></data>
   <data name="Efx_Ripple" xml:space="preserve"><value>Wellen</value></data>
-  <data name="Efx_RippleNote" xml:space="preserve"><value>In die Fläche klicken. Nur Storyboard, dekorativ, wird übersprungen, außer Bewegung ist Voll und Effekte sind an.</value></data>
+  <data name="Efx_RippleNote" xml:space="preserve"><value>In die Fläche klicken. Nur Storyboard, dekorativ, läuft nur, wenn die Bewegungsstufe hoch genug ist und Effekte an sind.</value></data>
   <data name="Efx_Surface" xml:space="preserve"><value>Animierte Fläche</value></data>
-  <data name="Efx_SurfaceNote" xml:space="preserve"><value>Optionaler Umgebungsverlauf. Standardmäßig aus; stoppt beim Verlassen der Seite.</value></data>
+  <data name="Efx_SurfaceNote" xml:space="preserve"><value>Umgebungsverlauf-Schleife. Benötigt eine hohe Bewegungsstufe; stoppt beim Verlassen der Seite.</value></data>
   <data name="Efx_AnimateGradient" xml:space="preserve"><value>Verlauf animieren</value></data>
   <data name="Efx_PolicyFormat" xml:space="preserve"><value>Effektive Bewegung: {0} (Einstellung: {1})</value></data>
   <data name="Efx_EnvFormat" xml:space="preserve"><value>BS-Animationen: {0}, Renderstufe {1}, Effekte: {2}</value></data>
   <data name="Efx_On" xml:space="preserve"><value>an</value></data>
   <data name="Efx_Off" xml:space="preserve"><value>aus</value></data>
+  <data name="Efx_Switches" xml:space="preserve"><value>Effektschalter</value></data>
+  <data name="Efx_SwitchesNote" xml:space="preserve"><value>Dekorative Effekte benötigen zusätzlich eine hohe Bewegungsstufe; der Hauptschalter deaktiviert alle.</value></data>
+  <data name="Efx_RippleSwitch" xml:space="preserve"><value>Klickwelle</value></data>
+  <data name="Efx_GradientSwitch" xml:space="preserve"><value>Animierter Verlauf</value></data>
+  <data name="Efx_WarpSwitch" xml:space="preserve"><value>Hintergrund-Warp-Prototyp</value></data>
+  <data name="Efx_Warp" xml:space="preserve"><value>Hintergrund-Warp (Prototyp)</value></data>
+  <data name="Efx_WarpNote" xml:space="preserve"><value>Nur Hintergrund, simulierte Verzerrung: kein Text und keine Bedienelemente darin, daher bleiben Lesbarkeit und Eingabe unberührt. Standardmäßig aus; sonst statischer Hintergrund.</value></data>
+  <data name="Efx_FallbackFormat" xml:space="preserve"><value>Warp-Prototyp: {0}</value></data>
+  <data name="Efx_FallbackActive" xml:space="preserve"><value>simulierte Verzerrung aktiv</value></data>
+  <data name="Efx_FallbackStaticEffects" xml:space="preserve"><value>statischer Ersatz (Premium-Effekte aus)</value></data>
+  <data name="Efx_FallbackStaticPolicy" xml:space="preserve"><value>statischer Ersatz (Bewegungsstufe zu niedrig)</value></data>
+  <data name="Efx_FallbackStaticSwitch" xml:space="preserve"><value>statischer Ersatz (Warp-Schalter aus)</value></data>
+  <data name="Efx_FallbackStaticReduced" xml:space="preserve"><value>statischer Ersatz (reduzierte Bewegung)</value></data>
+  <data name="Efx_ProfileTitle" xml:space="preserve"><value>Bewegungsprofil (Entwicklungsbuild)</value></data>
+  <data name="Efx_ProfileDetailFormat" xml:space="preserve"><value>Tokens: Schnell {0} ms, Standard {1} ms, Ausdrucksstark {2} ms, Staffel {3} ms; Renderstufe {4}</value></data>
   <data name="Tok_Title" xml:space="preserve"><value>Designtoken</value></data>
   <data name="Tok_Description" xml:space="preserve"><value>Live-Vorschau der App*-Tokenebene. Wechsle Design, Dichte oder Akzent in den Einstellungen, damit alle Farbfelder folgen.</value></data>
   <data name="Tok_Colors" xml:space="preserve"><value>Farben</value></data>

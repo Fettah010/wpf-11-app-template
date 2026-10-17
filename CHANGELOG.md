@@ -17,6 +17,12 @@ breaking changes, no new packages.
 - Motion lifecycle: shared `MotionScope` cancels in-flight motion and runs
   cleanup on navigation-away, unload, theme change, deactivation, and
   shutdown; no `CompositionTarget.Rendering` hooks (repo-only guard test).
+- Effects showcase: the Effects page now controls the master switch and each
+  effect (ripple, gradient, warp) live, reports the warp fallback reason, and
+  (development builds only) prints the resolved tokens and render tier.
+- Backdrop warp prototype: a simulated, backdrop-only radial-highlight drift —
+  no HLSL shader, no text or controls inside; off by default with a static
+  fallback (ADR-0016 records the shader no-go).
 - Effects: per-effect switches (ripple, gradient, warp) refine the master
   `EffectsEnabled` switch, all gated through `IMotionService.AllowsEffect`.
   The backdrop warp prototype is off by default and simulated only — no HLSL

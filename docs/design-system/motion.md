@@ -109,7 +109,19 @@ A true water-warp/distortion shader is **not shipped**. It needs a pinned
 HLSL toolchain (`fxc.exe`, ≤ `ps_3_0`) and low-spec GPU validation, and any
 `Effect` forces an intermediate render target that disables ClearType for its
 whole subtree. Neither the toolchain pin nor a low-spec reference machine
-exists here (D10/D27). The bounded prototype is a backdrop-only *simulated*
-distortion with a static fallback; it must never sit over text or interactive
-content. Unblock conditions and evidence: `docs/DEFERRED.md` (D01/D10) and
-ADR-0016.
+exists here (D10/D27). Unblock conditions and evidence: `docs/DEFERRED.md`
+(D01/D10) and ADR-0016.
+
+The shipped prototype is a backdrop-only *simulated* distortion: a radial
+highlight (a `RadialGradientBrush`) whose center and origin drift across a
+surface with no text or controls inside, so ClearType and hit-testing are
+untouched. It is off by default; when disabled, reduced motion, or the Rich
+level is unavailable, the same layout renders as a static backdrop and the
+Effects page reports the reason.
+
+## Showcase page
+
+The Effects page exposes the master `EffectsEnabled` switch plus the per-effect
+switches, the motion presets, and a fallback-status line; in development builds
+it also prints the resolved tokens and render tier.
+

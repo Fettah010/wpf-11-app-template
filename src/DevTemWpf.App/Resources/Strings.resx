@@ -95,14 +95,29 @@
   <data name="Efx_PresetExpressive" xml:space="preserve"><value>Expressive (380ms + slide)</value></data>
   <data name="Efx_PreviewText" xml:space="preserve"><value>The entrance plays here.</value></data>
   <data name="Efx_Ripple" xml:space="preserve"><value>Ripple</value></data>
-  <data name="Efx_RippleNote" xml:space="preserve"><value>Click inside the surface. Storyboard-only, decorative, skipped unless motion is Full and effects are on.</value></data>
+  <data name="Efx_RippleNote" xml:space="preserve"><value>Click inside the surface. Storyboard-only, decorative, runs only when motion is Rich and effects are on.</value></data>
   <data name="Efx_Surface" xml:space="preserve"><value>Animated surface</value></data>
-  <data name="Efx_SurfaceNote" xml:space="preserve"><value>Opt-in ambient gradient. Off by default; stops when you leave the page.</value></data>
+  <data name="Efx_SurfaceNote" xml:space="preserve"><value>Ambient gradient loop. Requires the Rich motion level; stops when you leave the page.</value></data>
   <data name="Efx_AnimateGradient" xml:space="preserve"><value>Animate the gradient</value></data>
   <data name="Efx_PolicyFormat" xml:space="preserve"><value>Effective motion: {0} (preference: {1})</value></data>
   <data name="Efx_EnvFormat" xml:space="preserve"><value>OS animations: {0}, render tier {1}, effects: {2}</value></data>
   <data name="Efx_On" xml:space="preserve"><value>on</value></data>
   <data name="Efx_Off" xml:space="preserve"><value>off</value></data>
+  <data name="Efx_Switches" xml:space="preserve"><value>Effect switches</value></data>
+  <data name="Efx_SwitchesNote" xml:space="preserve"><value>Decorative effects also require the Rich motion level; the master switch turns them all off.</value></data>
+  <data name="Efx_RippleSwitch" xml:space="preserve"><value>Click ripple</value></data>
+  <data name="Efx_GradientSwitch" xml:space="preserve"><value>Animated gradient</value></data>
+  <data name="Efx_WarpSwitch" xml:space="preserve"><value>Backdrop warp prototype</value></data>
+  <data name="Efx_Warp" xml:space="preserve"><value>Backdrop warp (prototype)</value></data>
+  <data name="Efx_WarpNote" xml:space="preserve"><value>Backdrop-only simulated distortion: no text or controls inside, so legibility and input are unaffected. Off by default; shows a static backdrop otherwise.</value></data>
+  <data name="Efx_FallbackFormat" xml:space="preserve"><value>Warp prototype: {0}</value></data>
+  <data name="Efx_FallbackActive" xml:space="preserve"><value>simulated distortion active</value></data>
+  <data name="Efx_FallbackStaticEffects" xml:space="preserve"><value>static fallback (premium effects off)</value></data>
+  <data name="Efx_FallbackStaticPolicy" xml:space="preserve"><value>static fallback (motion level too low)</value></data>
+  <data name="Efx_FallbackStaticSwitch" xml:space="preserve"><value>static fallback (warp switch off)</value></data>
+  <data name="Efx_FallbackStaticReduced" xml:space="preserve"><value>static fallback (reduced motion)</value></data>
+  <data name="Efx_ProfileTitle" xml:space="preserve"><value>Motion profile (development build)</value></data>
+  <data name="Efx_ProfileDetailFormat" xml:space="preserve"><value>tokens: fast {0} ms, standard {1} ms, deliberate {2} ms, stagger {3} ms; render tier {4}</value></data>
   <data name="Tok_Title" xml:space="preserve"><value>Design tokens</value></data>
   <data name="Tok_Description" xml:space="preserve"><value>Live preview of the App* token layer. Switch theme, density, or accent in Settings to see every swatch follow.</value></data>
   <data name="Tok_Colors" xml:space="preserve"><value>Colors</value></data>
