@@ -10,20 +10,24 @@ namespace DevTemWpf.App.Views;
 
 /// <summary>
 /// Effects showcase (view wiring + demo orchestration only). All policy
-/// decisions live in <see cref="IMotionService"/>.
+/// decisions live in <see cref="IMotionService"/>; lifecycle cleanup is owned
+/// by <see cref="MotionScope"/>.
 /// </summary>
 public partial class EffectsPage : Page, INavigableView<EffectsViewModel>
 {
     private readonly IMotionService _motion;
+    private readonly MotionScope _scope;
     private Storyboard? _gradientLoop;
+    private IDisposable? _gradientRegistration;
 
-    public EffectsPage(EffectsViewModel viewModel, IMotionService motion)
+    public EffectsPage(EffectsViewModel viewModel, IMotionService motion, MotionScope scope)
     {
         ViewModel = viewModel;
         _motion = motion;
+        _scope = scope;
         DataContext = this;
         InitializeComponent();
-        Loaded += (_, _) => _ = _motion.PlayEntranceAsync(this);
+        Loaded += (_, _) => _ = _motion.PlayEntranceAsync(this, cancellationToken: _scope.Token);
         Unloaded += (_, _) => StopGradient();
     }
 
@@ -42,7 +46,7 @@ public partial class EffectsPage : Page, INavigableView<EffectsViewModel>
             "Expressive" => MotionTokens.Deliberate,
             _ => MotionTokens.Standard,
         };
-        _ = _motion.PlayEntranceAsync(PresetPreview, duration);
+        _ = _motion.PlayEntranceAsync(PresetPreview, duration, _scope.Token);
     }
 
     private void OnRippleSurfaceDown(object sender, MouseButtonEventArgs e)
@@ -86,6 +90,8 @@ public partial class EffectsPage : Page, INavigableView<EffectsViewModel>
             // the parameterless Begin is required here.
             loop.Begin();
             _gradientLoop = loop;
+            // Deactivation / shutdown / theme change stop it via the shared scope.
+            _gradientRegistration = _scope.Register(StopGradientCore);
         }
         catch
         {
@@ -94,6 +100,13 @@ public partial class EffectsPage : Page, INavigableView<EffectsViewModel>
     }
 
     private void StopGradient()
+    {
+        _gradientRegistration?.Dispose();
+        _gradientRegistration = null;
+        StopGradientCore();
+    }
+
+    private void StopGradientCore()
     {
         try
         {

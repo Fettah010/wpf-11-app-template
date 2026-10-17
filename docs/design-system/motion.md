@@ -76,6 +76,16 @@ Under Reduced the movement parts are dropped (fast fade only); under Off every
 primitive snaps. Primitives own the element's `RenderTransform` (appending to
 a `TransformGroup` when one already exists).
 
+## Lifecycle
+
+`MotionScope` (registered as a singleton) owns in-flight motion. Views register
+the storyboards they start and pass `scope.Token` to awaited primitives; the
+shell calls `StopAll()` on navigation-away, unload, theme change, window
+deactivation, and shutdown, which cancels the token (primitives snap) and runs
+registrations in reverse. `StopAll()` re-arms the scope for the next cycle;
+`Dispose()` retires it. Motion never subscribes to
+`CompositionTarget.Rendering` — a repo-only test enforces this.
+
 ## Where motion plays
 
 - Page entrances: every page calls `PlayEntranceAsync` in `Loaded`

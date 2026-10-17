@@ -14,6 +14,9 @@ breaking changes, no new packages.
 - Motion primitives: cancellable enter/exit, selection, expand/collapse,
   feedback, and reduced-motion-aware page transitions (`IMotionService`); all
   snap to their final state on cancellation or failure.
+- Motion lifecycle: shared `MotionScope` cancels in-flight motion and runs
+  cleanup on navigation-away, unload, theme change, deactivation, and
+  shutdown; no `CompositionTarget.Rendering` hooks (repo-only guard test).
 - Effects: per-effect switches (ripple, gradient, warp) refine the master
   `EffectsEnabled` switch, all gated through `IMotionService.AllowsEffect`.
   The backdrop warp prototype is off by default and simulated only — no HLSL
