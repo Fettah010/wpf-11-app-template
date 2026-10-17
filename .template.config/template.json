@@ -176,7 +176,10 @@
         {
           "condition": "(!IncludeLogging)",
           "exclude": [
-            "src/DevTemWpf.App/Services/Logging.cs"
+            "src/DevTemWpf.App/Services/Logging.cs",
+            "src/DevTemWpf.App/Services/LogPrivacy.cs",
+            "src/DevTemWpf.App/Services/RedactingTextFormatter.cs",
+            "tests/DevTemWpf.Unit/LogPrivacyTests.cs"
           ]
         },
         {
