@@ -1,4 +1,4 @@
-# Deferred work backlog — 1.0 scope freeze (0.9.0); 1.1.0 additions appended (D21–D24); 1.4.0 dispositions appended (D09r/D14/D15 closed, D25–D27 opened)
+# Deferred work backlog — 1.0 scope freeze (0.9.0); 1.1.0 additions appended (D21–D24); 1.4.0 dispositions appended (D09r/D14/D15 closed, D25–D27 opened); 1.4.1 D09r note appended
 
 Rule: 1.0-rc takes bug fixes + release mechanics only. Everything below is
 post-1.0 unless marked **1.0**.
