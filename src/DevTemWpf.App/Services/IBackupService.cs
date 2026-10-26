@@ -5,7 +5,9 @@ namespace DevTemWpf.App.Services;
 
 /// <summary>
 /// Backup/restore of user state (settings + database). Explicit paths,
-/// validation on restore, restart recommended afterwards.
+/// validation on restore, restart recommended afterwards. Restore writes are
+/// bounded and validated; failures throw <see cref="BackupException"/> with a
+/// <see cref="BackupFailure"/> reason.
 /// </summary>
 public interface IBackupService
 {

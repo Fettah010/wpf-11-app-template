@@ -14,11 +14,53 @@ hand-edit (re-scaffold to change presets).
 <!--#if (!IncludeDiagnostics) -->
 - [ ] Diagnostics (excluded by preset)
 <!--#endif -->
-<!--#if (IncludeServices) -->
-- [x] Production services (Serilog logging, SQLite, typed HTTP, backup, Velopack updates, tray)
+<!--#if (IncludeLogging) -->
+- [x] Logging (Serilog file sink, bounded retention/redaction)
 <!--#endif -->
-<!--#if (!IncludeServices) -->
-- [ ] Production services (excluded by preset)
+<!--#if (!IncludeLogging) -->
+- [ ] Logging (excluded by preset)
+<!--#endif -->
+<!--#if (IncludeAuth) -->
+- [x] Auth sample (opt-in MSAL / Entra ID; disabled without configuration)
+<!--#endif -->
+<!--#if (!IncludeAuth) -->
+- [ ] Auth sample (opt-in; not selected)
+<!--#endif -->
+<!--#if (IncludeCrash) -->
+- [x] Crash capture (local-first, redacted; no vendor or telemetry)
+<!--#endif -->
+<!--#if (!IncludeCrash) -->
+- [ ] Crash capture (opt-in; not selected)
+<!--#endif -->
+<!--#if (IncludeLocalData) -->
+- [x] Local data (SQLite FavoritesStore)
+<!--#endif -->
+<!--#if (!IncludeLocalData) -->
+- [ ] Local data (excluded by preset)
+<!--#endif -->
+<!--#if (IncludeHttp) -->
+- [x] Typed HTTP client (StatusClient)
+<!--#endif -->
+<!--#if (!IncludeHttp) -->
+- [ ] Typed HTTP client (excluded by preset)
+<!--#endif -->
+<!--#if (IncludeBackup) -->
+- [x] Backup/restore (zip of settings + database)
+<!--#endif -->
+<!--#if (!IncludeBackup) -->
+- [ ] Backup/restore (excluded by preset)
+<!--#endif -->
+<!--#if (IncludeUpdates) -->
+- [x] Updates (Velopack engine + channel selection)
+<!--#endif -->
+<!--#if (!IncludeUpdates) -->
+- [ ] Updates (excluded by preset)
+<!--#endif -->
+<!--#if (IncludeTray) -->
+- [x] System tray icon (minimize to tray)
+<!--#endif -->
+<!--#if (!IncludeTray) -->
+- [ ] System tray (excluded by preset)
 <!--#endif -->
 - [x] Shell (rail + sidebar), tokens, themes, density, motion, feedback services
 - [x] Localization infrastructure (EN + German proof)

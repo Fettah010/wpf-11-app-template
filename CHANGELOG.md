@@ -1,5 +1,55 @@
 # Changelog
 
+## 1.6.0 (2026-10-18)
+
+Production modules, Windows integration assessment, and optionality (roadmap
+§8.6). Named presets stay byte-identical to 1.5.0; the single `IncludeServices`
+switch becomes per-module flags, and every module — including the two new
+samples — can be turned off completely (files, packages, DI, config, tests).
+
+- **Per-service modules**: `IncludeServices` is replaced by
+  `IncludeLogging` / `IncludeLocalData` / `IncludeHttp` / `IncludeBackup` /
+  `IncludeUpdates` / `IncludeTray` (+ existing `IncludeDashboard`,
+  `IncludeDiagnostics`), each reachable in `Custom` via a `--Custom<Module>`
+  flag. Dependency edges: diagnostics → {logging, http, backup, updates};
+  backup → localdata; **crash → logging** (shared redaction). Generated output
+  carries no template residue and no `#if` directives (ADR-0017).
+- **Logging privacy & bounds** (new): `LogPrivacy` + `RedactingTextFormatter`
+  mask secret-shaped keys and `Bearer` credentials on every line, never throw,
+  and the file sink is capped at 5 MB with 14 retained files in addition to
+  daily rolling (ADR-0018).
+- **Richer update surface**: Diagnostics now shows installed vs available
+  version, delta-vs-full, an explicit **Restart now** prompt (no auto-restart),
+  `Retry`/`Cancel`, and an opt-in downgrade switch that confirms first.
+  Failures become status, never a crash (ADR-0014).
+- **Optional auth sample** (`--CustomAuth`): MSAL (`Microsoft.Identity.Client`
+  4.91.0, MIT) public client + `IAuthService`; no client secret, no UI, silent
+  cache-only restore at startup. Unconfigured ⇒ no provider call, no network
+  (ADR-0017).
+- **Optional crash sample** (`--CustomCrash`): local-first, redacted capture
+  (`ICrashReporter`, `ICrashSink` adapter seam) under `%LOCALAPPDATA%`; no
+  vendor, no telemetry. Reuses `LogPrivacy.Redact` (ADR-0017/0018).
+- **Windows app notifications: NO-GO in 1.6.0** (deferred, D07t). The
+  `AppNotificationManager`/WindowsAppSDK spike built and registered unpackaged,
+  but interactive cold-start activation could not be exercised headlessly and
+  the dependency adds unmeasured startup/working-set cost to every measured
+  gate; no package or flag ships — the in-app Snackbar is the fallback.
+- **Distribution docs & tooling**: `docs/release/packaging.md` separates the
+  portable / Velopack / MSIX profiles and separates signing (owner-owned); new
+  `eng/pack-portable.ps1` publishes, zips, hashes, and explicitly reports
+  signed vs UNSIGNED. `docs/release/` is now tracked.
+- **Guides**: `module-selection`, `updates-and-channels`, `backup-restore`,
+  `auth-and-crash`.
+- **Tests**: 234 total (215 unit + 1 integration + 18 UI), 0 skipped (1.5.0
+  baseline 196). New: log-privacy, update-service, auth, and crash suites;
+  `eng/test-templates.ps1` gains a 5-combo Custom presence/absence module
+  matrix (built and asserted) and named-preset sample-absence checks.
+- **Template packaging**: `DevTemWPF.Templates 1.6.0`. `eng/test-templates.ps1`
+  now spawns the generated smoke with `-NoProfile` so a machine's PowerShell
+  profile cannot fail the gate.
+- No telemetry and no new default dependency; `Microsoft.ApplicationInsights`
+  remains test-only.
+
 ## 1.5.0 (2026-10-17)
 
 Motion system and effects prototype (roadmap §8.5). Additive only — no

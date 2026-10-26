@@ -9,21 +9,40 @@ dotnet new devtemwpf-app -n MyApp --Preset Full
 
 ## Presets
 
-| Preset | Dashboard + charts | Diagnostics UI | Production services | Tests |
+| Preset | Dashboard + charts | Diagnostics UI | Production modules | Tests |
 |---|---|---|---|---|
-| Clean | no | no | no | optional |
-| Recommended (default) | no | yes | yes | optional |
-| Full | yes | yes | yes | optional |
+| Clean | no | no | none | optional |
+| Recommended (default) | no | yes | logging, local data, HTTP, backup, updates, tray | optional |
+| Full | yes | yes | logging, local data, HTTP, backup, updates, tray | optional |
+| Custom | no | if `--CustomDiagnostics` | only the `--Custom<Module>` flags you set | optional |
 
-Module map: dashboard files + LiveCharts + sample data + favorites;
-diagnostics page + VM; service files + packages + tray/logging/update hooks.
-Localization, tokens, motion, and feedback stay in every preset.
+In **Custom**, each production module is selected with a `bool` flag.
+`Diagnostics` implies `logging`, `http`, `backup`, and `updates`; `backup`
+implies `localdata` (it protects the local database); `crash` implies
+`logging` (shared redaction). The named presets are unaffected by the
+`Custom<Module>` flags. The opt-in **auth** and **crash** samples are reachable
+**only** through `Custom` — they are never in Clean/Recommended/Full.
+
+Module map: dashboard files + LiveCharts + sample data; diagnostics page + VM;
+per-module service files + packages + tray/logging/update hooks; opt-in auth
+(MSAL) and crash (local file) samples. Localization, tokens, motion, and
+feedback stay in every preset. Windows app notifications (`AppNotificationManager`)
+were evaluated in 1.6.0 and deferred (no-go) — no package or flag ships (D07t).
 
 ## Flags
 
 | Flag | Values | Default | Notes |
 |---|---|---|---|
-| `--Preset` | Clean/Recommended/Full | Recommended | Drives module inclusion (computed symbols). |
+| `--Preset` | Clean/Recommended/Full/Custom | Recommended | Drives module inclusion (computed symbols). |
+| `--CustomLogging` | true/false | false | Custom only: Serilog file logging. |
+| `--CustomLocalData` | true/false | false | Custom only: SQLite local data. |
+| `--CustomHttp` | true/false | false | Custom only: typed HTTP client. |
+| `--CustomBackup` | true/false | false | Custom only: backup/restore (implies local data). |
+| `--CustomUpdates` | true/false | false | Custom only: Velopack update engine. |
+| `--CustomTray` | true/false | false | Custom only: system tray icon. |
+| `--CustomDiagnostics` | true/false | false | Custom only: Diagnostics page (implies logging, HTTP, backup, updates). |
+| `--CustomAuth` | true/false | false | Custom only: opt-in MSAL (Entra ID) auth sample; disabled without `Auth` config. |
+| `--CustomCrash` | true/false | false | Custom only: local-first redacted crash capture (implies logging); no vendor. |
 | `--IncludeTests` | true/false | true | Excludes `tests/**` + solution entries when false. |
 | `-n/--name` | text | directory name | Renames namespaces, files (`DevTemWpf.slnx`), and content via `sourceName`. |
 

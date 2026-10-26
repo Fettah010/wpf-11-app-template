@@ -14,11 +14,13 @@
   powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Shells Top, Tabbed
   powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Shells Sidebar
   powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -NoPresets
+  powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -NoPresets -Shells Sidebar
 #>
 param(
   [string[]]$Presets = @('Clean', 'Recommended', 'Full'),
   [string[]]$Shells = @('Sidebar', 'Rail', 'Top', 'Tabbed'),
   [switch]$NoPresets,
+  [switch]$NoModules,
   [string]$PackagePath = ''
 )
 
@@ -115,6 +117,11 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
   $dashChecked = $features -match '- \[x\] Dashboard'
   Assert-True ($dashChecked -eq ($Preset -eq 'Full')) "$Preset FEATURES dashboard row"
 
+  # Optional samples are Custom-only: never present in a named preset (AC04).
+  Assert-True (-not (Test-Path (Join-Path $srcDir 'Services\AuthService.cs'))) "$Preset auth sample absent"
+  Assert-True (-not (Test-Path (Join-Path $srcDir 'Services\CrashReporterService.cs'))) "$Preset crash sample absent"
+  Assert-True (-not ($csproj -match 'Microsoft\.Identity\.Client')) "$Preset MSAL ref absent"
+
   # Shell seed (1.4.0): the generated default must carry the chosen shell and
   # no unreplaced template token.
   $settingsCs = Get-Content (Join-Path $srcDir 'Services\ShellSettings.cs') -Raw
@@ -146,7 +153,7 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
     if ($script:failures -eq 0) { Write-Host "OK: $Preset/$Shell build+launch" -ForegroundColor Green }
   }
   elseif ($WithTests) {
-    if (-not (Invoke-Native 'powershell' @('-ExecutionPolicy', 'Bypass', '-File', (Join-Path $appDir 'eng\smoke.ps1')) $appDir)) { return }
+    if (-not (Invoke-Native 'powershell' @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $appDir 'eng\smoke.ps1')) $appDir)) { return }
     Write-Host "OK: $Preset smoke (restore/build/test/launch)" -ForegroundColor Green
   }
   else {
@@ -154,6 +161,33 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
     if (-not (Invoke-Native 'dotnet' @('build', '-c', 'Release', '--no-restore', '--warnaserror') $appDir)) { return }
     Write-Host "OK: $Preset build (no tests)" -ForegroundColor Green
   }
+}
+
+function Test-ModuleCombo([string]$DirName, [string[]]$Flags, [string[]]$PresentFiles, [string[]]$PresentPackages, [string[]]$AbsentFiles, [string[]]$AbsentPackages) {
+  $name = "Mod$DirName"
+  $dir = Join-Path $work $DirName
+  Write-Host "`n===== Custom modules: $DirName ($($Flags -join ' ')) =====" -ForegroundColor Cyan
+
+  $genArgs = @('new', 'devtemwpf-app', '-n', $name, '-o', $dir, '--Preset', 'Custom', '--Shell', 'Sidebar') + $Flags
+  if (-not (Invoke-Native 'dotnet' $genArgs $work)) { return }
+
+  $appDir = $dir
+  if (-not (Test-Path (Join-Path $dir 'src'))) {
+    $sub = Get-ChildItem -LiteralPath $dir -Directory | Select-Object -First 1
+    if ($sub) { $appDir = $sub.FullName }
+  }
+  $srcDir = Join-Path $appDir "src\$name.App"
+  $csproj = Get-Content (Join-Path $srcDir "$name.App.csproj") -Raw
+
+  # 1.6.0 (roadmap 8.6): per-module source + package presence AND absence.
+  foreach ($f in $PresentFiles) { Assert-True (Test-Path (Join-Path $srcDir $f)) "$DirName present file: $f" }
+  foreach ($p in $PresentPackages) { Assert-True ($csproj -match [regex]::Escape($p)) "$DirName present package: $p" }
+  foreach ($f in $AbsentFiles) { Assert-True (-not (Test-Path (Join-Path $srcDir $f))) "$DirName absent file: $f" }
+  foreach ($p in $AbsentPackages) { Assert-True (-not ($csproj -match [regex]::Escape($p))) "$DirName absent package: $p" }
+
+  if (-not (Invoke-Native 'dotnet' @('restore') $appDir)) { return }
+  if (-not (Invoke-Native 'dotnet' @('build', '-c', 'Release', '--no-restore', '--warnaserror') $appDir)) { return }
+  Write-Host "OK: $DirName modules (presence/absence + build)" -ForegroundColor Green
 }
 
 try {
@@ -200,6 +234,37 @@ try {
   }
   if ($Shells -contains 'Tabbed') {
     Test-Combo 'Full' '' $true 'FullTabbed' 'Tabbed' $false
+  }
+
+  # Module dimension (1.6.0, roadmap 8.6): Custom single modules, an
+  # independent pair, and the diagnostics bundle. Every combo asserts source
+  # + package presence AND absence, then builds Release --warnaserror.
+  if (-not $NoModules) {
+    Test-ModuleCombo 'CustomCrash' @('--CustomCrash', 'true') `
+      @('Services\CrashReporterService.cs', 'Services\ICrashReporter.cs', 'Services\Logging.cs', 'Services\LogPrivacy.cs') `
+      @('Serilog') `
+      @('Services\AuthService.cs', 'Services\IAuthService.cs') `
+      @('Microsoft.Identity.Client')
+    Test-ModuleCombo 'CustomAuth' @('--CustomAuth', 'true') `
+      @('Services\AuthService.cs', 'Services\IAuthService.cs', 'Services\MsalTokenProvider.cs') `
+      @('Microsoft.Identity.Client') `
+      @('Services\Logging.cs', 'Services\CrashReporterService.cs') `
+      @('Serilog')
+    Test-ModuleCombo 'CustomHttpUpdates' @('--CustomHttp', 'true', '--CustomUpdates', 'true') `
+      @('Services\StatusClient.cs', 'Services\UpdateService.cs') `
+      @('Microsoft.Extensions.Http', 'Velopack') `
+      @('Services\FavoritesStore.cs', 'Services\BackupService.cs', 'Services\AuthService.cs') `
+      @('Microsoft.Data.Sqlite', 'Microsoft.Identity.Client')
+    Test-ModuleCombo 'CustomTrayLocalData' @('--CustomTray', 'true', '--CustomLocalData', 'true') `
+      @('TrayGlyph.cs', 'Services\FavoritesStore.cs') `
+      @('WPF-UI.Tray', 'Microsoft.Data.Sqlite') `
+      @('Services\StatusClient.cs', 'Services\UpdateService.cs', 'Services\CrashReporterService.cs') `
+      @('Velopack')
+    Test-ModuleCombo 'CustomDiagnostics' @('--CustomDiagnostics', 'true') `
+      @('Views\DiagnosticsPage.xaml', 'ViewModels\DiagnosticsViewModel.cs', 'Services\Logging.cs', 'Services\StatusClient.cs', 'Services\BackupService.cs', 'Services\UpdateService.cs', 'Services\FavoritesStore.cs') `
+      @('Serilog', 'Microsoft.Extensions.Http', 'Velopack', 'Microsoft.Data.Sqlite') `
+      @('Services\AuthService.cs', 'Services\CrashReporterService.cs', 'TrayGlyph.cs') `
+      @('Microsoft.Identity.Client', 'WPF-UI.Tray')
   }
 
   # Item templates (into the Full app).

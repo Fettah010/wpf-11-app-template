@@ -50,6 +50,18 @@ public sealed partial class DiagnosticsViewModel : ObservableObject, INavigation
         ChannelOptions = [UpdateChannel.Stable, UpdateChannel.Beta];
         PathsText = $"Settings: {AppPaths.SettingsPath}\nDatabase: {AppPaths.DbPath}\nLogs: {AppPaths.LogsDir}\nBackups: {AppPaths.BackupsDir}";
         VersionsText = $"App: {GetType().Assembly.GetName().Version}\nRuntime: {Environment.Version}\nOS: {Environment.OSVersion.VersionString}";
+        if (update is System.ComponentModel.INotifyPropertyChanged observable)
+        {
+            observable.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName is nameof(IUpdateService.AvailableVersion) or nameof(IUpdateService.Status))
+                {
+                    RefreshUpdateVersions();
+                }
+            };
+        }
+
+        RefreshUpdateVersions();
         RefreshLogs();
     }
 
@@ -77,6 +89,14 @@ public sealed partial class DiagnosticsViewModel : ObservableObject, INavigation
     [ObservableProperty]
     private string feedUrlText = string.Empty;
 
+    /// <summary>Installed vs available version line (1.6.0).</summary>
+    [ObservableProperty]
+    private string updateVersionsText = string.Empty;
+
+    /// <summary>Opt-in switch required before an older version may be applied.</summary>
+    [ObservableProperty]
+    private bool allowDowngrade;
+
     public string PathsText { get; }
 
     public string VersionsText { get; }
@@ -89,6 +109,7 @@ public sealed partial class DiagnosticsViewModel : ObservableObject, INavigation
     {
         SelectedChannel = _settings.Current.UpdateChannel;
         RefreshFeedText();
+        RefreshUpdateVersions();
         RefreshLogs();
         return Task.CompletedTask;
     }
@@ -207,13 +228,23 @@ public sealed partial class DiagnosticsViewModel : ObservableObject, INavigation
     [RelayCommand]
     private async Task CheckUpdatesAsync(CancellationToken cancellationToken)
     {
-        await Update.CheckAsync(cancellationToken).ConfigureAwait(true);
+        await Update.CheckAsync(cancellationToken, AllowDowngrade).ConfigureAwait(true);
         RefreshFeedText();
+        RefreshUpdateVersions();
     }
 
     [RelayCommand]
     private async Task DownloadUpdatesAsync(CancellationToken cancellationToken)
         => await Update.DownloadAndRestartAsync(cancellationToken).ConfigureAwait(true);
+
+    [RelayCommand]
+    private Task RetryUpdatesAsync(CancellationToken cancellationToken) => Update.RetryAsync(cancellationToken);
+
+    [RelayCommand]
+    private void CancelUpdates() => Update.Cancel();
+
+    [RelayCommand]
+    private Task RestartUpdatesAsync() => Update.RestartNowAsync();
 
     [RelayCommand]
     private async Task ProbeHttpAsync(CancellationToken cancellationToken)
@@ -239,6 +270,12 @@ public sealed partial class DiagnosticsViewModel : ObservableObject, INavigation
             : _updateOptions.StableFeedUrl;
         FeedUrlText = string.IsNullOrWhiteSpace(url) ? "(updates not configured)" : url.Trim();
     }
+
+    private void RefreshUpdateVersions()
+        => UpdateVersionsText = string.Format(
+            Strings.Dia_AppVersionsFormat,
+            Update.CurrentVersion,
+            Update.AvailableVersion ?? "—");
 
     private bool MatchesFilter(string line)
         => string.IsNullOrWhiteSpace(LogFilter)

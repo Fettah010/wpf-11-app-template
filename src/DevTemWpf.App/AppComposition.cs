@@ -42,17 +42,13 @@ public static class AppComposition
         builder.Services.AddSingleton<Wpf.Ui.ISnackbarService, Wpf.Ui.SnackbarService>();
         builder.Services.AddSingleton<Wpf.Ui.IContentDialogService, Wpf.Ui.ContentDialogService>();
 
-        // Production services (ADR-0011). Each is inert without configuration;
-        // the 0.8.0 template drops the matching file set + lines + packages.
-        //#if (IncludeServices)
+        // Production services (ADR-0011). Each is inert without configuration
+        // and each module is independently removable (1.6.0). Diagnostics
+        // depends on HTTP + backup + updates + logging, so enabling it in the
+        // Custom preset implies those modules (see template.json).
+        //#if (IncludeHttp)
         builder.Services.Configure<HttpOptions>(
             builder.Configuration.GetSection(HttpOptions.SectionName));
-        builder.Services.Configure<UpdateOptions>(
-            builder.Configuration.GetSection(UpdateOptions.SectionName));
-        builder.Services.AddSingleton<FavoritesStore>();
-        builder.Services.AddSingleton<IBackupService, BackupService>();
-        builder.Services.AddSingleton<IUpdateService, UpdateService>();
-        builder.Services.AddSingleton<Wpf.Ui.Tray.INotifyIconService, Wpf.Ui.Tray.NotifyIconService>();
         builder.Services.AddHttpClient<StatusClient>((sp, client) =>
         {
             var baseUrl = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<HttpOptions>>().Value.BaseUrl;
@@ -61,6 +57,32 @@ public static class AppComposition
                 client.BaseAddress = uri;
             }
         });
+        //#endif
+        //#if (IncludeUpdates)
+        builder.Services.Configure<UpdateOptions>(
+            builder.Configuration.GetSection(UpdateOptions.SectionName));
+        builder.Services.AddSingleton<IUpdateService, UpdateService>();
+        //#endif
+        //#if (IncludeLocalData)
+        builder.Services.AddSingleton<FavoritesStore>();
+        //#endif
+        //#if (IncludeBackup)
+        builder.Services.AddSingleton<IBackupService, BackupService>();
+        //#endif
+        //#if (IncludeTray)
+        builder.Services.AddSingleton<Wpf.Ui.Tray.INotifyIconService, Wpf.Ui.Tray.NotifyIconService>();
+        //#endif
+        // Optional samples (ADR-0017; Custom preset only). Both are inert
+        // without configuration and never phone home by default.
+        //#if (IncludeAuth)
+        builder.Services.Configure<AuthOptions>(
+            builder.Configuration.GetSection(AuthOptions.SectionName));
+        builder.Services.AddSingleton<IAuthService, AuthService>();
+        //#endif
+        //#if (IncludeCrash)
+        builder.Services.Configure<CrashOptions>(
+            builder.Configuration.GetSection(CrashOptions.SectionName));
+        builder.Services.AddSingleton<ICrashReporter, CrashReporterService>();
         //#endif
 
         // Shell + pages

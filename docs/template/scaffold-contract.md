@@ -33,3 +33,33 @@ Removing the dashboard from a scaffold deletes exactly:
 
 Nothing outside this set may reference dashboard types (verified by review;
 a compile check after deletion is the 0.8.0 acceptance test).
+
+## Per-service modules (1.6.0)
+
+The single `IncludeServices` flag was split into per-module flags. Each module
+is independently removable in the `Custom` preset and covers the same file /
+package / DI / config set:
+
+| Module | Symbol / flag | Files | Packages | DI / hooks | Config | Tests |
+|---|---|---|---|---|---|---|
+| Logging | `IncludeLogging` / `--CustomLogging` | `Services/Logging.cs`, `LogPrivacy.cs`, `RedactingTextFormatter.cs` | Serilog, Serilog.Extensions.Hosting, Serilog.Sinks.File | `AddAppLogging()` in `App.xaml.cs` | `appsettings.json` (Serilog) | `LogPrivacyTests` + host logging |
+| Local data | `IncludeLocalData` / `--CustomLocalData` | `Services/FavoritesStore.cs` | Microsoft.Data.Sqlite | `AddSingleton<FavoritesStore>` | — | `FavoritesStoreTests` |
+| HTTP | `IncludeHttp` / `--CustomHttp` | `Services/StatusClient.cs`, `HttpOptions.cs` | Microsoft.Extensions.Http | `Configure<HttpOptions>` + `AddHttpClient<StatusClient>` | `Http` section | `StatusClientTests` |
+| Backup | `IncludeBackup` / `--CustomBackup` | `Services/BackupService.cs`, `IBackupService.cs` | — | `AddSingleton<IBackupService, BackupService>` | — | `BackupServiceTests` |
+| Updates | `IncludeUpdates` / `--CustomUpdates` | `Services/UpdateService.cs`, `IUpdateService.cs`, `UpdateOptions.cs`, `VelopackUpdateEngine.cs` | Velopack | `Configure<UpdateOptions>` + `AddSingleton<IUpdateService>` + `VelopackApp.Build().Run()` | `Updates` section | `UpdateServiceTests` |
+| Tray | `IncludeTray` / `--CustomTray` | `TrayGlyph.cs` | WPF-UI.Tray | `AddSingleton<INotifyIconService>` + `MainWindow.SetupTray` | — | UI |
+| Auth (opt-in sample) | `IncludeAuth` / `--CustomAuth` | `Services/AuthOptions.cs`, `IAuthService.cs`, `AuthService.cs`, `MsalTokenProvider.cs` | Microsoft.Identity.Client | `Configure<AuthOptions>` + `AddSingleton<IAuthService>` + silent `TryRestoreAsync()` | `Auth` section | `AuthServiceTests` |
+| Crash (opt-in sample) | `IncludeCrash` / `--CustomCrash` | `Services/CrashOptions.cs`, `ICrashReporter.cs`, `CrashReporterService.cs` | — | `Configure<CrashOptions>` + `AddSingleton<ICrashReporter>` + `Install()` | `Crash` section | `CrashReporterServiceTests` |
+
+Dependency edges (Custom only): diagnostics → {logging, http, backup, updates};
+backup → localdata; crash → logging (redaction); auth → none. The opt-in
+samples (**auth**, **crash**) are reachable **only** through the `Custom`
+preset with their flag — never through Clean/Recommended/Full. Disabling a
+module removes its files, packages, registrations, and tests — never just
+hides UI. The Diagnostics **UI** module still removes the dashboard set
+described above.
+
+**Notifications** (`AppNotificationManager`, Windows App SDK) were evaluated
+in 1.6.0 and **not shipped** (no-go; see `docs/DEFERRED.md` D07t). The in-app
+Snackbar/feedback surface is the fallback and there is no notifications
+package, file, or flag.

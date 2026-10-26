@@ -22,7 +22,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     private readonly MotionScope _motionScope;
     private Services.ThemeMode _lastTheme;
     private IInputElement? _paletteInvoker;
-    //#if (IncludeServices)
+    //#if (IncludeTray)
     private readonly Wpf.Ui.Tray.INotifyIconService _tray;
     //#endif
 
@@ -33,7 +33,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         INavigationViewPageProvider pageProvider,
         Wpf.Ui.ISnackbarService snackbar,
         Wpf.Ui.IContentDialogService dialogs,
-        //#if (IncludeServices)
+        //#if (IncludeTray)
         Wpf.Ui.Tray.INotifyIconService tray,
         //#endif
         ISettingsService settings,
@@ -44,7 +44,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         _workspace = workspace;
         _motionScope = motionScope;
         _lastTheme = settings.Current.Theme;
-        //#if (IncludeServices)
+        //#if (IncludeTray)
         _tray = tray;
         //#endif
 
@@ -70,7 +70,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         dialogs.SetDialogHost(RootDialogHost);
         RootNavigation.Navigating += OnNavNavigating;
         _workspace.PropertyChanged += OnWorkspaceSelectionChanged;
-        //#if (IncludeServices)
+        //#if (IncludeTray)
         SetupTray(options.Value.Title);
         //#endif
 
@@ -100,7 +100,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     /// <summary>Command palette model (1.4.0); overlay chrome is in XAML above.</summary>
     public PaletteViewModel Palette { get; }
 
-    //#if (IncludeServices)
+    //#if (IncludeTray)
     /// <summary>Tray: icon exists only while minimize-to-tray is enabled.</summary>
     private void SetupTray(string title)
     {

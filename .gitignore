@@ -30,6 +30,10 @@ x86/
 [Ll]og/
 *.log
 
+# Docs are source-controlled even though the [Rr]elease/ build rule matches
+# docs/release/ by name.
+!docs/release/
+
 # OS
 Thumbs.db
 Desktop.ini

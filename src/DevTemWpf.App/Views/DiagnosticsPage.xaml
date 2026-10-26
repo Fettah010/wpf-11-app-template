@@ -45,11 +45,24 @@
                 SelectedItem="{Binding ViewModel.SelectedChannel, Mode=TwoWay}"
                 AutomationProperties.Name="Update channel" Margin="{StaticResource AppGapTitle}" />
       <TextBlock Text="{Binding ViewModel.FeedUrlText}" Style="{StaticResource AppCaptionText}" Margin="{StaticResource AppGapItem}" />
+      <TextBlock Text="{Binding ViewModel.UpdateVersionsText}" Style="{StaticResource AppSecondaryBodyText}"
+                 AutomationProperties.Name="Update versions" Margin="{StaticResource AppGapItem}" />
+      <ui:ToggleSwitch Content="{x:Static res:Strings.Update_AllowDowngrade}"
+                       IsChecked="{Binding ViewModel.AllowDowngrade, Mode=TwoWay}"
+                       Checked="OnAllowDowngradeChecked"
+                       AutomationProperties.Name="{x:Static res:Strings.Update_AllowDowngrade}"
+                       Margin="{StaticResource AppGapItem}" />
       <WrapPanel Margin="{StaticResource AppGapTitle}">
         <ui:Button Content="{x:Static res:Strings.Dia_CheckUpdates}" Command="{Binding ViewModel.CheckUpdatesCommand}"
                    AutomationProperties.Name="{x:Static res:Strings.Dia_CheckUpdates}" Margin="{StaticResource AppGapFlow}" />
-        <ui:Button Content="{x:Static res:Strings.Dia_DownloadRestart}" Command="{Binding ViewModel.DownloadUpdatesCommand}" Appearance="Primary"
+        <ui:Button Content="{x:Static res:Strings.Update_Retry}" Command="{Binding ViewModel.RetryUpdatesCommand}"
+                   AutomationProperties.Name="{x:Static res:Strings.Update_Retry}" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="{x:Static res:Strings.Update_Cancel}" Command="{Binding ViewModel.CancelUpdatesCommand}"
+                   AutomationProperties.Name="{x:Static res:Strings.Update_Cancel}" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="{x:Static res:Strings.Dia_DownloadRestart}" Command="{Binding ViewModel.DownloadUpdatesCommand}"
                    AutomationProperties.Name="Download and restart" Margin="{StaticResource AppGapFlow}" />
+        <ui:Button Content="{x:Static res:Strings.Update_RestartNow}" Command="{Binding ViewModel.RestartUpdatesCommand}"
+                   AutomationProperties.Name="{x:Static res:Strings.Update_RestartNow}" Margin="{StaticResource AppGapFlow}" />
       </WrapPanel>
       <TextBlock Text="{Binding ViewModel.Update.Detail}" Style="{StaticResource AppSecondaryBodyText}"
                  TextWrapping="Wrap" AutomationProperties.Name="Update status" />

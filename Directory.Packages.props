@@ -23,6 +23,9 @@
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.12" />
     <PackageVersion Include="Velopack" Version="1.2.161" />
     <PackageVersion Include="WPF-UI.Tray" Version="4.3.0" />
+    <!-- Optional auth sample (1.6.0, ADR-0017/D-2), Custom preset only.
+         Verified 2026-10-18: 4.91.0 stable, MIT (public client; no secret). -->
+    <PackageVersion Include="Microsoft.Identity.Client" Version="4.91.0" />
     <!-- Charts (ADR-0010): optional dashboard module only. Audited 2026-10-14:
          2.0.5 stable (MIT), net8.0-windows asset, SkiaSharp 3.119 native runtimes. -->
     <PackageVersion Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.5" />

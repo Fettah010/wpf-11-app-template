@@ -18,9 +18,24 @@ public sealed class UpdateServiceTests : IDisposable
         public Exception? CheckError { get; set; }
         public Exception? DownloadError { get; set; }
         public bool Restarted { get; private set; }
+        public bool? LastAllowDowngrade { get; private set; }
+        public TaskCompletionSource? Gate { get; set; }
 
-        public Task<UpdateCheck?> CheckAsync(string feedUrl, CancellationToken cancellationToken)
-            => CheckError is not null ? Task.FromException<UpdateCheck?>(CheckError) : Task.FromResult(CheckResult);
+        public async Task<UpdateCheck?> CheckAsync(string feedUrl, bool allowDowngrade, CancellationToken cancellationToken)
+        {
+            LastAllowDowngrade = allowDowngrade;
+            if (Gate is not null)
+            {
+                await Task.Delay(Timeout.Infinite, cancellationToken).ConfigureAwait(false);
+            }
+
+            if (CheckError is not null)
+            {
+                throw CheckError;
+            }
+
+            return CheckResult;
+        }
 
         public Task DownloadAsync(string feedUrl, UpdateCheck update, IProgress<double> progress, CancellationToken cancellationToken)
         {
@@ -38,12 +53,12 @@ public sealed class UpdateServiceTests : IDisposable
     }
 
     private async Task<(UpdateService Service, FakeEngine Engine)> CreateAsync(
-        UpdateOptions? options = null, ShellSettings? seed = null)
+        UpdateOptions? options = null, ShellSettings? seed = null, string currentVersion = "1.0.0")
     {
         var settings = new SettingsService(_path);
         await settings.UpdateAsync(_ => seed ?? new ShellSettings(), TestContext.Current.CancellationToken);
         var engine = new FakeEngine();
-        return (new UpdateService(settings, Options.Create(options ?? new UpdateOptions()), () => engine), engine);
+        return (new UpdateService(settings, Options.Create(options ?? new UpdateOptions()), () => engine, currentVersion), engine);
     }
 
     [Fact]
@@ -74,6 +89,24 @@ public sealed class UpdateServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task DownloadWithoutRestart_AwaitsPrompt()
+    {
+        var (service, engine) = await CreateAsync(
+            new UpdateOptions { StableFeedUrl = "https://example.test/feed" });
+        engine.CheckResult = new UpdateCheck("9.9.9", 2048);
+        await service.CheckAsync(TestContext.Current.CancellationToken);
+
+        await service.DownloadAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(UpdateStatus.ReadyToRestart, service.Status);
+        Assert.False(engine.Restarted);
+        Assert.Contains("restart", service.Detail, StringComparison.OrdinalIgnoreCase);
+
+        await service.RestartNowAsync();
+        Assert.True(engine.Restarted);
+    }
+
+    [Fact]
     public async Task NoUpdate_ReportsUpToDate()
     {
         var (service, engine) = await CreateAsync(
@@ -96,6 +129,38 @@ public sealed class UpdateServiceTests : IDisposable
 
         Assert.Equal(UpdateStatus.Failed, service.Status);
         Assert.Contains("dns boom", service.Detail);
+    }
+
+    [Fact]
+    public async Task Retry_RepeatsLastFailedCheck()
+    {
+        var (service, engine) = await CreateAsync(
+            new UpdateOptions { StableFeedUrl = "https://example.test/feed" });
+        engine.CheckError = new HttpRequestException("dns boom");
+        await service.CheckAsync(TestContext.Current.CancellationToken);
+        Assert.Equal(UpdateStatus.Failed, service.Status);
+
+        engine.CheckError = null;
+        engine.CheckResult = new UpdateCheck("9.9.9", 100);
+        await service.RetryAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(UpdateStatus.Available, service.Status);
+    }
+
+    [Fact]
+    public async Task Cancel_StopsInFlightCheck()
+    {
+        var (service, engine) = await CreateAsync(
+            new UpdateOptions { StableFeedUrl = "https://example.test/feed" });
+        engine.Gate = new TaskCompletionSource();
+
+        var check = service.CheckAsync(TestContext.Current.CancellationToken);
+        Assert.True(service.IsBusy);
+        service.Cancel();
+        await check;
+
+        Assert.Equal(UpdateStatus.Idle, service.Status);
+        Assert.Contains("cancel", service.Detail, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -131,6 +196,7 @@ public sealed class UpdateServiceTests : IDisposable
         Assert.Contains("cancelled", service.Detail, StringComparison.OrdinalIgnoreCase);
         Assert.False(engine.Restarted);
     }
+
     [Fact]
     public async Task BetaChannel_SelectsBetaFeed()
     {
@@ -139,5 +205,41 @@ public sealed class UpdateServiceTests : IDisposable
             new ShellSettings { UpdateChannel = UpdateChannel.Beta });
 
         Assert.Equal("https://example.test/beta", service.EffectiveFeedUrl);
+    }
+
+    [Fact]
+    public async Task DeltaUpdate_IsSurfaced()
+    {
+        var (service, engine) = await CreateAsync(
+            new UpdateOptions { StableFeedUrl = "https://example.test/feed" });
+        engine.CheckResult = new UpdateCheck("9.9.9", 2048, IsDelta: true);
+
+        await service.CheckAsync(TestContext.Current.CancellationToken);
+
+        Assert.Contains("delta", service.Detail, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task Downgrade_IsDetected_AndForwardedToEngine()
+    {
+        var (service, engine) = await CreateAsync(
+            new UpdateOptions { StableFeedUrl = "https://example.test/feed" },
+            currentVersion: "2.0.0");
+        engine.CheckResult = new UpdateCheck("1.5.0", 2048);
+
+        await service.CheckAsync(TestContext.Current.CancellationToken, allowDowngrade: true);
+
+        Assert.True(service.IsDowngrade);
+        Assert.True(engine.LastAllowDowngrade);
+        Assert.Contains("older", service.Detail, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task CurrentVersion_IsReported()
+    {
+        var (service, _) = await CreateAsync(currentVersion: "1.2.3");
+
+        Assert.Equal("1.2.3", service.CurrentVersion);
+        Assert.Null(service.AvailableVersion);
     }
 }

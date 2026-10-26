@@ -19,7 +19,8 @@
       "choices": [
         { "choice": "Clean", "description": "Minimal shell: no dashboard, diagnostics, or production services." },
         { "choice": "Recommended", "description": "Shell + diagnostics + production services, no dashboard. (Default)" },
-        { "choice": "Full", "description": "Everything: services, diagnostics, dashboard, and charts." }
+        { "choice": "Full", "description": "Everything: services, diagnostics, dashboard, and charts." },
+        { "choice": "Custom", "description": "Pick individual modules with the Custom<Module> flags (see docs/template/presets.md)." }
       ],
       "defaultValue": "Recommended",
       "description": "Feature preset."
@@ -37,17 +38,99 @@
       "description": "Default shell for the generated app (applies at first launch; switchable in Settings with restart).",
       "replaces": "DevTemWpfShellDefault"
     },
+    "CustomLogging": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Custom preset: Serilog file logging (also implied by CustomDiagnostics)."
+    },
+    "CustomLocalData": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Custom preset: SQLite local data (FavoritesStore)."
+    },
+    "CustomHttp": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Custom preset: typed HTTP client (StatusClient; also implied by CustomDiagnostics)."
+    },
+    "CustomBackup": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Custom preset: backup/restore (also implied by CustomDiagnostics)."
+    },
+    "CustomUpdates": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Custom preset: Velopack update engine (also implied by CustomDiagnostics)."
+    },
+    "CustomTray": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Custom preset: system tray icon."
+    },
+    "CustomDiagnostics": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Custom preset: Diagnostics page (implies logging, HTTP, backup, and updates)."
+    },
+    "CustomAuth": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Custom preset: opt-in MSAL (Entra ID) auth sample; disabled without Auth configuration."
+    },
+    "CustomCrash": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Custom preset: local-first crash capture, no vendor or telemetry (implies logging for redaction)."
+    },
     "IncludeDashboard": {
       "type": "computed",
       "value": "(Preset == \"Full\")"
     },
     "IncludeDiagnostics": {
       "type": "computed",
-      "value": "(Preset != \"Clean\")"
+      "value": "(Preset == \"Full\") || (Preset == \"Recommended\") || (Preset == \"Custom\" && CustomDiagnostics)"
     },
-    "IncludeServices": {
+    "IncludeLogging": {
       "type": "computed",
-      "value": "(Preset != \"Clean\")"
+      "value": "(Preset == \"Full\") || (Preset == \"Recommended\") || (Preset == \"Custom\" && (CustomLogging || CustomDiagnostics || CustomCrash))"
+    },
+    "IncludeLocalData": {
+      "type": "computed",
+      "value": "(Preset == \"Full\") || (Preset == \"Recommended\") || (Preset == \"Custom\" && (CustomLocalData || CustomBackup || CustomDiagnostics))"
+    },
+    "IncludeHttp": {
+      "type": "computed",
+      "value": "(Preset == \"Full\") || (Preset == \"Recommended\") || (Preset == \"Custom\" && (CustomHttp || CustomDiagnostics))"
+    },
+    "IncludeBackup": {
+      "type": "computed",
+      "value": "(Preset == \"Full\") || (Preset == \"Recommended\") || (Preset == \"Custom\" && (CustomBackup || CustomDiagnostics))"
+    },
+    "IncludeUpdates": {
+      "type": "computed",
+      "value": "(Preset == \"Full\") || (Preset == \"Recommended\") || (Preset == \"Custom\" && (CustomUpdates || CustomDiagnostics))"
+    },
+    "IncludeTray": {
+      "type": "computed",
+      "value": "(Preset == \"Full\") || (Preset == \"Recommended\") || (Preset == \"Custom\" && CustomTray)"
+    },
+    "IncludeAuth": {
+      "type": "computed",
+      "value": "(Preset == \"Custom\" && CustomAuth)"
+    },
+    "IncludeCrash": {
+      "type": "computed",
+      "value": "(Preset == \"Custom\" && CustomCrash)"
     },
     "IncludeTests": {
       "type": "parameter",
@@ -111,23 +194,70 @@
           ]
         },
         {
-          "condition": "(!IncludeServices)",
+          "condition": "(!IncludeLogging)",
           "exclude": [
             "src/DevTemWpf.App/Services/Logging.cs",
+            "src/DevTemWpf.App/Services/LogPrivacy.cs",
+            "src/DevTemWpf.App/Services/RedactingTextFormatter.cs",
+            "tests/DevTemWpf.Unit/LogPrivacyTests.cs"
+          ]
+        },
+        {
+          "condition": "(!IncludeLocalData)",
+          "exclude": [
             "src/DevTemWpf.App/Services/FavoritesStore.cs",
+            "tests/DevTemWpf.Unit/FavoritesStoreTests.cs"
+          ]
+        },
+        {
+          "condition": "(!IncludeHttp)",
+          "exclude": [
             "src/DevTemWpf.App/Services/StatusClient.cs",
             "src/DevTemWpf.App/Services/HttpOptions.cs",
+            "tests/DevTemWpf.Unit/StatusClientTests.cs"
+          ]
+        },
+        {
+          "condition": "(!IncludeBackup)",
+          "exclude": [
             "src/DevTemWpf.App/Services/BackupService.cs",
             "src/DevTemWpf.App/Services/IBackupService.cs",
+            "tests/DevTemWpf.Unit/BackupServiceTests.cs"
+          ]
+        },
+        {
+          "condition": "(!IncludeUpdates)",
+          "exclude": [
             "src/DevTemWpf.App/Services/UpdateOptions.cs",
             "src/DevTemWpf.App/Services/UpdateService.cs",
             "src/DevTemWpf.App/Services/IUpdateService.cs",
             "src/DevTemWpf.App/Services/VelopackUpdateEngine.cs",
-            "src/DevTemWpf.App/TrayGlyph.cs",
-            "tests/DevTemWpf.Unit/FavoritesStoreTests.cs",
-            "tests/DevTemWpf.Unit/StatusClientTests.cs",
-            "tests/DevTemWpf.Unit/BackupServiceTests.cs",
             "tests/DevTemWpf.Unit/UpdateServiceTests.cs"
+          ]
+        },
+        {
+          "condition": "(!IncludeTray)",
+          "exclude": [
+            "src/DevTemWpf.App/TrayGlyph.cs"
+          ]
+        },
+        {
+          "condition": "(!IncludeAuth)",
+          "exclude": [
+            "src/DevTemWpf.App/Services/AuthOptions.cs",
+            "src/DevTemWpf.App/Services/IAuthService.cs",
+            "src/DevTemWpf.App/Services/AuthService.cs",
+            "src/DevTemWpf.App/Services/MsalTokenProvider.cs",
+            "tests/DevTemWpf.Unit/AuthServiceTests.cs"
+          ]
+        },
+        {
+          "condition": "(!IncludeCrash)",
+          "exclude": [
+            "src/DevTemWpf.App/Services/ICrashReporter.cs",
+            "src/DevTemWpf.App/Services/CrashOptions.cs",
+            "src/DevTemWpf.App/Services/CrashReporterService.cs",
+            "tests/DevTemWpf.Unit/CrashReporterServiceTests.cs"
           ]
         },
         {
