@@ -4,14 +4,16 @@
 [![Windows 11](https://img.shields.io/badge/Windows-11-0078D4)](https://www.microsoft.com/windows/windows-11)
 [![WPF-UI 4.3.0](https://img.shields.io/badge/WPF--UI-4.3.0-8A2BE2)](https://github.com/lepoco/wpfui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![Stable 1.5.0](https://img.shields.io/badge/release-1.5.0-green)](https://github.com/Fettah010/wpf-11-app-template/releases)
+[![Stable 1.6.0](https://img.shields.io/badge/release-1.6.0-green)](https://github.com/Fettah010/wpf-11-app-template/releases)
 
 A premium, Windows 11-first **WPF application template** and reusable **UI
 foundation** — Fluent design, MVVM, dependency injection, modular production
 services, and `dotnet new` scaffolding with clean / recommended / full presets.
 
-> **Status:** `1.5.0` — stable. Install the template, generate your app,
-> and ship it: `dotnet new install DevTemWPF.Templates` (see
+> **Status:** `1.6.0` — stable. Per-service template modules, hardened
+> updates, optional auth/crash samples, and privacy-bounded logging. Install the
+> template, generate your app, and ship it:
+> `dotnet new install DevTemWPF.Templates` (see
 > [Roadmap](#roadmap--milestones) for what's next).
 >
 > ```powershell
@@ -108,6 +110,7 @@ also asserts the theme-surface invariants. Keep this provenance line accurate.
 | `1.4.0` | Navigation shells & Tabbed document workspace | ✅ Released |
 | `1.4.1` | Tabbed shell themed-surface fix | ✅ Released |
 | `1.5.0` | Advanced motion system & effects prototype | ✅ Released |
+| `1.6.0` | Per-service modules, updates/backup hardening, optional auth/crash | ✅ Released |
 
 Full product plan: [`WPF-11-App-Template-Roadmap-1.0-to-2.0.md`](WPF-11-App-Template-Roadmap-1.0-to-2.0.md) ·
 per-version plans/reports: [`docs/releases/`](docs/releases/) ·

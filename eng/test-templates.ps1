@@ -153,7 +153,7 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
     if ($script:failures -eq 0) { Write-Host "OK: $Preset/$Shell build+launch" -ForegroundColor Green }
   }
   elseif ($WithTests) {
-    if (-not (Invoke-Native 'powershell' @('-ExecutionPolicy', 'Bypass', '-File', (Join-Path $appDir 'eng\smoke.ps1')) $appDir)) { return }
+    if (-not (Invoke-Native 'powershell' @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $appDir 'eng\smoke.ps1')) $appDir)) { return }
     Write-Host "OK: $Preset smoke (restore/build/test/launch)" -ForegroundColor Green
   }
   else {
