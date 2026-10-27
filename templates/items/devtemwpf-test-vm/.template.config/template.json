@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "DevTemWPF",
+  "classifications": ["Desktop", "WPF", "MVVM"],
+  "name": "DevTemWPF ViewModel Unit Test",
+  "description": "Adds a behavioral unit test scaffold that exercises ViewModel commands and state following project conventions. Use the same name as the ViewModel plus a Tests suffix (e.g. -n EditorViewModelTests).",
+  "identity": "DevTemWPF.Test.ViewModel.CSharp",
+  "shortName": "devtemwpf-test-vm",
+  "sourceName": "SampleViewModelTests",
+  "tags": { "language": "C#", "type": "item" },
+  "symbols": {
+    "RootNamespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "DevTemWpf",
+      "replaces": "DevTemWpf",
+      "description": "Root namespace of the generated app (the .App and .Unit suffixes are preserved)."
+    },
+    "TargetViewModelName": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "stripTestsSuffix",
+      "replaces": "SampleViewModel",
+      "description": "ViewModel type under test, derived from the item name minus the Tests suffix."
+    }
+  },
+  "forms": {
+    "stripTestsSuffix": { "identifier": "replace", "pattern": "Tests", "replacement": "" }
+  },
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "exclude": [".template.config/**"]
+    }
+  ]
+}

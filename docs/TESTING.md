@@ -32,6 +32,25 @@ dotnet list package --include-transitive
 Expect **0 warnings** on both build configurations. Any warning must be
 triaged in the version completion report — never silenced without a record.
 
+## Generators and template matrix
+
+```powershell
+# item-template gate: install, generate all 11 templates, residue check, build, tests
+powershell -ExecutionPolicy Bypass -File eng/test-generators.ps1
+
+# same gate against the packed .nupkg (required when the package changes)
+powershell -ExecutionPolicy Bypass -File eng/test-generators.ps1 -PackagePath artifacts/DevTemWPF.Templates.1.7.0.nupkg
+
+# full preset/module matrix from source or package
+powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1
+powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -PackagePath <nupkg>
+```
+
+Both scripts install into a throwaway `DOTNET_CLI_HOME`, so the developer's
+global `dotnet new` registrations are never modified. `test-generators.ps1`
+fails on any leftover template token (`DevTemWpf`, `Sample*`, undefined `App*`
+styles), on a non-zero-warning build, or on a failing generated test.
+
 ## UI automation (FlaUI)
 
 `tests/DevTemWpf.UiAutomation` drives the built app (launch/close,

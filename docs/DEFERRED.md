@@ -1,4 +1,4 @@
-# Deferred work backlog — 1.0 scope freeze (0.9.0); 1.1.0 additions appended (D21–D24); 1.4.0 dispositions appended (D09r/D14/D15 closed, D25–D27 opened); 1.4.1 D09r note appended; 1.5.0 D13 no-go note appended; 1.6.0 dispositions appended (D07r progressed, D07t no-go)
+# Deferred work backlog — 1.0 scope freeze (0.9.0); 1.1.0 additions appended (D21–D24); 1.4.0 dispositions appended (D09r/D14/D15 closed, D25–D27 opened); 1.4.1 D09r note appended; 1.5.0 D13 no-go note appended; 1.6.0 dispositions appended (D07r progressed, D07t no-go); 1.7.0 D08r resolved (ADR-0019)
 
 Rule: 1.0-rc takes bug fixes + release mechanics only. Everything below is
 post-1.0 unless marked **1.0**.
@@ -9,7 +9,7 @@ post-1.0 unless marked **1.0**.
 | D07r | Auth + crash-reporting samples | Post-1.0 — needs security review + config-burden approval. |
 | D07t | System toast notifications | Post-1.0 — MSIX-gated. |
 | D07s | Release signing execution (real cert) | Post-1.0 — app-level concern; guidance published. |
-| D08r | VSIX / VS Add-Item integration | Post-1.0 — CLI templates surface in VS already. |
+| D08r | VSIX / VS Add-Item integration | **1.7.0 — resolved (CLI-first, ADR-0019).** Modern VS (2022/2026) natively discovers installed dotnet-new item templates in New Project and Add Item; dedicated VSIX adds immense packaging/maintenance burden without added value. |
 | D09r | Visual regression snapshots | **1.2.0 (partial)** — dependency-free spike shipped (`eng/compare-screenshots.ps1` + baselines, advisory-only, 0.03% noise floor proven). Required-gate decision → 1.3.0 with this evidence. |
 | D10 | Low-spec reference machine | Post-1.0 — no hardware; modern-HW budgets ratified. |
 | D12 | `Microsoft.ApplicationInsights` test-only transitive | Watch each audit — still test-only, still harmless. |
@@ -36,5 +36,5 @@ post-1.0 unless marked **1.0**.
 | D07s | Release signing execution (real cert) | **1.6.0 — guidance/s separation shipped, still owner-owned.** `docs/release/packaging.md` now separates portable/Velopack from MSIX/Store, states "script verification ≠ signing", and lists the owner-owned secrets; no real signed artifact is claimed (no certificate in this environment). |
 
 Done: D02 (0.2.0), D03 (0.3.0), D04 (0.4.0), D05 (0.5.0), D06 dashboard+charts (0.6.0),
-D07 core services/CI (0.7.0), D08 templates/generators (0.8.0), D09 CI+FlaUI (0.7.0/0.9.0),
-D11 remote/publishing (0.1.0–0.8.0).
+D07 core services/CI (0.7.0), D08 templates/generators (0.8.0), D08r VSIX/VS integration (1.7.0),
+D09 CI+FlaUI (0.7.0/0.9.0), D11 remote/publishing (0.1.0–0.8.0).

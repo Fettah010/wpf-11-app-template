@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "DevTemWPF",
+  "classifications": ["Desktop", "WPF", "MVVM"],
+  "name": "DevTemWPF DataGrid Page",
+  "description": "Adds a DataGrid page with custom column formatting, search filter, and ViewModel following project conventions.",
+  "identity": "DevTemWPF.DataGridPage.CSharp",
+  "shortName": "devtemwpf-datagrid",
+  "sourceName": "SampleDataGridPage",
+  "tags": { "language": "C#", "type": "item" },
+  "symbols": {
+    "RootNamespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "DevTemWpf",
+      "replaces": "DevTemWpf",
+      "description": "Root namespace of the generated app (the .App suffix is preserved)."
+    },
+    "RowName": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "pageToRow",
+      "replaces": "SampleDataGridRow",
+      "description": "Name of the generated row model (Page -> Row)."
+    }
+  },
+  "forms": {
+    "pageToRow": { "identifier": "replace", "pattern": "Page", "replacement": "Row" }
+  },
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "exclude": [".template.config/**"]
+    }
+  ]
+}

@@ -1,5 +1,44 @@
 # Changelog
 
+## 1.7.0 (2026-10-27)
+
+Advanced scaffolding and developer productivity (roadmap §8.7). Item
+templates become a complete catalog, drive their namespaces from one root
+namespace flag, derive companion type names from the item name, and are
+verified by a blocking generator gate.
+
+- **Nine new generators** alongside `devtemwpf-page` / `devtemwpf-service`:
+  `devtemwpf-settings`, `devtemwpf-listdetail`, `devtemwpf-datagrid`,
+  `devtemwpf-treeview`, `devtemwpf-tabpage`, `devtemwpf-control`,
+  `devtemwpf-viewmodel`, plus behavioral test scaffolds `devtemwpf-test-vm`
+  and `devtemwpf-test-service`. Every scaffold emits token-based XAML,
+  CommunityToolkit.Mvvm code, `INavigableView<T>` pages, and entrance motion
+  where a page is involved.
+- **Naming/namespace contract fixed**: item templates now take
+  `--RootNamespace <Root>` (replaces the whole `DevTemWpf` root, preserving
+  `.App`/`.Unit`), so test scaffolds resolve the app namespace too. Companion
+  types derive from `-n` (`OrdersPage` → `OrdersRow`/`OrdersItem`/`OrdersNode`,
+  `AuditServiceTests` → `AuditService`) via template `forms`, so repeated
+  generation cannot collide.
+- **Blocking generator gate** `eng/test-generators.ps1`: isolated CLI home,
+  source-folder or `.nupkg` install, all eleven templates plus repeat and
+  edge-case generations, residual-token detection (`DevTemWpf`, `Sample*`,
+  undefined `App*` styles), `--warnaserror` build, and generated-test run.
+  Fixed generator defects it caught: invalid `Themes/Generic.xaml` setter
+  form, missing `AutomationPeer` using/override, a read-only collection
+  assigned in an initializer, and an undefined `AppBodyStrongText` style.
+- **Visual Studio decision recorded** (ADR-0019, closes D08r as CLI-first):
+  project template appears in **New Project** after
+  `dotnet new install`; a VSIX for **Add → New Item** is rejected for 1.x for
+  cost/duplication reasons - documented rather than implied.
+- **Generated apps stay clean**: the project template now excludes the
+  repository's `.kilo/`, `.idea/`, and `*.user` files, and the generator gate
+  asserts that no tool config, build output, or absolute developer path leaks
+  into generated output.
+- **Docs**: new [`docs/template/item-templates.md`](docs/template/item-templates.md)
+  catalog (flags, companion naming, output folders, post-generation
+  checklists), refreshed `generators.md`, README and scaffold `FEATURES.md`.
+
 ## 1.6.0 (2026-10-18)
 
 Production modules, Windows integration assessment, and optionality (roadmap

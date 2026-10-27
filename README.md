@@ -19,6 +19,8 @@ services, and `dotnet new` scaffolding with clean / recommended / full presets.
 > ```powershell
 > dotnet new install <repo>
 > dotnet new devtemwpf-app -n MyApp --Preset Full
+> cd src/MyApp.App
+> dotnet new devtemwpf-datagrid -n OrdersPage --RootNamespace MyApp
 > ```
 
 ## ✨ Highlights
@@ -34,6 +36,10 @@ services, and `dotnet new` scaffolding with clean / recommended / full presets.
   effect profiles, reduced-motion and low-power fallbacks.
 - 🤖 **Agent-friendly** — predictable structure, ADRs, repeatable CLI
   workflows, verifiable acceptance criteria per milestone.
+- 🧩 **Generators for the boring parts** — eleven `dotnet new` item templates
+  (page, settings, list-detail, DataGrid, TreeView, tab document, custom
+  control, ViewModel, service, and behavioral test scaffolds) that emit code
+  in project conventions and compile as generated.
 
 ## 🚀 Quick start
 
@@ -111,6 +117,7 @@ also asserts the theme-surface invariants. Keep this provenance line accurate.
 | `1.4.1` | Tabbed shell themed-surface fix | ✅ Released |
 | `1.5.0` | Advanced motion system & effects prototype | ✅ Released |
 | `1.6.0` | Per-service modules, updates/backup hardening, optional auth/crash | ✅ Released |
+| `1.7.0` | Advanced scaffolding and developer productivity | 🚧 In progress |
 
 Full product plan: [`WPF-11-App-Template-Roadmap-1.0-to-2.0.md`](WPF-11-App-Template-Roadmap-1.0-to-2.0.md) ·
 per-version plans/reports: [`docs/releases/`](docs/releases/) ·
@@ -134,9 +141,10 @@ Dependency inventory & licenses: [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md)
 ```text
 src/DevTemWpf.App/   # reference app (embryo of the clean preset)
 tests/               # unit + integration (xUnit v3, MTP mode)
+templates/items/     # eleven dotnet new item templates (docs/template/item-templates.md)
 docs/                # decisions, guides, per-release plans/reports
-eng/                 # smoke/UI/perf gates (smoke, check-ui-tests,
-                     # measure-startup, measure-motion, …)
+eng/                 # smoke/UI/perf/generator gates (smoke, check-ui-tests,
+                     # test-generators, measure-startup, measure-motion, …)
 ```
 
 Conventions: central package management, pinned SDK (`global.json`),

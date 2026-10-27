@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "DevTemWPF",
+  "classifications": ["Desktop", "WPF", "MVVM"],
+  "name": "DevTemWPF Service Unit Test",
+  "description": "Adds a behavioral unit test scaffold that exercises service methods following project conventions. Use the same name as the service plus a Tests suffix (e.g. -n SyncServiceTests).",
+  "identity": "DevTemWPF.Test.Service.CSharp",
+  "shortName": "devtemwpf-test-service",
+  "sourceName": "SampleServiceTests",
+  "tags": { "language": "C#", "type": "item" },
+  "symbols": {
+    "RootNamespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "DevTemWpf",
+      "replaces": "DevTemWpf",
+      "description": "Root namespace of the generated app (the .App and .Unit suffixes are preserved)."
+    },
+    "TargetServiceName": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "stripTestsSuffix",
+      "replaces": "SampleService",
+      "description": "Service type under test, derived from the item name minus the Tests suffix."
+    }
+  },
+  "forms": {
+    "stripTestsSuffix": { "identifier": "replace", "pattern": "Tests", "replacement": "" }
+  },
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "exclude": [".template.config/**"]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "DevTemWPF",
+  "classifications": ["Desktop", "WPF", "MVVM"],
+  "name": "DevTemWPF Custom Control",
+  "description": "Adds a reusable custom control with Themes/Generic.xaml default style, dependency properties, commands, and an automation peer following project conventions. Themes/Generic.xaml stays a single dictionary per assembly, so merge additional control styles into it.",
+  "identity": "DevTemWPF.Control.CSharp",
+  "shortName": "devtemwpf-control",
+  "sourceName": "SampleValueEditor",
+  "tags": { "language": "C#", "type": "item" },
+  "symbols": {
+    "RootNamespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "DevTemWpf",
+      "replaces": "DevTemWpf",
+      "description": "Root namespace of the generated app (the .App suffix is preserved)."
+    }
+  },
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "exclude": [".template.config/**"]
+    }
+  ]
+}
