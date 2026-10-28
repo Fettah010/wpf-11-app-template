@@ -38,8 +38,12 @@ triaged in the version completion report — never silenced without a record.
 # item-template gate: install, generate all 11 templates, residue check, build, tests
 powershell -ExecutionPolicy Bypass -File eng/test-generators.ps1
 
+# package-boundary gate: pack DevTemWpf.UI, restore a clean consumer from the
+# local package plus NuGet, build, and launch the consumer
+powershell -ExecutionPolicy Bypass -File eng/test-ui-package.ps1
+
 # same gate against the packed .nupkg (required when the package changes)
-powershell -ExecutionPolicy Bypass -File eng/test-generators.ps1 -PackagePath artifacts/DevTemWPF.Templates.1.7.0.nupkg
+powershell -ExecutionPolicy Bypass -File eng/test-generators.ps1 -PackagePath artifacts/DevTemWPF.Templates.1.8.0.nupkg
 
 # full preset/module matrix from source or package
 powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1
@@ -50,6 +54,9 @@ Both scripts install into a throwaway `DOTNET_CLI_HOME`, so the developer's
 global `dotnet new` registrations are never modified. `test-generators.ps1`
 fails on any leftover template token (`DevTemWpf`, `Sample*`, undefined `App*`
 styles), on a non-zero-warning build, or on a failing generated test.
+`test-ui-package.ps1` verifies the experimental `DevTemWpf.UI` package from a
+clean temporary consumer with no reference to the gallery app; it also checks
+Comfortable/Compact token values and runtime density replacement.
 
 ## UI automation (FlaUI)
 

@@ -6,7 +6,7 @@ They live in this repository under `templates/items/` and ship inside
 generator.
 
 ```powershell
-dotnet new install <path-to-repo>            # or a .nupkg: dotnet new install DevTemWPF.Templates.1.7.0.nupkg
+dotnet new install <path-to-repo>            # or a .nupkg: dotnet new install DevTemWPF.Templates.1.8.0.nupkg
 dotnet new list devtemwpf                    # 1 project template + 11 item templates
 ```
 
@@ -141,7 +141,7 @@ edge-case generations, fails on any leftover template token, builds with
 ```powershell
 powershell -ExecutionPolicy Bypass -File eng/test-generators.ps1
 powershell -ExecutionPolicy Bypass -File eng/test-generators.ps1 -Preset Full
-powershell -ExecutionPolicy Bypass -File eng/test-generators.ps1 -PackagePath artifacts/DevTemWPF.Templates.1.7.0.nupkg
+powershell -ExecutionPolicy Bypass -File eng/test-generators.ps1 -PackagePath artifacts/DevTemWPF.Templates.1.8.0.nupkg
 ```
 
 ## Visual Studio

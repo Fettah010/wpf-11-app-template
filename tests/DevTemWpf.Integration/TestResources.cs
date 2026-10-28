@@ -5,41 +5,30 @@ using System.Windows.Diagnostics;
 namespace DevTemWpf.Integration;
 
 /// <summary>
-/// Test-only application shell: pages consume app-level token dictionaries
-/// via StaticResource, which requires an <see cref="Application"/> with the
-/// same merged dictionaries production loads in <c>App.xaml</c>.
+/// Test-only application shell: use the real app resources so tests exercise
+/// the same merged UI-library and WPF-UI dictionaries as production.
 /// Must be called on the test (STA) thread; safe to call repeatedly.
 /// Also captures WPF data-binding errors involving our views so silent XAML
 /// bugs fail tests instead of hiding (ADR-0013).
 /// </summary>
 internal static class TestResources
 {
-    private static readonly string[] Dictionaries =
-    [
-        "DesignTokens/SemanticColors.xaml",
-        "DesignTokens/Typography.xaml",
-        "DesignTokens/Spacing.Comfortable.xaml",
-        "DesignTokens/Shapes.xaml",
-    ];
-
     private static readonly List<string> BindingErrors = [];
     private static bool _listening;
 
     internal static void Ensure()
     {
-        var app = Application.Current ?? new Application();
-        foreach (var file in Dictionaries)
+        var app = Application.Current;
+        if (app is null)
         {
-            var uri = $"/DevTemWpf.App;component/{file}";
-            var already = app.Resources.MergedDictionaries.Any(d =>
-                string.Equals(d.Source?.OriginalString, uri, StringComparison.OrdinalIgnoreCase));
-            if (!already)
-            {
-                app.Resources.MergedDictionaries.Add(new ResourceDictionary
-                {
-                    Source = new Uri(uri, UriKind.Relative),
-                });
-            }
+            var application = new DevTemWpf.App.App();
+            application.InitializeComponent();
+            app = application;
+        }
+
+        if (app is not DevTemWpf.App.App)
+        {
+            throw new InvalidOperationException("Integration tests require the production App resource dictionaries.");
         }
 
         if (!_listening)

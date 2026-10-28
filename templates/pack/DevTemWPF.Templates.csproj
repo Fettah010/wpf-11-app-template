@@ -1,14 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Template packaging (1.0.0-rc.1). Content mirrors template.json sources;
-       verify with eng/test-templates.ps1 -PackagePath after every change. -->
+  <!-- Content mirrors template.json sources; verify the packed artifact with
+       eng/test-templates.ps1 -PackagePath after every change. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <PackageType>Template</PackageType>
     <PackageId>DevTemWPF.Templates</PackageId>
-    <Version>1.7.0</Version>
+    <Version>1.8.0</Version>
     <Authors>DevTemWpf Contributors</Authors>
     <Description>Windows 11-first WPF application template (Clean/Recommended/Full) + page/service generators.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <NoDefaultExcludes>true</NoDefaultExcludes>
     <!-- NU5110/5111 (.ps1 content is template payload, never auto-executed)
@@ -32,6 +33,7 @@
     <Content Include="..\..\templates\support\**" PackagePath="content\templates\support\" />
     <Content Include="..\..\templates\items\**" PackagePath="content\templates\items\" />
     <Content Include="..\..\global.json;..\..\Directory.Build.props;..\..\Directory.Packages.props;..\..\.editorconfig;..\..\.gitignore;..\..\.gitattributes;..\..\LICENSE;..\..\NOTICE-THIRD-PARTY.md;..\..\AGENTS.md;..\..\DevTemWpf.slnx" PackagePath="content\" />
+    <None Update="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

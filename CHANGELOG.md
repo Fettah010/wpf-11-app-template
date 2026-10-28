@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.8.0 - Architecture preparation
+
+Architecture proof for the 2.0 package-boundary direction. The app and
+generated-app contract remain in place; only compiled design-token resources
+move behind a tested library boundary.
+
+- **UI resource package proof**: `DevTemWpf.UI` owns the compiled token
+  dictionaries; app-level merge order and density selection remain unchanged.
+  An independent package-only WPF consumer resolves Comfortable and Compact
+  resources and runtime density replacement without a project reference to
+  the gallery app. The prototype package is not a stable public control API.
+- **No speculative splits**: Windows integration, motion, shell, and optional
+  services remain app-owned. ADR-0020 records the narrow accepted boundary and
+  the evidence required before any Windows/service package is considered.
+- **Migration contract**: a compatibility draft records the preserved 1.x
+  template flags, item-template IDs, resource keys, DI root, and settings
+  behavior, plus what still must be decided before the 2.0 preview.
+- **More reliable UI automation**: tests explicitly choose the expected shell
+  and pane state, wait on window-size conditions, and activate palette
+  controls through UI Automation rather than screen coordinates.
+- **Verification**: warning-free Release build; full suite passed 234/234
+  locally (including all 18 UI automation tests) with no skips; complete
+  source and packed generator/template gates passed; package-only UI canary
+  passed; vulnerability/deprecation audits were clean. Final hosted CI and
+  publication remain pending the required merges.
+- **Documentation**: scaffold workflow diagram, concise project direction,
+  UI-package instructions, and updated testing commands.
+
 ## 1.7.0 (2026-10-27)
 
 Advanced scaffolding and developer productivity (roadmap §8.7). Item

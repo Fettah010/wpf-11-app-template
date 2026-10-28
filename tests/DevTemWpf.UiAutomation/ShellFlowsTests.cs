@@ -209,6 +209,22 @@ public sealed class ShellFlowsTests : IDisposable
         return handle;
     }
 
+    private static void WaitForWindowAtLeastWidth(IntPtr handle, int width)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+        while (DateTime.UtcNow < deadline)
+        {
+            if (NativeWindow.GetWindowRect(handle, out var rect) && rect.Width >= width)
+            {
+                return;
+            }
+
+            Thread.Sleep(50);
+        }
+
+        throw new InvalidOperationException($"Window did not reach width {width}.");
+    }
+
     private static void RequireUiOrSkip()
     {
         if (!UiEnabled(out var reason))
@@ -1064,6 +1080,40 @@ public sealed class ShellFlowsTests : IDisposable
         }
     }
 
+    private static void SetDetailPaneOpen(AutomationElement window, bool isOpen)
+    {
+        var expectedState = isOpen
+            ? FlaUI.Core.Definitions.ToggleState.On
+            : FlaUI.Core.Definitions.ToggleState.Off;
+        var currentState = WaitFor(
+            () => DetailToggleState(window)?.ToString(),
+            TimeSpan.FromSeconds(10),
+            "detail toggle state");
+
+        if (currentState != expectedState.ToString())
+        {
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Toggle detail pane")),
+                TimeSpan.FromSeconds(10), "detail toggle")
+                .Patterns.Toggle.Pattern.Toggle();
+        }
+
+        WaitFor(
+            () => DetailToggleState(window) == expectedState ? "ready" : null,
+            TimeSpan.FromSeconds(10),
+            $"detail pane {(isOpen ? "open" : "closed")}");
+        if (isOpen)
+        {
+            WaitFor(() => FindButtonWithText(window, "Close document"),
+                TimeSpan.FromSeconds(10), "close document button");
+        }
+        else
+        {
+            WaitWhile(() => FindButtonWithText(window, "Close document") is not null,
+                TimeSpan.FromSeconds(10), "detail pane to collapse");
+        }
+    }
+
     /// <summary>
     /// Reads tab header titles in tree order (proves visual reorder).
     /// </summary>
@@ -1108,6 +1158,7 @@ public sealed class ShellFlowsTests : IDisposable
             window.Focus();
             WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Open documents")),
                 TimeSpan.FromSeconds(10), "documents tab strip");
+            SetDetailPaneOpen(window, isOpen: true);
 
             // Close everything first: persisted tabs from earlier runs would
             // otherwise make the starting order nondeterministic.
@@ -1143,18 +1194,8 @@ public sealed class ShellFlowsTests : IDisposable
             // desktop) and verified on peer-backed children: plain Borders
             // expose no UIA peer, so the container's own name is not
             // searchable — the Close button is the reliable hook.
-            window.Focus();
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Toggle detail pane")),
-                TimeSpan.FromSeconds(10), "detail toggle").Patterns.Toggle.Pattern.Toggle();
-            WaitWhile(() => DetailToggleState(window) != FlaUI.Core.Definitions.ToggleState.Off,
-                TimeSpan.FromSeconds(10), "detail toggle to uncheck");
-            WaitWhile(() => FindButtonWithText(window, "Close document") is not null,
-                TimeSpan.FromSeconds(10), "detail pane to collapse");
-            window.Focus();
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Toggle detail pane")),
-                TimeSpan.FromSeconds(10), "detail toggle").Patterns.Toggle.Pattern.Toggle();
-            WaitWhile(() => DetailToggleState(window) != FlaUI.Core.Definitions.ToggleState.On,
-                TimeSpan.FromSeconds(10), "detail toggle to check");
+            SetDetailPaneOpen(window, isOpen: false);
+            SetDetailPaneOpen(window, isOpen: true);
             var closeAfter = WaitFor(() => FindButtonWithText(window, "Close document"),
                 TimeSpan.FromSeconds(10), "detail pane to expand");
             Assert.NotNull(closeAfter);
@@ -1300,7 +1341,7 @@ public sealed class ShellFlowsTests : IDisposable
             // filter box.
             window.Focus();
             WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Open command palette")),
-                TimeSpan.FromSeconds(10), "palette button").Click();
+                TimeSpan.FromSeconds(10), "palette button").Patterns.Invoke.Pattern.Invoke();
             var filter = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Command palette filter")),
                 TimeSpan.FromSeconds(10), "palette filter");
             Assert.NotNull(filter);
@@ -1389,6 +1430,7 @@ public sealed class ShellFlowsTests : IDisposable
             var home = WaitFor(() => FindTabItem(window, "Home"),
                 TimeSpan.FromSeconds(10), "restored home tab");
             Assert.NotNull(home);
+            SetDetailPaneOpen(window, isOpen: true);
 
             // Rail clicks open route-keyed documents instead of navigating.
             window.Focus();
@@ -1548,12 +1590,17 @@ public sealed class ShellFlowsTests : IDisposable
         {
             // Launch maximizes; restore first so resizes take effect.
             var handle = MainHandle(app);
+            window.Focus();
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home")),
+                TimeSpan.FromSeconds(10), "home navigation item").Click();
+            Assert.NotNull(WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home headline")),
+                TimeSpan.FromSeconds(10), "home content before resizing"));
             NativeWindow.ShowWindow(handle, NativeWindow.Restore);
-            Thread.Sleep(500);
+            WaitForWindowAtLeastWidth(handle, 640);
 
             // Below-minimum requests clamp to MinWidth/MinHeight (640x480).
             NativeWindow.MoveWindow(handle, 0, 0, 500, 400, true);
-            Thread.Sleep(800);
+            WaitForWindowAtLeastWidth(handle, 640);
             NativeWindow.GetWindowRect(handle, out var clamped);
             Assert.True(clamped.Width >= 640, $"width clamped to min, got {clamped.Width}");
             Assert.True(clamped.Height >= 480, $"height clamped to min, got {clamped.Height}");
@@ -1561,7 +1608,7 @@ public sealed class ShellFlowsTests : IDisposable
             foreach (var width in new[] { 640, 1024, 1280, 1600 })
             {
                 NativeWindow.MoveWindow(handle, 0, 0, width, 800, true);
-                Thread.Sleep(800);
+                WaitForWindowAtLeastWidth(handle, width);
                 window.Focus();
                 var nav = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
                     TimeSpan.FromSeconds(10), $"nav item at width {width}");
@@ -1573,7 +1620,7 @@ public sealed class ShellFlowsTests : IDisposable
 
             // Narrow navigation still works: gallery content reachable at 640.
             NativeWindow.MoveWindow(handle, 0, 0, 640, 800, true);
-            Thread.Sleep(800);
+            WaitForWindowAtLeastWidth(handle, 640);
             window.Focus();
             WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
                 TimeSpan.FromSeconds(10), "nav item at 640").Click();

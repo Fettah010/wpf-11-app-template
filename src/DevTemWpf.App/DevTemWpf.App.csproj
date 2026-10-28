@@ -13,6 +13,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DevTemWpf.UI\DevTemWpf.UI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="WPF-UI" />
     <PackageReference Include="WPF-UI.DependencyInjection" />
     <!-- Dashboard-only charting (ADR-0010); excluded from clean scaffolds. -->

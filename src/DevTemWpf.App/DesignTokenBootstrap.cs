@@ -35,7 +35,7 @@ internal static class DesignTokenBootstrap
         {
             merged.Add(new ResourceDictionary
             {
-                Source = new Uri($"DesignTokens/Spacing.{density}.xaml", UriKind.Relative),
+                Source = new Uri($"/DevTemWpf.UI;component/DesignTokens/Spacing.{density}.xaml", UriKind.Relative),
             });
             _applied = density;
         }
@@ -44,7 +44,7 @@ internal static class DesignTokenBootstrap
             // Defensive: never break startup over the density layer.
             merged.Add(new ResourceDictionary
             {
-                Source = new Uri("DesignTokens/Spacing.Comfortable.xaml", UriKind.Relative),
+                Source = new Uri("/DevTemWpf.UI;component/DesignTokens/Spacing.Comfortable.xaml", UriKind.Relative),
             });
             _applied = DensityMode.Comfortable;
         }

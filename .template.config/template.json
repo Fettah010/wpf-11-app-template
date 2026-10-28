@@ -164,6 +164,8 @@
         "templates/pack/**",
         "eng/test-templates.ps1",
         "eng/test-generators.ps1",
+        "eng/test-ui-package.ps1",
+        "experiments/**",
         "tmp/**",
         "temp/**",
         "tests/DevTemWpf.Unit/TemplateSurfaceTests.cs",

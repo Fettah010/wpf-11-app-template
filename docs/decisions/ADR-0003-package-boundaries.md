@@ -36,3 +36,17 @@ feature.
 ## Revisit triggers
 
 Second consumer for shared XAML/services, or TFM friction on clean machines.
+
+## 1.8.0 revisit (2026-10-28)
+
+The trigger is met **only for compiled design-token resources**: the
+`DevTemWpf.UI` package was consumed by a clean WPF canary that references the
+package, not the gallery project, and successfully resolved its dictionaries
+and runtime density change. ADR-0020 accepts this narrow boundary for the 1.8
+architecture proof.
+
+This does not satisfy a second-consumer case for Windows integration or
+service modules. Keep `MainWindow`, backdrop/tray/notifications, motion,
+`AppComposition`, and optional service implementations in `DevTemWpf.App`.
+Do not treat `DevTemWpf.UI`'s prototype package version as a stable public
+control API; reassess public API and package identity during the 2.0 preview.

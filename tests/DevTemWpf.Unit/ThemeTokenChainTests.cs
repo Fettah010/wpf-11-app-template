@@ -53,7 +53,7 @@ public sealed class ThemeTokenChainTests
     [Fact]
     public void AliasLayer_OnlyApprovedUpstream()
     {
-        var path = Path.Combine(RepoRoot().FullName, "src", "DevTemWpf.App", "DesignTokens", "SemanticColors.xaml");
+        var path = Path.Combine(RepoRoot().FullName, "src", "DevTemWpf.UI", "DesignTokens", "SemanticColors.xaml");
         var bad = DynamicResourceKeys(File.ReadAllText(path)).Where(k => !ApprovedUpstream.Contains(k)).ToList();
         Assert.True(bad.Count == 0, "Unapproved upstream keys in SemanticColors.xaml: " + string.Join(", ", bad));
     }
@@ -80,15 +80,14 @@ public sealed class ThemeTokenChainTests
     public void ViewsAndTokens_NoLiteralColors()
     {
         var bad = new List<string>();
-        foreach (var dir in new[] { "Views", "DesignTokens" })
+        var repoRoot = RepoRoot().FullName;
+        var files = Directory.GetFiles(Path.Combine(repoRoot, "src", "DevTemWpf.App", "Views"), "*.xaml")
+            .Concat(Directory.GetFiles(Path.Combine(repoRoot, "src", "DevTemWpf.UI", "DesignTokens"), "*.xaml"));
+        foreach (var file in files)
         {
-            var path = Path.Combine(RepoRoot().FullName, "src", "DevTemWpf.App", dir);
-            foreach (var file in Directory.GetFiles(path, "*.xaml"))
+            foreach (Match m in Regex.Matches(File.ReadAllText(file), @"Color=""#[0-9A-Fa-f]+"""))
             {
-                foreach (Match m in Regex.Matches(File.ReadAllText(file), @"Color=""#[0-9A-Fa-f]+"""))
-                {
-                    bad.Add($"{Path.GetFileName(file)}: {m.Value}");
-                }
+                bad.Add($"{Path.GetFileName(file)}: {m.Value}");
             }
         }
 

@@ -15,6 +15,12 @@ public sealed class HostLifecycleTests
     public async Task Host_Builds_ResolvesServices_And_StopsCleanly()
     {
         TestResources.Ensure();
+        DesignTokenBootstrap.ApplyDensity(DensityMode.Compact);
+        var compact = System.Windows.Application.Current!.Resources.MergedDictionaries
+            .Single(dictionary => dictionary.Source?.OriginalString.Contains("Spacing.Compact", StringComparison.Ordinal) == true);
+        Assert.Equal(new System.Windows.Thickness(16), compact["AppPageMargin"]);
+        DesignTokenBootstrap.ApplyDensity(DensityMode.Comfortable);
+
         using var host = Host.CreateApplicationBuilder()
             .ConfigureForApp()
             .Build();
