@@ -17,14 +17,16 @@ move behind a tested library boundary.
 - **Migration contract**: a compatibility draft records the preserved 1.x
   template flags, item-template IDs, resource keys, DI root, and settings
   behavior, plus what still must be decided before the 2.0 preview.
-- **More reliable UI automation**: tests explicitly choose the expected shell
-  and pane state, wait on window-size conditions, and activate palette
-  controls through UI Automation rather than screen coordinates.
+- **More reliable UI automation**: each test uses a temporary app-data profile
+  that survives relaunches but cannot leak state to other tests; resize targets
+  respect the runner's desktop bounds, and coordinate navigation clicks are
+  guarded by foreground checks when no semantic UIA pattern is available.
 - **Verification**: warning-free Release build; full suite passed 234/234
   locally (including all 18 UI automation tests) with no skips; complete
   source and packed generator/template gates passed; package-only UI canary
-  passed; vulnerability/deprecation audits were clean. Final hosted CI and
-  publication remain pending the required merges.
+  passed; vulnerability/deprecation audits were clean. PR #9's first hosted
+  run failed on the fixed-width resize assumption; the corrective commit must
+  pass hosted CI before the stack can be merged or v1.8.0 published.
 - **Documentation**: scaffold workflow diagram, concise project direction,
   UI-package instructions, and updated testing commands.
 

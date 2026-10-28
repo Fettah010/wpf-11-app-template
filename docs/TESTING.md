@@ -64,16 +64,19 @@ Comfortable/Compact token values and runtime density replacement.
 menu-navigate + keyboard walk, dialog round-trip) via UIA3. Rules learned
 the hard way:
 
-- Use `InvokePattern` for activation, not coordinate clicks (scrolled
-  content misses).
+- Prefer semantic UIA patterns; use coordinate clicks only when an element
+  exposes no activation pattern, and confirm the app is foreground first.
 - Poll `HasExited` for exit; never read `ExitCode` off a FlaUI handle.
 - Retry-with-timeout everywhere; STA via `[WpfFact]`.
+- Each test launches the app with its own temporary `DEVTEM_TEST_DATA_ROOT`.
+  Relaunches within one test reuse that profile; cleanup removes it afterward,
+  so tests neither depend on nor modify the developer's app settings.
 - Headless environments: set `DEVTEM_RUN_UI_TESTS=0` (or non-interactive
   sessions skip automatically). Skips use `Assert.Skip`, so they are counted
   as `skipped` — never as passes. The required gate
   (`eng/check-ui-tests.ps1`, wired into CI) fails on any skip or on zero
-  executed tests; a green required job always means the 4 ShellFlows cases
-  really ran. Record the `UI_TESTS total=/failed=/skipped=` line in the
+  executed tests; a green required job means every ShellFlows case really
+  ran. Record the `UI_TESTS total=/failed=/skipped=` line in the
   version completion report.
 - Data-binding errors involving our views fail the integration suite
   (`TestResources` listener) — silent XAML bugs become test failures.

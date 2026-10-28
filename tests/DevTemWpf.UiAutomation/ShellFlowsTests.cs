@@ -18,6 +18,7 @@ namespace DevTemWpf.UiAutomation;
 public sealed class ShellFlowsTests : IDisposable
 {
     private readonly List<Application> _apps = [];
+    private string? _appDataDir;
 
     public void Dispose()
     {
@@ -40,6 +41,21 @@ public sealed class ShellFlowsTests : IDisposable
             catch
             {
                 // Best effort cleanup.
+            }
+        }
+
+        if (_appDataDir is not null)
+        {
+            try
+            {
+                if (Directory.Exists(_appDataDir))
+                {
+                    Directory.Delete(_appDataDir, recursive: true);
+                }
+            }
+            catch
+            {
+                // Best effort cleanup of isolated test profiles.
             }
         }
     }
@@ -65,9 +81,13 @@ public sealed class ShellFlowsTests : IDisposable
     private static class NativeWindow
     {
         public const int Restore = 9;
+        public const int ScreenWidth = 0;
 
         [DllImport("user32.dll")]
         public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        public static extern int GetSystemMetrics(int index);
 
         [DllImport("user32.dll")]
         public static extern bool MoveWindow(IntPtr hWnd, int x, int y, int width, int height, bool repaint);
@@ -77,6 +97,9 @@ public sealed class ShellFlowsTests : IDisposable
 
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct Rect
@@ -225,6 +248,19 @@ public sealed class ShellFlowsTests : IDisposable
         throw new InvalidOperationException($"Window did not reach width {width}.");
     }
 
+    private static void EnsureWindowForeground(IntPtr handle, AutomationElement window)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+        while (DateTime.UtcNow < deadline && NativeWindow.GetForegroundWindow() != handle)
+        {
+            window.Focus();
+            NativeWindow.SetForegroundWindow(handle);
+            Thread.Sleep(100);
+        }
+
+        Assert.Equal(handle, NativeWindow.GetForegroundWindow());
+    }
+
     private static void RequireUiOrSkip()
     {
         if (!UiEnabled(out var reason))
@@ -293,7 +329,16 @@ public sealed class ShellFlowsTests : IDisposable
 
     private Window Launch(out Application app, out UIA3Automation automation)
     {
-        app = Application.Launch(FindAppExe());
+        var executable = FindAppExe();
+        _appDataDir ??= Path.Combine(Path.GetTempPath(), "DevTemWpf.UiAutomation", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(_appDataDir);
+        var startInfo = new ProcessStartInfo(executable)
+        {
+            UseShellExecute = false,
+            WorkingDirectory = Path.GetDirectoryName(executable)!,
+        };
+        startInfo.Environment["DEVTEM_TEST_DATA_ROOT"] = _appDataDir;
+        app = Application.Launch(startInfo);
         _apps.Add(app);
         automation = new UIA3Automation();
         var window = app.GetMainWindow(automation, TimeSpan.FromSeconds(15))
@@ -822,11 +867,13 @@ public sealed class ShellFlowsTests : IDisposable
     /// pressed once the settings file carries the new value, otherwise the
     /// relaunched app loads stale chrome.
     /// </summary>
-    private static void WaitForShellPersisted(int shellValue)
+    private string TestSettingsPath => Path.Combine(
+        _appDataDir ?? throw new InvalidOperationException("The UI test app profile has not been initialized."),
+        "Roaming", "Wpf11AppTemplate", "settings.json");
+
+    private void WaitForShellPersisted(int shellValue)
     {
-        var path = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "Wpf11AppTemplate", "settings.json");
+        var path = TestSettingsPath;
         var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
         while (DateTime.UtcNow < deadline)
         {
@@ -856,11 +903,9 @@ public sealed class ShellFlowsTests : IDisposable
     /// relaunched app cannot read a torn write (which would fall back to
     /// default settings and the wrong shell).
     /// </summary>
-    private static void WaitForWorkspaceSelected(string key)
+    private void WaitForWorkspaceSelected(string key)
     {
-        var path = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "Wpf11AppTemplate", "settings.json");
+        var path = TestSettingsPath;
         var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
         while (DateTime.UtcNow < deadline)
         {
@@ -1605,7 +1650,16 @@ public sealed class ShellFlowsTests : IDisposable
             Assert.True(clamped.Width >= 640, $"width clamped to min, got {clamped.Width}");
             Assert.True(clamped.Height >= 480, $"height clamped to min, got {clamped.Height}");
 
-            foreach (var width in new[] { 640, 1024, 1280, 1600 })
+            var maxWidth = Math.Min(1600, NativeWindow.GetSystemMetrics(NativeWindow.ScreenWidth) - 64);
+            Assert.True(maxWidth > 640, $"desktop width is too small for the resize test: {maxWidth + 64}");
+            var widths = new[] { 640, 1024, 1280, 1600 }
+                .Where(width => width <= maxWidth)
+                .Append(maxWidth)
+                .Distinct()
+                .Order()
+                .ToArray();
+
+            foreach (var width in widths)
             {
                 NativeWindow.MoveWindow(handle, 0, 0, width, 800, true);
                 WaitForWindowAtLeastWidth(handle, width);
@@ -1621,11 +1675,25 @@ public sealed class ShellFlowsTests : IDisposable
             // Narrow navigation still works: gallery content reachable at 640.
             NativeWindow.MoveWindow(handle, 0, 0, 640, 800, true);
             WaitForWindowAtLeastWidth(handle, 640);
-            window.Focus();
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
-                TimeSpan.FromSeconds(10), "nav item at 640").Click();
-            var gallery = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Gallery dialog demo")),
-                TimeSpan.FromSeconds(10), "gallery content at 640");
+            EnsureWindowForeground(handle, window);
+            var controlsNav = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                TimeSpan.FromSeconds(10), "nav item at 640");
+            controlsNav.Click();
+            AutomationElement gallery;
+            try
+            {
+                gallery = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Gallery dialog demo")),
+                    TimeSpan.FromSeconds(10), "gallery content at 640");
+            }
+            catch (InvalidOperationException ex)
+            {
+                var names = window.FindAllDescendants()
+                    .Select(element => $"{element.ControlType}: {element.Name}")
+                    .Where(name => !name.EndsWith(": ", StringComparison.Ordinal))
+                    .Take(80);
+                throw new InvalidOperationException($"{ex.Message} UIA elements: {string.Join(" | ", names)}", ex);
+            }
+
             Assert.NotNull(gallery);
         }
         finally
