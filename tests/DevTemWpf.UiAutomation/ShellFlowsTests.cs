@@ -98,9 +98,6 @@ public sealed class ShellFlowsTests : IDisposable
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
 
-        [DllImport("user32.dll")]
-        public static extern bool SetForegroundWindow(IntPtr hWnd);
-
         [StructLayout(LayoutKind.Sequential)]
         public struct Rect
         {
@@ -246,19 +243,6 @@ public sealed class ShellFlowsTests : IDisposable
         }
 
         throw new InvalidOperationException($"Window did not reach width {width}.");
-    }
-
-    private static void EnsureWindowForeground(IntPtr handle, AutomationElement window)
-    {
-        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
-        while (DateTime.UtcNow < deadline && NativeWindow.GetForegroundWindow() != handle)
-        {
-            window.Focus();
-            NativeWindow.SetForegroundWindow(handle);
-            Thread.Sleep(100);
-        }
-
-        Assert.Equal(handle, NativeWindow.GetForegroundWindow());
     }
 
     private static void RequireUiOrSkip()
@@ -1672,28 +1656,23 @@ public sealed class ShellFlowsTests : IDisposable
                 Assert.NotNull(home);
             }
 
-            // Narrow navigation still works: gallery content reachable at 640.
+            // The navigation pane collapses below the responsive breakpoint;
+            // use the keyboard route launcher to reach a page without relying
+            // on a non-visible pane item.
             NativeWindow.MoveWindow(handle, 0, 0, 640, 800, true);
             WaitForWindowAtLeastWidth(handle, 640);
-            EnsureWindowForeground(handle, window);
-            var controlsNav = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
-                TimeSpan.FromSeconds(10), "nav item at 640");
-            controlsNav.Click();
-            AutomationElement gallery;
-            try
-            {
-                gallery = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Gallery dialog demo")),
-                    TimeSpan.FromSeconds(10), "gallery content at 640");
-            }
-            catch (InvalidOperationException ex)
-            {
-                var names = window.FindAllDescendants()
-                    .Select(element => $"{element.ControlType}: {element.Name}")
-                    .Where(name => !name.EndsWith(": ", StringComparison.Ordinal))
-                    .Take(80);
-                throw new InvalidOperationException($"{ex.Message} UIA elements: {string.Join(" | ", names)}", ex);
-            }
-
+            window.Focus();
+            Keyboard.Press(VirtualKeyShort.CONTROL);
+            Keyboard.Press(VirtualKeyShort.KEY_K);
+            Keyboard.Release(VirtualKeyShort.CONTROL);
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Command palette filter")),
+                TimeSpan.FromSeconds(10), "palette filter at 640");
+            TypeIntoBox(window, "Command palette filter", "controls");
+            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Controls")),
+                TimeSpan.FromSeconds(10), "Controls palette result at 640");
+            Keyboard.Press(VirtualKeyShort.RETURN);
+            var gallery = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Gallery dialog demo")),
+                TimeSpan.FromSeconds(10), "gallery content at 640");
             Assert.NotNull(gallery);
         }
         finally

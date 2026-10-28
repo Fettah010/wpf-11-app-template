@@ -19,14 +19,15 @@ move behind a tested library boundary.
   behavior, plus what still must be decided before the 2.0 preview.
 - **More reliable UI automation**: each test uses a temporary app-data profile
   that survives relaunches but cannot leak state to other tests; resize targets
-  respect the runner's desktop bounds, and coordinate navigation clicks are
-  guarded by foreground checks when no semantic UIA pattern is available.
+  respect the runner's desktop bounds, and narrow-width navigation uses the
+  keyboard command palette when the responsive pane is collapsed.
 - **Verification**: warning-free Release build; full suite passed 234/234
   locally (including all 18 UI automation tests) with no skips; complete
   source and packed generator/template gates passed; package-only UI canary
   passed; vulnerability/deprecation audits were clean. PR #9's first hosted
-  run failed on the fixed-width resize assumption; the corrective commit must
-  pass hosted CI before the stack can be merged or v1.8.0 published.
+  runs exposed fixed-width and hidden-navigation assumptions plus a Windows
+  package-source parsing issue; the current corrections must pass hosted CI
+  before the stack can be merged or v1.8.0 published.
 - **Documentation**: scaffold workflow diagram, concise project direction,
   UI-package instructions, and updated testing commands.
 
