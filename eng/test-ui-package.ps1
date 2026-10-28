@@ -20,8 +20,19 @@ try {
     New-Item -ItemType Directory -Path $packageRoot, $consumerRoot -Force | Out-Null
     Invoke-DotNet @("pack", $library, "--configuration", "Release", "--output", $packageRoot, "-p:TreatWarningsAsErrors=true")
     Copy-Item -Path (Join-Path $canarySource "*") -Destination $consumerRoot -Recurse -Force
-    $sources = "$packageRoot;https://api.nuget.org/v3/index.json"
-    Invoke-DotNet @("restore", $consumerProject, "--source", $sources)
+    $escapedPackageRoot = [System.Security.SecurityElement]::Escape($packageRoot)
+    $nugetConfig = Join-Path $tempRoot "NuGet.Config"
+    @"
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <clear />
+    <add key="UiPackageCanary" value="$escapedPackageRoot" />
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+  </packageSources>
+</configuration>
+"@ | Set-Content -LiteralPath $nugetConfig -Encoding utf8
+    Invoke-DotNet @("restore", $consumerProject, "--configfile", $nugetConfig)
     Invoke-DotNet @("build", $consumerProject, "--configuration", "Release", "--no-restore", "--warnaserror")
     Invoke-DotNet @("run", "--project", $consumerProject, "--configuration", "Release", "--no-build")
     $completed = $true
