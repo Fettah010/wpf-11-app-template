@@ -28,8 +28,9 @@ move behind a tested library boundary.
   passed and the stack merged. The first default-branch release preflight
   passed build, test, UI, generator, and package-canary gates, then caught
   package-build artifacts under the UI library's `obj` folder in the source
-  template residue check. The scheduled release remains blocked until that
-  template exclusion is corrected and the hosted preflight passes.
+  template residue check. The exclusion fix is in a follow-up PR; a green
+  hosted rerun and default-branch preflight are required before the candidate
+  can be pinned or the scheduled release published.
 - **Documentation**: scaffold workflow diagram, concise project direction,
   UI-package instructions, and updated testing commands.
 

@@ -1620,8 +1620,6 @@ public sealed class ShellFlowsTests : IDisposable
             // Launch maximizes; restore first so resizes take effect.
             var handle = MainHandle(app);
             window.Focus();
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home")),
-                TimeSpan.FromSeconds(10), "home navigation item").Click();
             Assert.NotNull(WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home headline")),
                 TimeSpan.FromSeconds(10), "home content before resizing"));
             NativeWindow.ShowWindow(handle, NativeWindow.Restore);
