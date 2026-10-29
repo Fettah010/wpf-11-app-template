@@ -17,9 +17,12 @@ that the app window appears.
 
 ## Next steps
 
-1. Search for `TODO-APP` (none yet — this is your canvas).
-2. Add a page: `dotnet new devtemwpf-page -n OrdersPage` (install the item
-   templates from the template repo first — see template docs).
+1. Search for `TODO-APP` (none yet - this is your canvas).
+2. Add an element with a generator, for example
+   `dotnet new devtemwpf-page -n OrdersPage --RootNamespace <YourRoot>`
+   (run inside `src/<YourRoot>.App`; the item templates ship in the template
+   package - see `docs/template/item-templates.md` in the template repo for the
+   full catalog).
 3. Pick a shell, theme, density, and motion in Settings; preferences persist.
 4. Read `docs/` in the template repo for the design system, ADRs, packaging,
    and localization guides.

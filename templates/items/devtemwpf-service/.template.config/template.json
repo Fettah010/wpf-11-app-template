@@ -9,12 +9,12 @@
   "sourceName": "SampleService",
   "tags": { "language": "C#", "type": "item" },
   "symbols": {
-    "Namespace": {
+    "RootNamespace": {
       "type": "parameter",
       "datatype": "text",
-      "defaultValue": "DevTemWpf.App",
-      "replaces": "DevTemWpf.App",
-      "description": "Root namespace of the target project."
+      "defaultValue": "DevTemWpf",
+      "replaces": "DevTemWpf",
+      "description": "Root namespace of the generated app (the .App suffix is preserved)."
     }
   },
   "sources": [

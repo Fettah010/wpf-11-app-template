@@ -32,22 +32,51 @@ dotnet list package --include-transitive
 Expect **0 warnings** on both build configurations. Any warning must be
 triaged in the version completion report — never silenced without a record.
 
+## Generators and template matrix
+
+```powershell
+# item-template gate: install, generate all 11 templates, residue check, build, tests
+powershell -ExecutionPolicy Bypass -File eng/test-generators.ps1
+
+# package-boundary gate: pack DevTemWpf.UI, restore a clean consumer from the
+# local package plus NuGet, build, and launch the consumer
+powershell -ExecutionPolicy Bypass -File eng/test-ui-package.ps1
+
+# same gate against the packed .nupkg (required when the package changes)
+powershell -ExecutionPolicy Bypass -File eng/test-generators.ps1 -PackagePath artifacts/DevTemWPF.Templates.1.8.0.nupkg
+
+# full preset/module matrix from source or package
+powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1
+powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -PackagePath <nupkg>
+```
+
+Both scripts install into a throwaway `DOTNET_CLI_HOME`, so the developer's
+global `dotnet new` registrations are never modified. `test-generators.ps1`
+fails on any leftover template token (`DevTemWpf`, `Sample*`, undefined `App*`
+styles), on a non-zero-warning build, or on a failing generated test.
+`test-ui-package.ps1` verifies the experimental `DevTemWpf.UI` package from a
+clean temporary consumer with no reference to the gallery app; it also checks
+Comfortable/Compact token values and runtime density replacement.
+
 ## UI automation (FlaUI)
 
 `tests/DevTemWpf.UiAutomation` drives the built app (launch/close,
 menu-navigate + keyboard walk, dialog round-trip) via UIA3. Rules learned
 the hard way:
 
-- Use `InvokePattern` for activation, not coordinate clicks (scrolled
-  content misses).
+- Prefer semantic UIA patterns; use coordinate clicks only when an element
+  exposes no activation pattern, and confirm the app is foreground first.
 - Poll `HasExited` for exit; never read `ExitCode` off a FlaUI handle.
 - Retry-with-timeout everywhere; STA via `[WpfFact]`.
+- Each test launches the app with its own temporary `DEVTEM_TEST_DATA_ROOT`.
+  Relaunches within one test reuse that profile; cleanup removes it afterward,
+  so tests neither depend on nor modify the developer's app settings.
 - Headless environments: set `DEVTEM_RUN_UI_TESTS=0` (or non-interactive
   sessions skip automatically). Skips use `Assert.Skip`, so they are counted
   as `skipped` — never as passes. The required gate
   (`eng/check-ui-tests.ps1`, wired into CI) fails on any skip or on zero
-  executed tests; a green required job always means the 4 ShellFlows cases
-  really ran. Record the `UI_TESTS total=/failed=/skipped=` line in the
+  executed tests; a green required job means every ShellFlows case really
+  ran. Record the `UI_TESTS total=/failed=/skipped=` line in the
   version completion report.
 - Data-binding errors involving our views fail the integration suite
   (`TestResources` listener) — silent XAML bugs become test failures.

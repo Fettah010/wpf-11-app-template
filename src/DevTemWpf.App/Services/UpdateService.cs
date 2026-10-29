@@ -136,10 +136,16 @@ public sealed partial class UpdateService : ObservableObject, IUpdateService
         Progress = 0;
         try
         {
-            var progress = new Progress<double>(p => Progress = p);
+            var progress = new Progress<double>(p =>
+            {
+                if (Status == UpdateStatus.Downloading)
+                {
+                    Progress = p;
+                }
+            });
             await _engineFactory().DownloadAsync(feed, _pending, progress, token).ConfigureAwait(false);
-            Progress = 1.0;
             Status = UpdateStatus.ReadyToRestart;
+            Progress = 1.0;
             Detail = string.Format(Strings.Update_ReadyFormat, _pending.Version) + " " + Strings.Update_RestartPrompt;
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested)

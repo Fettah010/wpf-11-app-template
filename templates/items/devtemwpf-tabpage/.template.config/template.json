@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "DevTemWPF",
+  "classifications": ["Desktop", "WPF", "MVVM"],
+  "name": "DevTemWPF Tabbed Workspace Page",
+  "description": "Adds a document page designed for the Tabbed shell document manager, following project conventions.",
+  "identity": "DevTemWPF.TabPage.CSharp",
+  "shortName": "devtemwpf-tabpage",
+  "sourceName": "SampleTabPage",
+  "tags": { "language": "C#", "type": "item" },
+  "symbols": {
+    "RootNamespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "DevTemWpf",
+      "replaces": "DevTemWpf",
+      "description": "Root namespace of the generated app (the .App suffix is preserved)."
+    }
+  },
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "exclude": [".template.config/**"]
+    }
+  ]
+}

@@ -10,15 +10,19 @@ A premium, Windows 11-first **WPF application template** and reusable **UI
 foundation** — Fluent design, MVVM, dependency injection, modular production
 services, and `dotnet new` scaffolding with clean / recommended / full presets.
 
-> **Status:** `1.6.0` — stable. Per-service template modules, hardened
-> updates, optional auth/crash samples, and privacy-bounded logging. Install the
-> template, generate your app, and ship it:
+> **Current stable:** `1.6.0`. The `1.7.0` scaffolding release is awaiting
+> final merge and publication; it is not a stable install target yet. The
+> `1.8.0` architecture work is a prototype, not a released package contract.
+> To start from the current stable template:
 > `dotnet new install DevTemWPF.Templates` (see
-> [Roadmap](#roadmap--milestones) for what's next).
+> [Release notes](https://github.com/Fettah010/wpf-11-app-template/releases)
+> and the [canonical roadmap](WPF-11-App-Template-Roadmap-1.0-to-2.0.md)).
 >
 > ```powershell
 > dotnet new install <repo>
 > dotnet new devtemwpf-app -n MyApp --Preset Full
+> cd src/MyApp.App
+> dotnet new devtemwpf-datagrid -n OrdersPage --RootNamespace MyApp
 > ```
 
 ## ✨ Highlights
@@ -34,6 +38,10 @@ services, and `dotnet new` scaffolding with clean / recommended / full presets.
   effect profiles, reduced-motion and low-power fallbacks.
 - 🤖 **Agent-friendly** — predictable structure, ADRs, repeatable CLI
   workflows, verifiable acceptance criteria per milestone.
+- 🧩 **Generators for the boring parts** — eleven `dotnet new` item templates
+  (page, settings, list-detail, DataGrid, TreeView, tab document, custom
+  control, ViewModel, service, and behavioral test scaffolds) that emit code
+  in project conventions and compile as generated.
 
 ## 🚀 Quick start
 
@@ -42,12 +50,46 @@ services, and `dotnet new` scaffolding with clean / recommended / full presets.
 ```powershell
 git clone https://github.com/Fettah010/wpf-11-app-template.git
 cd wpf-11-app-template
-dotnet restore
-dotnet build -c Release
-dotnet test -c Release
-# full gate: build + tests + app launch check
-powershell -ExecutionPolicy Bypass -File eng/smoke.ps1
+dotnet new install .
+dotnet new devtemwpf-app -n Orders --Preset Recommended --Shell Tabbed
+cd Orders
+dotnet new devtemwpf-datagrid -n OrdersPage -o .\src\Orders.App --RootNamespace Orders
+dotnet build .\Orders.slnx -c Release
 ```
+
+Prefer the published template package? Install the `.nupkg` attached to the
+desired GitHub release instead of cloning the repository:
+
+```powershell
+dotnet new install .\DevTemWPF.Templates.<version>.nupkg
+dotnet new devtemwpf-app -n MyApp --Preset Clean
+```
+
+### The workflow
+
+```mermaid
+flowchart LR
+    A["Install template"] --> B["Generate Clean / Recommended / Full app"]
+    B --> C["Choose Sidebar / Rail / Top / Tabbed"]
+    C --> D["Add pages, controls, services or tests"]
+    D --> E["Build and test your app"]
+```
+
+Templates are generators, not a runtime dependency: generated projects own
+their source and can be customized normally.
+
+### Choose a starting point
+
+- **Clean** — minimal application foundation and test project; no gallery
+  dashboard or optional production modules.
+- **Recommended** — practical starter services and diagnostics for a typical
+  desktop app.
+- **Full** — reference gallery, dashboard, charts and broader examples.
+
+`Custom` lets you choose modules individually. Every shell is available in
+each generated app; `--Shell` selects the first-launch default. See the
+[preset and module guide](docs/template/module-selection.md) before choosing
+optional packages.
 
 ## 🖼️ Screenshots
 
@@ -89,32 +131,34 @@ shell plates (`shell-top.png`, `shell-tabbed.png`) come from
 `eng/verify-shell-surfaces.ps1 -SaveAs`, which captures deterministically and
 also asserts the theme-surface invariants. Keep this provenance line accurate.
 
-## 🗺️ Roadmap & milestones
+## 🧭 Project direction
 
-| Version | Focus | Status |
-|---|---|---|
-| `0.1.0` | Foundation, ADRs, minimal app | ✅ Released |
-| `0.2.0` | Window experience, nav rail + sidebar | ✅ Released |
-| `0.3.0` | Design tokens & themes | ✅ Released |
-| `0.4.0` | Essential controls & forms | ✅ Released |
-| `0.5.0` | Motion system & optional effects | ✅ Released |
-| `0.6.0` | Layouts, data controls, dashboard & gallery | ✅ Released |
-| `0.7.0` | Production services & distribution | ✅ Released |
-| `0.8.0` | `dotnet new` scaffolding & generators | ✅ Released |
-| `0.9.0` | Beta hardening | ✅ Released |
-| `1.0.0-rc.1` | API freeze & candidate validation | ✅ Released |
-| `1.0.0` | Stable template and UI foundation | ✅ Released |
-| `1.1.0` | Stabilization and test truth | ✅ Released |
-| `1.2.0` | Visual-system upgrade | ✅ Released |
-| `1.3.0` | Core control and data completion | ✅ Released |
-| `1.4.0` | Navigation shells & Tabbed document workspace | ✅ Released |
-| `1.4.1` | Tabbed shell themed-surface fix | ✅ Released |
-| `1.5.0` | Advanced motion system & effects prototype | ✅ Released |
-| `1.6.0` | Per-service modules, updates/backup hardening, optional auth/crash | ✅ Released |
+The template is evolving from a polished reference app into a modular,
+independently consumable WPF foundation. The current work is focused on
+reliable scaffolding, package-boundary evidence and a tested 1.x-to-2.0
+upgrade path—not on breaking the stable 1.x template.
 
-Full product plan: [`WPF-11-App-Template-Roadmap-1.0-to-2.0.md`](WPF-11-App-Template-Roadmap-1.0-to-2.0.md) ·
-per-version plans/reports: [`docs/releases/`](docs/releases/) ·
-decisions: [`docs/decisions/`](docs/decisions/).
+For authoritative scope and sequencing, see the
+[product roadmap](WPF-11-App-Template-Roadmap-1.0-to-2.0.md). The current
+[1.8.0 plan](docs/releases/1.8.0-plan.md) and
+[migration draft](docs/releases/1.8.0-migration.md) document the package-boundary
+proof; [ADR-0020](docs/decisions/ADR-0020-ui-resource-package-boundary.md)
+records why only the token-resource library is accepted. Per-release evidence
+lives in [`docs/releases/`](docs/releases/), architectural decisions in
+[`docs/decisions/`](docs/decisions/), and delivered changes in the
+[`changelog`](CHANGELOG.md).
+
+```mermaid
+flowchart LR
+    App["DevTemWpf.App<br/>shell + composition root"] --> UI["DevTemWpf.UI<br/>compiled design tokens"]
+    App --> Platform["Windows integration<br/>kept app-owned"]
+    App --> Modules["Optional services<br/>kept app-owned"]
+    UI --> WpfUi["WPF-UI theme resources"]
+```
+
+> **Prototype notice:** `src/DevTemWpf.UI` is an isolated 1.8.0 experiment
+> for compiled design-token resources. It is not part of the stable template
+> package and should not be treated as a supported public API.
 
 ## 🛠️ Tech stack
 
@@ -132,15 +176,19 @@ Dependency inventory & licenses: [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md)
 ## 📁 Project structure
 
 ```text
-src/DevTemWpf.App/   # reference app (embryo of the clean preset)
+src/DevTemWpf.App/   # reference app and gallery
+src/DevTemWpf.UI/    # isolated 1.8.0 token-resource package prototype
 tests/               # unit + integration (xUnit v3, MTP mode)
+templates/items/     # eleven dotnet new item templates (docs/template/item-templates.md)
 docs/                # decisions, guides, per-release plans/reports
-eng/                 # smoke/UI/perf gates (smoke, check-ui-tests,
-                     # measure-startup, measure-motion, …)
+eng/                 # smoke/UI/perf/generator gates (smoke, check-ui-tests,
+                     # test-generators, measure-startup, measure-motion, …)
 ```
 
 Conventions: central package management, pinned SDK (`global.json`),
-analyzers + formatting enforced, zero-warning builds.
+analyzers + formatting enforced, zero-warning builds. UI automation requires
+an interactive Windows desktop; the required gate fails rather than counting
+skipped tests as passes.
 
 ## 🤝 Contributing
 

@@ -7,6 +7,23 @@ public sealed class UpdateServiceTests : IDisposable
 {
     private readonly string _path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".json");
 
+    private sealed class QueuedSynchronizationContext : SynchronizationContext
+    {
+        private readonly Queue<(SendOrPostCallback Callback, object? State)> _callbacks = new();
+
+        public override void Post(SendOrPostCallback callback, object? state)
+            => _callbacks.Enqueue((callback, state));
+
+        public void Drain()
+        {
+            while (_callbacks.Count > 0)
+            {
+                var (callback, state) = _callbacks.Dequeue();
+                callback(state);
+            }
+        }
+    }
+
     public void Dispose()
     {
         try { File.Delete(_path); } catch { /* best effort */ }
@@ -82,7 +99,21 @@ public sealed class UpdateServiceTests : IDisposable
         Assert.Equal(UpdateStatus.Available, service.Status);
         Assert.Contains("9.9.9", service.Detail);
 
-        await service.DownloadAndRestartAsync(TestContext.Current.CancellationToken);
+        var previousContext = SynchronizationContext.Current;
+        var progressContext = new QueuedSynchronizationContext();
+        Task downloadTask;
+        try
+        {
+            SynchronizationContext.SetSynchronizationContext(progressContext);
+            downloadTask = service.DownloadAndRestartAsync(TestContext.Current.CancellationToken);
+        }
+        finally
+        {
+            SynchronizationContext.SetSynchronizationContext(previousContext);
+        }
+
+        await downloadTask;
+        progressContext.Drain();
         Assert.Equal(UpdateStatus.ReadyToRestart, service.Status);
         Assert.True(engine.Restarted);
         Assert.Equal(1.0, service.Progress);

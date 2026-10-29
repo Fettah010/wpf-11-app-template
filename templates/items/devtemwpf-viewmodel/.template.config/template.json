@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "DevTemWPF",
+  "classifications": ["Desktop", "WPF", "MVVM"],
+  "name": "DevTemWPF ViewModel",
+  "description": "Adds a standalone ObservableObject ViewModel with RelayCommand commands and navigation lifecycle hooks following project conventions.",
+  "identity": "DevTemWPF.ViewModel.CSharp",
+  "shortName": "devtemwpf-viewmodel",
+  "sourceName": "SampleViewModel",
+  "tags": { "language": "C#", "type": "item" },
+  "symbols": {
+    "RootNamespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "DevTemWpf",
+      "replaces": "DevTemWpf",
+      "description": "Root namespace of the generated app (the .App suffix is preserved)."
+    }
+  },
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "exclude": [".template.config/**"]
+    }
+  ]
+}

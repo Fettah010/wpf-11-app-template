@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "DevTemWPF",
+  "classifications": ["Desktop", "WPF", "MVVM"],
+  "name": "DevTemWPF Settings Page",
+  "description": "Adds a Settings page with section cards, toggle switches, and ViewModel following project conventions.",
+  "identity": "DevTemWPF.SettingsPage.CSharp",
+  "shortName": "devtemwpf-settings",
+  "sourceName": "SampleSettingsPage",
+  "tags": { "language": "C#", "type": "item" },
+  "symbols": {
+    "RootNamespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "DevTemWpf",
+      "replaces": "DevTemWpf",
+      "description": "Root namespace of the generated app (the .App suffix is preserved)."
+    }
+  },
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "exclude": [".template.config/**"]
+    }
+  ]
+}

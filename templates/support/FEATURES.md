@@ -64,6 +64,7 @@ hand-edit (re-scaffold to change presets).
 <!--#endif -->
 - [x] Shell (rail + sidebar), tokens, themes, density, motion, feedback services
 - [x] Localization infrastructure (EN + German proof)
+- [x] Generators: 11 `dotnet new` item templates (pages, data views, control, ViewModel, service, tests)
 <!--#if (IncludeTests) -->
 - [x] xUnit test projects
 <!--#endif -->

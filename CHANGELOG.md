@@ -1,5 +1,75 @@
 # Changelog
 
+## 1.8.0 - Architecture preparation
+
+Architecture proof for the 2.0 package-boundary direction. The app and
+generated-app contract remain in place; only compiled design-token resources
+move behind a tested library boundary.
+
+- **UI resource package proof**: `DevTemWpf.UI` owns the compiled token
+  dictionaries; app-level merge order and density selection remain unchanged.
+  An independent package-only WPF consumer resolves Comfortable and Compact
+  resources and runtime density replacement without a project reference to
+  the gallery app. The prototype package is not a stable public control API.
+- **No speculative splits**: Windows integration, motion, shell, and optional
+  services remain app-owned. ADR-0020 records the narrow accepted boundary and
+  the evidence required before any Windows/service package is considered.
+- **Migration contract**: a compatibility draft records the preserved 1.x
+  template flags, item-template IDs, resource keys, DI root, and settings
+  behavior, plus what still must be decided before the 2.0 preview.
+- **More reliable UI automation**: each test uses a temporary app-data profile
+  that survives relaunches but cannot leak state to other tests; resize targets
+  respect the runner's desktop bounds, and narrow-width navigation uses the
+  keyboard command palette when the responsive pane is collapsed.
+- **Verification**: warning-free Release build; full suite passed 234/234
+  locally (including all 18 UI automation tests) with no skips; complete
+  source and packed generator/template gates passed; package-only UI canary
+  passed; vulnerability/deprecation audits were clean. PR #9's first hosted
+  runs exposed fixed-width and hidden-navigation assumptions plus a Windows
+  package-source parsing issue; the current corrections must pass hosted CI
+  before the stack can be merged or v1.8.0 published.
+- **Documentation**: scaffold workflow diagram, concise project direction,
+  UI-package instructions, and updated testing commands.
+
+## 1.7.0 (2026-10-27)
+
+Advanced scaffolding and developer productivity (roadmap §8.7). Item
+templates become a complete catalog, drive their namespaces from one root
+namespace flag, derive companion type names from the item name, and are
+verified by a blocking generator gate.
+
+- **Nine new generators** alongside `devtemwpf-page` / `devtemwpf-service`:
+  `devtemwpf-settings`, `devtemwpf-listdetail`, `devtemwpf-datagrid`,
+  `devtemwpf-treeview`, `devtemwpf-tabpage`, `devtemwpf-control`,
+  `devtemwpf-viewmodel`, plus behavioral test scaffolds `devtemwpf-test-vm`
+  and `devtemwpf-test-service`. Every scaffold emits token-based XAML,
+  CommunityToolkit.Mvvm code, `INavigableView<T>` pages, and entrance motion
+  where a page is involved.
+- **Naming/namespace contract fixed**: item templates now take
+  `--RootNamespace <Root>` (replaces the whole `DevTemWpf` root, preserving
+  `.App`/`.Unit`), so test scaffolds resolve the app namespace too. Companion
+  types derive from `-n` (`OrdersPage` → `OrdersRow`/`OrdersItem`/`OrdersNode`,
+  `AuditServiceTests` → `AuditService`) via template `forms`, so repeated
+  generation cannot collide.
+- **Blocking generator gate** `eng/test-generators.ps1`: isolated CLI home,
+  source-folder or `.nupkg` install, all eleven templates plus repeat and
+  edge-case generations, residual-token detection (`DevTemWpf`, `Sample*`,
+  undefined `App*` styles), `--warnaserror` build, and generated-test run.
+  Fixed generator defects it caught: invalid `Themes/Generic.xaml` setter
+  form, missing `AutomationPeer` using/override, a read-only collection
+  assigned in an initializer, and an undefined `AppBodyStrongText` style.
+- **Visual Studio decision recorded** (ADR-0019, closes D08r as CLI-first):
+  project template appears in **New Project** after
+  `dotnet new install`; a VSIX for **Add → New Item** is rejected for 1.x for
+  cost/duplication reasons - documented rather than implied.
+- **Generated apps stay clean**: the project template now excludes the
+  repository's `.kilo/`, `.idea/`, and `*.user` files, and the generator gate
+  asserts that no tool config, build output, or absolute developer path leaks
+  into generated output.
+- **Docs**: new [`docs/template/item-templates.md`](docs/template/item-templates.md)
+  catalog (flags, companion naming, output folders, post-generation
+  checklists), refreshed `generators.md`, README and scaffold `FEATURES.md`.
+
 ## 1.6.0 (2026-10-18)
 
 Production modules, Windows integration assessment, and optionality (roadmap

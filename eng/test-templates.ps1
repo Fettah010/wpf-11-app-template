@@ -278,8 +278,8 @@ try {
   if (-not (Invoke-Native 'dotnet' @('new', 'install', $pageDir) $root)) { throw 'page template install failed' }
   if (-not (Invoke-Native 'dotnet' @('new', 'install', $svcDir) $root)) { throw 'service template install failed' }
   $target = Join-Path $fullApp 'src\TmplFull.App'
-  if (-not (Invoke-Native 'dotnet' @('new', 'devtemwpf-page', '-n', 'OrdersPage', '--Namespace', 'TmplFull.App') $target)) { throw 'page gen failed' }
-  if (-not (Invoke-Native 'dotnet' @('new', 'devtemwpf-service', '-n', 'AuditService', '--Namespace', 'TmplFull.App') $target)) { throw 'service gen failed' }
+  if (-not (Invoke-Native 'dotnet' @('new', 'devtemwpf-page', '-n', 'OrdersPage', '--RootNamespace', 'TmplFull') $target)) { throw 'page gen failed' }
+  if (-not (Invoke-Native 'dotnet' @('new', 'devtemwpf-service', '-n', 'AuditService', '--RootNamespace', 'TmplFull') $target)) { throw 'service gen failed' }
   Assert-True (Test-Path (Join-Path $target 'OrdersPage.xaml')) 'OrdersPage.xaml generated'
   Assert-True (Test-Path (Join-Path $target 'AuditService.cs')) 'AuditService.cs generated'
   $nsHits = @(Select-String -LiteralPath (Join-Path $target 'OrdersPage.xaml.cs') -Pattern 'namespace TmplFull.App')
@@ -301,12 +301,12 @@ finally {
   $env:DOTNET_CLI_USE_MSBUILD_SERVER = $oldMsBuildServer
   $env:UseSharedCompilation = $oldSharedCompilation
   if (($script:failures -eq 0) -and (Test-Path $work)) {
-    # Long-path-safe removal (generated bin/obj trees nest deeply); warn —
-    # never fail the product gate — with the cause when removal struggles.
+    # Generated bin/obj trees nest deeply; prefer extended paths and fall back
+    # to the ordinary path if the Windows PowerShell provider rejects them.
     $removed = $false
-    foreach ($target in @($work, "\\?\$work")) {
+    foreach ($target in @("\\?\$work", $work)) {
       try { Remove-Item -LiteralPath $target -Recurse -Force -ErrorAction Stop; $removed = $true; break }
-      catch { Write-Host "cleanup retry ($target): $($_.Exception.Message)" -ForegroundColor Yellow }
+      catch { Write-Verbose "cleanup retry ($target): $($_.Exception.Message)" }
     }
     if (-not $removed) { Write-Host "WARNING: work-dir cleanup failed, kept for manual removal: $work" -ForegroundColor Yellow }
   }

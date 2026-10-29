@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/DevTemWpf.App/DevTemWpf.App.csproj" />
+    <Project Path="src/DevTemWpf.UI/DevTemWpf.UI.csproj" />
   </Folder>
   <!--#if (IncludeTests) -->
   <Folder Name="/tests/">

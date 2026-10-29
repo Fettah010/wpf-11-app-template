@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "DevTemWPF",
+  "classifications": ["Desktop", "WPF", "MVVM"],
+  "name": "DevTemWPF List-Detail Page",
+  "description": "Adds a master-detail List/Detail page with search, selection, and detail inspection following project conventions.",
+  "identity": "DevTemWPF.ListDetailPage.CSharp",
+  "shortName": "devtemwpf-listdetail",
+  "sourceName": "SampleListDetailPage",
+  "tags": { "language": "C#", "type": "item" },
+  "symbols": {
+    "RootNamespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "DevTemWpf",
+      "replaces": "DevTemWpf",
+      "description": "Root namespace of the generated app (the .App suffix is preserved)."
+    },
+    "ItemName": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "pageToItem",
+      "replaces": "SampleListItem",
+      "description": "Name of the generated list item model (Page -> Item)."
+    }
+  },
+  "forms": {
+    "pageToItem": { "identifier": "replace", "pattern": "Page", "replacement": "Item" }
+  },
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "exclude": [".template.config/**"]
+    }
+  ]
+}

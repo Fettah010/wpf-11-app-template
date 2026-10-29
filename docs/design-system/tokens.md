@@ -1,8 +1,9 @@
 # Design tokens
 
-Single source of truth: `src/DevTemWpf.App/DesignTokens/` for XAML resources
-plus `Services/MotionTokens.cs` for motion values (moves to the UI library
-with its second consumer, per ADR-0003).
+Single source of truth: `src/DevTemWpf.UI/DesignTokens/` for XAML resources.
+`src/DevTemWpf.App/Services/MotionTokens.cs` remains app-owned because motion
+policy currently depends on app settings; revisit that boundary only after a
+decoupled contract and a second consumer are demonstrated (ADR-0003).
 
 ## Layers (`App.xaml` order)
 

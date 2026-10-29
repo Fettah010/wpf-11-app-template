@@ -37,7 +37,7 @@ public sealed class XamlTokenTests
 
     private static Dictionary<string, string> LoadThicknessKeys(string fileName)
     {
-        var path = Path.Combine(RepoRoot().FullName, "src", "DevTemWpf.App", "DesignTokens", fileName);
+        var path = Path.Combine(RepoRoot().FullName, "src", "DevTemWpf.UI", "DesignTokens", fileName);
         Assert.True(File.Exists(path), $"Missing {fileName} — run from a repo checkout.");
         var text = File.ReadAllText(path);
         return Regex.Matches(text, @"<Thickness x:Key=""(App\w+)"">(.*?)</Thickness>")
