@@ -158,6 +158,8 @@
         "SECURITY.md",
         "**/bin/**",
         "**/obj/**",
+        "src/DevTemWpf.UI/bin/**",
+        "src/DevTemWpf.UI/obj/**",
         "**/TestResults/**",
         "artifacts/**",
         "templates/items/**",
