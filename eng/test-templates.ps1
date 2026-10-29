@@ -21,6 +21,7 @@ param(
   [string[]]$Shells = @('Sidebar', 'Rail', 'Top', 'Tabbed'),
   [switch]$NoPresets,
   [switch]$NoModules,
+  [switch]$NoLaunch,
   [string]$PackagePath = ''
 )
 
@@ -35,8 +36,7 @@ $failures = 0
 # NUGET_PACKAGES keeps pointing at the user's cache (read-through reuse:
 # no per-run package re-download, and nothing hive-specific to clean).
 $cliHome = Join-Path $work 'cli-home'
-$logOut = Join-Path $work 'invoke.out.log'
-$logErr = Join-Path $work 'invoke.err.log'
+$script:invokeCount = 0
 $oldCliHome = $env:DOTNET_CLI_HOME
 $oldNugetPackages = $env:NUGET_PACKAGES
 $oldNodeReuse = $env:MSBUILDDISABLENODEREUSE
@@ -51,6 +51,9 @@ function Assert-True([bool]$Condition, [string]$Message) {
 }
 
 function Invoke-Native([string]$Exe, [string[]]$Arguments, [string]$WorkDir) {
+  $script:invokeCount++
+  $logOut = Join-Path $work "invoke-$script:invokeCount.out.log"
+  $logErr = Join-Path $work "invoke-$script:invokeCount.err.log"
   $sw = [System.Diagnostics.Stopwatch]::StartNew()
   $p = Start-Process -FilePath $Exe -ArgumentList $Arguments -WorkingDirectory $WorkDir `
     -NoNewWindow -Wait -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
@@ -135,6 +138,10 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
   if ($LaunchOnly) {
     if (-not (Invoke-Native 'dotnet' @('restore') $appDir)) { return }
     if (-not (Invoke-Native 'dotnet' @('build', '-c', 'Release', '--no-restore', '--warnaserror') $appDir)) { return }
+    if ($NoLaunch) {
+      Write-Host "OK: $Preset/$Shell build (launch skipped -NoLaunch)" -ForegroundColor Green
+      return
+    }
     $exe = Get-ChildItem -LiteralPath $appDir -Recurse -Filter "$name.App.exe" -ErrorAction SilentlyContinue |
       Where-Object { $_.FullName -match 'Release' } | Select-Object -First 1
     Assert-True ($null -ne $exe) "$Preset/$Shell exe built"
@@ -157,8 +164,11 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
     if ($script:failures -eq 0) { Write-Host "OK: $Preset/$Shell build+launch" -ForegroundColor Green }
   }
   elseif ($WithTests) {
-    if (-not (Invoke-Native 'powershell' @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $appDir 'eng\smoke.ps1')) $appDir)) { return }
-    Write-Host "OK: $Preset smoke (restore/build/test/launch)" -ForegroundColor Green
+    $smokeArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $appDir 'eng\smoke.ps1'))
+    if ($NoLaunch) { $smokeArgs += '-NoLaunch' }
+    if (-not (Invoke-Native 'powershell' $smokeArgs $appDir)) { return }
+    $smokeScope = if ($NoLaunch) { 'restore/build/unit+integration; UI skipped' } else { 'restore/build/test/launch' }
+    Write-Host "OK: $Preset smoke ($smokeScope)" -ForegroundColor Green
   }
   else {
     if (-not (Invoke-Native 'dotnet' @('restore') $appDir)) { return }
@@ -319,3 +329,4 @@ finally {
 
 if ($failures -gt 0) { Write-Host "`nTEMPLATE MATRIX FAILED ($failures)" -ForegroundColor Red; exit 1 }
 Write-Host "`nTEMPLATE MATRIX PASSED" -ForegroundColor Green
+exit 0

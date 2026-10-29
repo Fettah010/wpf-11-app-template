@@ -37,6 +37,11 @@ move behind a tested library boundary.
   `.nuget/packages` cache outside `bin`/`obj`. The residue check now excludes
   that build-output cache while still scanning generated source and project
   files; a green hosted rerun is required before release.
+- **More reliable template gates**: each native command now has isolated
+  diagnostic logs, and smoke scripts return an explicit success code after
+  passing. CI runs source and packed preset checks concurrently while retaining
+  aggregate required checks. Local `-NoLaunch` runs keep unit/integration
+  coverage without opening WPF windows or running interactive UI automation.
 - **Documentation**: scaffold workflow diagram, concise project direction,
   UI-package instructions, and updated testing commands.
 

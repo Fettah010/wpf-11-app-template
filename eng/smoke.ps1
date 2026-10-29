@@ -3,7 +3,13 @@
 .SYNOPSIS
   0.1.0 smoke gate: restore, build (Release), test, launch check.
   Fails fast with a non-zero exit code; prints each step's outcome.
+.PARAMETER NoLaunch
+  Runs unit and integration tests without UI automation or foreground app launch.
 #>
+param(
+  [switch]$NoLaunch
+)
+
 $ErrorActionPreference = 'Stop'
 
 function Invoke-Step([string]$Name, [scriptblock]$Cmd) {
@@ -25,7 +31,27 @@ Invoke-Step 'restore' { dotnet restore }
 # required gates build Release with warnings as errors — a second Debug build
 # doubles combo time for no additional signal.
 Invoke-Step 'build Release' { dotnet build -c Release --no-restore }
-Invoke-Step 'test Release' { dotnet test -c Release --no-build }
+if ($NoLaunch) {
+  $testProjects = @(Get-ChildItem -LiteralPath (Join-Path $root 'tests') -Recurse -Filter '*.csproj' |
+    Where-Object { $_.Directory.Name -notlike '*.UiAutomation' })
+  if ($testProjects.Count -eq 0) { throw 'No non-UI test projects were found.' }
+  foreach ($project in $testProjects) {
+    $projectPath = $project.FullName
+    Invoke-Step "test $($project.BaseName)" { dotnet test $projectPath -c Release --no-build }
+  }
+}
+else {
+  Invoke-Step 'test Release' { dotnet test -c Release --no-build }
+}
+
+# Local matrix runs can keep the full build/test coverage without opening
+# foreground WPF windows. UI automation is also excluded because it requires
+# an interactive desktop; CI omits this switch and runs the complete test suite.
+if ($NoLaunch) {
+  Write-Host "`n== UI automation and launch checks skipped (-NoLaunch) ==" -ForegroundColor DarkGray
+  Write-Host "`nSMOKE PASSED" -ForegroundColor Green
+  exit 0
+}
 
 # Launch check: start the app, verify it stays alive with a window, then close it.
 # The executable is located dynamically so renamed (generated) apps work too.
@@ -66,3 +92,4 @@ finally {
 }
 
 Write-Host "`nSMOKE PASSED" -ForegroundColor Green
+exit 0

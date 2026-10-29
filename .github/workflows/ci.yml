@@ -68,15 +68,17 @@ jobs:
       - name: List packages (audit trail)
         run: dotnet list package --include-transitive
 
-  # Template gates split into parallel jobs (presets vs shells, source vs
-  # packed package). The union of shards is the full gate defined in
-  # eng/test-templates.ps1 (defaults run everything). Before the harness fix
-  # each generated-app build blocked ~15 min on lingering MSBuild/Roslyn
-  # servers (~30 min/combo); combos now build in seconds, so the whole matrix
-  # finishes in minutes.
-  template-matrix-presets:
+  # Template gates split into parallel preset, optional-module, shell, and
+  # packed-package shards. Aggregate jobs preserve the required preset status
+  # contexts and fail unless every shard passes. Together they cover the full
+  # gate defined in eng/test-templates.ps1.
+  template-presets:
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [Clean, Recommended, Full]
     steps:
       - uses: actions/checkout@v4
 
@@ -93,8 +95,47 @@ jobs:
           restore-keys: nuget-
 
       - name: Preset matrix (source folder)
-        run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Shells Sidebar
-        timeout-minutes: 45
+        env:
+          TEMPLATE_PRESET: ${{ matrix.preset }}
+        run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Presets $env:TEMPLATE_PRESET -NoModules -Shells Sidebar
+        timeout-minutes: 30
+
+  template-modules:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: nuget-${{ hashFiles('Directory.Packages.props', 'global.json') }}
+          restore-keys: nuget-
+
+      - name: Custom module matrix (source folder)
+        run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -NoPresets -Shells Sidebar
+        timeout-minutes: 30
+
+  template-matrix-presets:
+    needs: [template-presets, template-modules]
+    if: always()
+    runs-on: windows-latest
+    steps:
+      - name: Require all preset and module shards
+        env:
+          PRESET_RESULT: ${{ needs.template-presets.result }}
+          MODULE_RESULT: ${{ needs.template-modules.result }}
+        run: |
+          if ($env:PRESET_RESULT -ne "success" -or $env:MODULE_RESULT -ne "success") {
+            throw "Preset or optional-module template matrix did not pass."
+          }
+          Write-Host "All source preset and optional-module shards passed."
 
   template-matrix-shells:
     runs-on: windows-latest
@@ -118,9 +159,13 @@ jobs:
         run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -NoPresets
         timeout-minutes: 45
 
-  template-package-presets:
+  template-package-preset-shards:
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [Clean, Recommended, Full]
     steps:
       - uses: actions/checkout@v4
 
@@ -140,12 +185,50 @@ jobs:
         run: dotnet pack templates/pack/DevTemWPF.Templates.csproj -c Release -o artifacts/packages
 
       - name: Preset matrix (packed .nupkg)
-        run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -PackagePath (Get-ChildItem artifacts/packages/*.nupkg | Select-Object -First 1 -ExpandProperty FullName) -Shells Sidebar
-        timeout-minutes: 45
+        env:
+          TEMPLATE_PRESET: ${{ matrix.preset }}
+        run: powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -PackagePath (Get-ChildItem artifacts/packages/*.nupkg | Select-Object -First 1 -ExpandProperty FullName) -Presets $env:TEMPLATE_PRESET -NoModules -Shells Sidebar
+        timeout-minutes: 30
+
+  template-package-generators:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: nuget-${{ hashFiles('Directory.Packages.props', 'global.json') }}
+          restore-keys: nuget-
+
+      - name: Pack template package
+        run: dotnet pack templates/pack/DevTemWPF.Templates.csproj -c Release -o artifacts/packages
 
       - name: Generator gate (item templates, packed .nupkg)
         run: powershell -ExecutionPolicy Bypass -File eng/test-generators.ps1 -PackagePath (Get-ChildItem artifacts/packages/*.nupkg | Select-Object -First 1 -ExpandProperty FullName)
         timeout-minutes: 20
+
+  template-package-presets:
+    needs: [template-package-preset-shards, template-package-generators]
+    if: always()
+    runs-on: windows-latest
+    steps:
+      - name: Require all packed preset and generator shards
+        env:
+          PRESET_RESULT: ${{ needs.template-package-preset-shards.result }}
+          GENERATOR_RESULT: ${{ needs.template-package-generators.result }}
+        run: |
+          if ($env:PRESET_RESULT -ne "success" -or $env:GENERATOR_RESULT -ne "success") {
+            throw "Packed preset or item-generator matrix did not pass."
+          }
+          Write-Host "All packed preset and generator shards passed."
 
   template-package-shells:
     runs-on: windows-latest
