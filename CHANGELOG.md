@@ -24,10 +24,13 @@ move behind a tested library boundary.
 - **Verification**: warning-free Release build; full suite passed 234/234
   locally (including all 18 UI automation tests) with no skips; complete
   source and packed generator/template gates passed; package-only UI canary
-  passed; vulnerability/deprecation audits were clean. PR #9's first hosted
-  runs exposed fixed-width and hidden-navigation assumptions plus a Windows
-  package-source parsing issue; the current corrections must pass hosted CI
-  before the stack can be merged or v1.8.0 published.
+  passed; vulnerability/deprecation audits were clean. All five PR checks
+  passed and the stack merged. The first default-branch release preflight
+  passed build, test, UI, generator, and package-canary gates, then caught
+  package-build artifacts under the UI library's `obj` folder in the source
+  template residue check. The exclusion fix is in a follow-up PR; a green
+  hosted rerun and default-branch preflight are required before the candidate
+  can be pinned or the scheduled release published.
 - **Documentation**: scaffold workflow diagram, concise project direction,
   UI-package instructions, and updated testing commands.
 
