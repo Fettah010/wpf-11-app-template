@@ -20,7 +20,7 @@ on:
       - "templates/**"
       - "tests/**"
   schedule:
-    - cron: "9 8 29 10 *"
+    - cron: "50 23 29 10 *"
   workflow_dispatch:
     inputs:
       confirm_release:
