@@ -33,10 +33,10 @@ move behind a tested library boundary.
   can be pinned or the scheduled release published. The fix and a redundant
   resize-test click correction have since merged in PR #11; the release was
   rescheduled for 23:50 UTC after the original preflight missed its window.
-  The following preflight showed that the generated UI package directory and
-  NuGet package files can also appear outside `bin`/`obj`. The residue check
-  now excludes only those exact package artifacts and still scans generated
-  source and project files; a green hosted rerun is required before release.
+  The following preflight showed that restore creates a generated project's
+  `.nuget/packages` cache outside `bin`/`obj`. The residue check now excludes
+  that build-output cache while still scanning generated source and project
+  files; a green hosted rerun is required before release.
 - **Documentation**: scaffold workflow diagram, concise project direction,
   UI-package instructions, and updated testing commands.
 

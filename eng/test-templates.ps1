@@ -87,15 +87,10 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
   $srcDir = Join-Path $appDir "src\$name.App"
 
   # Template post-actions may restore projects and create legitimate NuGet
-  # artifacts under obj before these checks run.
-  $buildOutputPath = '[\\/](?:bin|obj)(?:[\\/]|$)'
-  $uiPackageArtifactName = '^DevTemWpf\.UI(?:\.[0-9][A-Za-z0-9.+-]*\.nupkg(?:\.sha512)?|\.nuspec)$'
+  # artifacts under build outputs and the generated project's local package cache.
+  $buildOutputPath = '[\\/](?:bin|obj|\.nuget[\\/]packages)(?:[\\/]|$)'
   $nameHits = @(Get-ChildItem -LiteralPath $appDir -Recurse -Filter '*DevTemWpf*' -ErrorAction SilentlyContinue |
-    Where-Object {
-      $_.FullName -notmatch $buildOutputPath -and
-      -not ($_.PSIsContainer -and $_.Name -ceq 'DevTemWpf.UI') -and
-      -not (-not $_.PSIsContainer -and $_.Name -match $uiPackageArtifactName)
-    })
+    Where-Object { $_.FullName -notmatch $buildOutputPath })
   Assert-True ($nameHits.Count -eq 0) "DevTemWpf residue in file names: $($nameHits.FullName -join ', ')"
   $contentHits = @(Get-ChildItem -LiteralPath $appDir -Recurse -File -Include *.cs, *.xaml, *.csproj, *.slnx, *.json, *.md, *.ps1 -ErrorAction SilentlyContinue |
     Where-Object { $_.FullName -notmatch $buildOutputPath } |
