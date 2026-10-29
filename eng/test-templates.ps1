@@ -86,10 +86,14 @@ function Test-Combo([string]$Preset, [string]$ExtraArgs, [bool]$WithTests, [stri
   }
   $srcDir = Join-Path $appDir "src\$name.App"
 
-  # Residue checks (before build creates bin/obj).
-  $nameHits = @(Get-ChildItem -LiteralPath $appDir -Recurse -Filter '*DevTemWpf*' -ErrorAction SilentlyContinue)
+  # Template post-actions may restore projects and create legitimate NuGet
+  # artifacts under obj before these checks run.
+  $buildOutputPath = '[\\/](?:bin|obj)(?:[\\/]|$)'
+  $nameHits = @(Get-ChildItem -LiteralPath $appDir -Recurse -Filter '*DevTemWpf*' -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch $buildOutputPath })
   Assert-True ($nameHits.Count -eq 0) "DevTemWpf residue in file names: $($nameHits -join ', ')"
   $contentHits = @(Get-ChildItem -LiteralPath $appDir -Recurse -File -Include *.cs, *.xaml, *.csproj, *.slnx, *.json, *.md, *.ps1 -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch $buildOutputPath } |
     Select-String -Pattern 'DevTemWpf' -ErrorAction SilentlyContinue)
   Assert-True ($contentHits.Count -eq 0) "DevTemWpf residue in content"
   $ifHits = @(Get-ChildItem -LiteralPath (Join-Path $appDir 'src') -Recurse -File -Include *.cs, *.xaml, *.csproj, *.slnx -ErrorAction SilentlyContinue |

@@ -33,6 +33,9 @@ move behind a tested library boundary.
   can be pinned or the scheduled release published. The fix and a redundant
   resize-test click correction have since merged in PR #11; the release was
   rescheduled for 23:50 UTC after the original preflight missed its window.
+  A later default-branch run showed these were generated `obj` package
+  artifacts, so the residue validator now excludes build-output directories
+  while continuing to inspect generated source and project files.
 - **Documentation**: scaffold workflow diagram, concise project direction,
   UI-package instructions, and updated testing commands.
 
