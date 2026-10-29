@@ -30,7 +30,9 @@ move behind a tested library boundary.
   package-build artifacts under the UI library's `obj` folder in the source
   template residue check. The exclusion fix is in a follow-up PR; a green
   hosted rerun and default-branch preflight are required before the candidate
-  can be pinned or the scheduled release published.
+  can be pinned or the scheduled release published. The fix and a redundant
+  resize-test click correction have since merged in PR #11; the release was
+  rescheduled for 23:50 UTC after the original preflight missed its window.
 - **Documentation**: scaffold workflow diagram, concise project direction,
   UI-package instructions, and updated testing commands.
 
