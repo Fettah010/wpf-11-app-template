@@ -74,7 +74,7 @@ jobs:
             $remoteTag = git ls-remote --tags origin "refs/tags/$candidateTag"
             if ($LASTEXITCODE -ne 0) { throw "Unable to inspect the candidate tag." }
             if ($remoteTag) {
-              git fetch origin "refs/tags/$candidateTag:refs/tags/$candidateTag"
+              git fetch origin "refs/tags/${candidateTag}:refs/tags/${candidateTag}"
               if ($LASTEXITCODE -ne 0) { throw "Unable to fetch the existing candidate tag." }
               $sha = (git rev-parse "$candidateTag^{commit}").Trim()
             }
@@ -83,7 +83,7 @@ jobs:
             }
           }
           else {
-            git fetch origin "refs/tags/$candidateTag:refs/tags/$candidateTag"
+            git fetch origin "refs/tags/${candidateTag}:refs/tags/${candidateTag}"
             if ($LASTEXITCODE -ne 0) {
               throw "No verified candidate tag exists; the release must not be published."
             }
@@ -265,7 +265,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Unable to inspect the candidate tag." }
 
           if ($remoteTag) {
-            git fetch origin "refs/tags/$tag:refs/tags/$tag"
+            git fetch origin "refs/tags/${tag}:refs/tags/${tag}"
             if ($LASTEXITCODE -ne 0) { throw "Unable to fetch the existing candidate tag." }
             $existingSha = (git rev-parse "$tag^{commit}").Trim()
             if ($existingSha -cne $env:RELEASE_SHA) {
@@ -323,7 +323,7 @@ jobs:
             throw "The v1.8.0 tag points to a different commit; refusing to overwrite it."
           }
 
-          $releaseJson = gh release view v1.8.0 --json isDraft,assets,tagName,url 2>$null
+          $releaseJson = gh release view v1.8.0 --repo $env:REPOSITORY --json isDraft,assets,tagName,url 2>$null
           $releaseExists = $LASTEXITCODE -eq 0
           if ($releaseExists) {
             $release = $releaseJson | ConvertFrom-Json
@@ -333,13 +333,13 @@ jobs:
           }
           else {
             if ($tagExists) {
-              gh release create v1.8.0 $packagePath $checksumPath --verify-tag --draft --title "v1.8.0 - Architecture preparation" --notes-file $notesPath
+              gh release create v1.8.0 $packagePath $checksumPath --repo $env:REPOSITORY --verify-tag --draft --title "v1.8.0 - Architecture preparation" --notes-file $notesPath
             }
             else {
-              gh release create v1.8.0 $packagePath $checksumPath --target $env:RELEASE_SHA --draft --title "v1.8.0 - Architecture preparation" --notes-file $notesPath
+              gh release create v1.8.0 $packagePath $checksumPath --repo $env:REPOSITORY --target $env:RELEASE_SHA --draft --title "v1.8.0 - Architecture preparation" --notes-file $notesPath
             }
             if ($LASTEXITCODE -ne 0) { throw "Unable to create the v1.8.0 draft release." }
-            $releaseJson = gh release view v1.8.0 --json isDraft,assets,tagName,url
+            $releaseJson = gh release view v1.8.0 --repo $env:REPOSITORY --json isDraft,assets,tagName,url
             if ($LASTEXITCODE -ne 0) { throw "Unable to verify the created v1.8.0 draft release." }
             $release = $releaseJson | ConvertFrom-Json
           }
@@ -349,7 +349,7 @@ jobs:
           if ($release.isDraft) {
             $missing = @($requiredAssets | Where-Object { $_ -notin $assetNames })
             if ($missing.Count -gt 0) {
-              $uploadArgs = @("release", "upload", "v1.8.0")
+              $uploadArgs = @("release", "upload", "v1.8.0", "--repo", $env:REPOSITORY)
               if ($env:PACKAGE_NAME -in $missing) { $uploadArgs += $packagePath }
               if ($env:CHECKSUM_NAME -in $missing) { $uploadArgs += $checksumPath }
               gh @uploadArgs
@@ -362,7 +362,7 @@ jobs:
 
           $verifyDir = "artifacts/existing-release"
           New-Item -ItemType Directory -Path $verifyDir -Force | Out-Null
-          gh release download v1.8.0 --pattern $env:PACKAGE_NAME --dir $verifyDir
+          gh release download v1.8.0 --repo $env:REPOSITORY --pattern $env:PACKAGE_NAME --dir $verifyDir
           if ($LASTEXITCODE -ne 0) { throw "Unable to verify the published template package." }
           $publishedPackage = Get-Item (Join-Path $verifyDir $env:PACKAGE_NAME)
           $publishedHash = (Get-FileHash -LiteralPath $publishedPackage.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -370,16 +370,16 @@ jobs:
 
           $checksumDir = "artifacts/existing-checksum"
           New-Item -ItemType Directory -Path $checksumDir -Force | Out-Null
-          gh release download v1.8.0 --pattern $env:CHECKSUM_NAME --dir $checksumDir
+          gh release download v1.8.0 --repo $env:REPOSITORY --pattern $env:CHECKSUM_NAME --dir $checksumDir
           if ($LASTEXITCODE -ne 0) { throw "Unable to verify the published checksum." }
           $publishedChecksum = (Get-Content (Join-Path $checksumDir $env:CHECKSUM_NAME) -Raw).Trim()
           if ($publishedChecksum -cne $checksumLine) { throw "Existing release checksum does not match the verified build." }
 
           if ($release.isDraft) {
-            gh release edit v1.8.0 --draft=false
+            gh release edit v1.8.0 --repo $env:REPOSITORY --draft=false
             if ($LASTEXITCODE -ne 0) { throw "Unable to publish the verified v1.8.0 release." }
           }
-          $url = gh release view v1.8.0 --json url --jq .url
+          $url = gh release view v1.8.0 --repo $env:REPOSITORY --json url --jq .url
           if ($LASTEXITCODE -ne 0) { throw "Unable to confirm the published release URL." }
           $summary = @"
           ## v1.8.0 release
