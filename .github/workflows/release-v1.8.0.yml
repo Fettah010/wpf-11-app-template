@@ -74,7 +74,7 @@ jobs:
             $remoteTag = git ls-remote --tags origin "refs/tags/$candidateTag"
             if ($LASTEXITCODE -ne 0) { throw "Unable to inspect the candidate tag." }
             if ($remoteTag) {
-              git fetch origin "refs/tags/$candidateTag:refs/tags/$candidateTag"
+              git fetch origin "refs/tags/${candidateTag}:refs/tags/${candidateTag}"
               if ($LASTEXITCODE -ne 0) { throw "Unable to fetch the existing candidate tag." }
               $sha = (git rev-parse "$candidateTag^{commit}").Trim()
             }
@@ -83,7 +83,7 @@ jobs:
             }
           }
           else {
-            git fetch origin "refs/tags/$candidateTag:refs/tags/$candidateTag"
+            git fetch origin "refs/tags/${candidateTag}:refs/tags/${candidateTag}"
             if ($LASTEXITCODE -ne 0) {
               throw "No verified candidate tag exists; the release must not be published."
             }
@@ -265,7 +265,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Unable to inspect the candidate tag." }
 
           if ($remoteTag) {
-            git fetch origin "refs/tags/$tag:refs/tags/$tag"
+            git fetch origin "refs/tags/${tag}:refs/tags/${tag}"
             if ($LASTEXITCODE -ne 0) { throw "Unable to fetch the existing candidate tag." }
             $existingSha = (git rev-parse "$tag^{commit}").Trim()
             if ($existingSha -cne $env:RELEASE_SHA) {
