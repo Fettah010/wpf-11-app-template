@@ -4,7 +4,7 @@ No package changes in rc.1 (packaging/tests/docs only). 0.9.0 inventory
 below stands; vuln scan re-run at gate. Nothing removable: every direct
 package has a live consumer (0.9.0 review).
 
-## 1.9.0 re-audit (2026-11-01, working tree; no dependency changes)
+## 1.9.0 re-audit (2026-11-02, working tree; no dependency changes)
 
 - `dotnet list package --vulnerable --include-transitive`: **0 vulnerable**
   across all five projects. `--deprecated --include-transitive`: **0
@@ -17,16 +17,20 @@ package has a live consumer (0.9.0 review).
   audit found no vulnerability/deprecation and this stabilization change
   adds no dependency; reconsider against the then-current advisories before
   the release candidate.
-- Exact local template package tested: `DevTemWPF.Templates.1.8.0.nupkg`,
-  packed from clean-clone source commit
-  `15134736665ef35e96d6d4bd90b296a938e7e632`, 227,757 bytes, SHA-256
-  `E9D2BEC412B1773EE516ABF219B56AB664F79989BC183E17E57D0FA8EAFC864D`.
-  This is a working-tree verification artifact carrying the existing 1.8.0
-  package metadata, **not** a 1.9.0 release package or a published asset.
-  Its archive includes `README.md`, `LICENSE`, and this notice; the content
-  inventory found no `bin`/`obj`/test-result entries, developer absolute
-  paths, or scanned secret markers. Source and packed generator/template
-  gates passed against this exact artifact after the smoke fail-fast fix.
+- Exact local 1.9.0 candidate package tested:
+  `DevTemWPF.Templates.1.9.0.nupkg`, 227,750 bytes, SHA-256
+  `4C1C7FC02F713D3336B5429C25A16BBA64A7C87749261312BCBFAC49F1AB63E1`.
+  The packed template matrix and generator gate passed against this artifact.
+  Its 198-entry archive includes `README.md`, `LICENSE`, and this notice;
+  there are no `bin`/`obj`/test-result entries, developer absolute-path hits,
+  or high-confidence secret-marker hits. This is a local candidate artifact,
+  not a published GitHub or NuGet asset.
+- The earlier clean-clone package test used commit
+  `15134736665ef35e96d6d4bd90b296a938e7e632` and the then-current 1.8.0
+  package metadata (227,757 bytes; SHA-256
+  `E9D2BEC412B1773EE516ABF219B56AB664F79989BC183E17E57D0FA8EAFC864D`).
+  It remains historical clean-clone evidence, not the current release
+  candidate.
 - Environment: .NET SDK 10.0.403 / runtime 10.0.14; Windows 11 Pro build
   26300. No new runtime or test package was introduced by the 1.9 changes.
 

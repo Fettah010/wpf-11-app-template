@@ -45,6 +45,11 @@ This register reconciles the deferred candidates above with delivered
 milestones. Historical descriptions remain intact; where an older row says
 "in progress", this current disposition takes precedence.
 
+The repository owner reviewed and accepted these current dispositions and
+revisit conditions on 2026-11-01 under explicit authorization. This review
+does not convert the still-deferred items into 2.0 scope or remove their
+individual prerequisites.
+
 | Item | Current disposition | Evidence / revisit condition |
 |---|---|---|
 | D01 | Still deferred | No concrete behavior consumer or approved need for `Microsoft.Xaml.Behaviors.Wpf`; revisit only for a specific behavior. |

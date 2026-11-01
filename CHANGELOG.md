@@ -12,11 +12,15 @@
   a success-shaped launch result.
 - **Migration baseline**: add a provisional 1.x compatibility inventory and
   2.0 migration examples, a deferred-work disposition register, and refreshed
-  dependency/package and performance evidence. Proposed 2.0 contracts remain
-  subject to owner review.
-- **Release status**: implementation candidate only; hosted checks and
-  required owner/accessibility evidence remain outstanding. No 1.9.0 package,
-  tag, or release has been published.
+  dependency/package and performance evidence. The owner reviewed the
+  inventory and dispositions; proposed 2.0 contracts remain open pending
+  preview canaries.
+- **More reliable packed-template diagnostics**: child log output no longer
+  contaminates the template matrix's Boolean result after a failed smoke
+  process. Added a reproducible interactive large-list/effects profile.
+- **Release status**: candidate only; hosted packed-shell rerun and
+  clean-clone verification of the committed 1.9.0 package remain pending.
+  No 1.9.0 tag, GitHub Release, or NuGet publication has been made.
 
 ## 1.8.0 - Architecture preparation
 
