@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.9.0 - 1.x stabilization (candidate; not released)
+
+- **Settings integrity**: missing/corrupt settings still recover to defaults,
+  while unrelated read failures and cancellation propagate rather than
+  risking replacement of unreadable settings.
+- **More reliable release gates**: shell UI automation uses supported UI
+  Automation patterns where available, and the generator gate disables
+  persistent MSBuild servers in isolated redirected builds.
+- **Migration baseline**: add a provisional 1.x compatibility inventory and
+  2.0 migration examples, a deferred-work disposition register, and refreshed
+  dependency/package and performance evidence. Proposed 2.0 contracts remain
+  subject to owner review.
+- **Release status**: implementation candidate only; hosted checks and
+  required owner/accessibility evidence remain outstanding. No 1.9.0 package,
+  tag, or release has been published.
+
 ## 1.8.0 - Architecture preparation
 
 Architecture proof for the 2.0 package-boundary direction. The app and

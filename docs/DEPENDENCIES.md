@@ -4,6 +4,31 @@ No package changes in rc.1 (packaging/tests/docs only). 0.9.0 inventory
 below stands; vuln scan re-run at gate. Nothing removable: every direct
 package has a live consumer (0.9.0 review).
 
+## 1.9.0 re-audit (2026-11-01, working tree; no dependency changes)
+
+- `dotnet list package --vulnerable --include-transitive`: **0 vulnerable**
+  across all five projects. `--deprecated --include-transitive`: **0
+  deprecated** across all five projects.
+- `dotnet list package --outdated`: the app graph has patch updates available
+  for `Microsoft.Data.Sqlite` 10.0.13 → 10.0.14,
+  `Microsoft.Extensions.Hosting` 10.0.12 → 10.0.14,
+  `Microsoft.Extensions.Http` 10.0.12 → 10.0.14, and
+  `Microsoft.Identity.Client` 4.91.0 → 4.92.0. No update was applied: the
+  audit found no vulnerability/deprecation and this stabilization change
+  adds no dependency; reconsider against the then-current advisories before
+  the release candidate.
+- Exact local template package tested: `DevTemWPF.Templates.1.8.0.nupkg`,
+  227,728 bytes, SHA-256
+  `2012B5EE190F326C4977C3DA3167F0D26D8F8842AA7F6FEE978851B880EBF605`.
+  This is a working-tree verification artifact carrying the existing 1.8.0
+  package metadata, **not** a 1.9.0 release package or a published asset.
+  Its archive includes `README.md`, `LICENSE`, and this notice; the content
+  inventory found no `bin`/`obj`/test-result entries, developer absolute
+  paths, or scanned secret markers. Source and packed generator/template
+  gates passed against this exact artifact.
+- Environment: .NET SDK 10.0.403 / runtime 10.0.14; Windows 11 Pro build
+  26300. No new runtime or test package was introduced by the 1.9 changes.
+
 ## 1.1.0 re-audit (2026-10-14, `work/1.1.0`, no pin changes)
 
 - `dotnet list package --vulnerable --include-transitive`: **0 vulnerable** (all 4 projects).

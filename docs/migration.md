@@ -20,9 +20,14 @@ fields and defaults missing ones; SQLite uses `user_version` upgrades.
 - **Minor** (1.x.0): additive features (new pages, services, tokens);
   existing contracts untouched.
 - **Major** (2.0.0): may break frozen surface; ships a migration guide and
-  codemods where automatable.
+  codemods where automatable. The current 1.9 compatibility inventory and
+  migration draft is in
+  [`docs/releases/1.9.0-migration.md`](releases/1.9.0-migration.md).
 - Deprecations: one minor of warnings before removal, documented in the
   changelog with the replacement.
+- **After 2.0:** 1.x maintenance is not guaranteed for a fixed duration;
+  correctness or security fixes may be made as capacity allows. No response
+  time or service-level commitment is implied.
 
 ## Supported extension points (stable)
 

@@ -133,3 +133,30 @@ Inside budgets. No resident additions in rc.1 (packaging/tests/docs only).
 Inside ratified budgets (≤1.0s, ≤150 MB) but memory headroom is thin —
 first post-1.0 perf work should reclaim working set before adding resident
 features.
+
+## 1.9.0 working-tree baseline (2026-11-01)
+
+Proxy hardware: Windows 11 Pro build 26300, .NET SDK 10.0.403 / runtime
+10.0.14, AMD Ryzen 7 8700G with Radeon 780M, 31.1 GB visible RAM. This is
+not the roadmap's 8 GB reference machine. Display DPI/refresh rate, power
+mode, and storage profile were not recorded; results should not be treated as
+low-spec evidence.
+
+| Metric | Result | How |
+|---|---|---|
+| Cold start (launch → window) | 0.81 s median, 0.84 s max | `eng/measure-startup.ps1 -Runs 5`; samples 0.84/0.78/0.81/0.81/0.78 s |
+| Working set after start | 145.5 MB median, 149.2 MB max | Same five runs, sampled 2 s after window |
+| Idle 30 s CPU | 0% of one core equivalent; raw 0/0/0 | `eng/measure-idle.ps1 -IdleSeconds 30` |
+| Working set after idle | 144.3 MB | Same idle run |
+| Motion profiles | Startup medians 0.78–0.82 s; working-set medians 143.9–144.3 MB; idle 0% | `eng/measure-motion.ps1 -Runs 3 -IdleSeconds 5`; Auto, Balanced, Rich, Reduced, Off |
+| Template package | 227,728 bytes compressed | Local working-tree `DevTemWPF.Templates.1.8.0.nupkg`; not an application runtime footprint or 1.9 release asset |
+
+The 1.8.0 report's prototype measurement on the same broad hardware class
+recorded 0.86 s startup median and 137.2 MB working-set median. The current
+median startup is within the existing ≤1.0 s modern-hardware budget, while
+the measured working set is about 8.3 MB higher. Treat this as a signal to
+track, not a causal regression claim: the 1.9 settings and UI-test changes do
+not add runtime dependencies, and a controlled before/after profile was not
+run from the same commit/configuration. The ≤150 MB modern-hardware budget is
+not exceeded, but headroom is limited. The 8 GB reference-machine gate stays
+open.

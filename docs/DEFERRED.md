@@ -38,3 +38,33 @@ post-1.0 unless marked **1.0**.
 Done: D02 (0.2.0), D03 (0.3.0), D04 (0.4.0), D05 (0.5.0), D06 dashboard+charts (0.6.0),
 D07 core services/CI (0.7.0), D08 templates/generators (0.8.0), D08r VSIX/VS integration (1.7.0),
 D09 CI+FlaUI (0.7.0/0.9.0), D11 remote/publishing (0.1.0–0.8.0).
+
+## 1.9.0 disposition register
+
+This register reconciles the deferred candidates above with delivered
+milestones. Historical descriptions remain intact; where an older row says
+"in progress", this current disposition takes precedence.
+
+| Item | Current disposition | Evidence / revisit condition |
+|---|---|---|
+| D01 | Still deferred | No concrete behavior consumer or approved need for `Microsoft.Xaml.Behaviors.Wpf`; revisit only for a specific behavior. |
+| D02–D06, D08, D09, D11 | Shipped | Delivered in their listed milestones; retain prior release reports as historical evidence. |
+| D07r | Shipped (sample scope) | Opt-in auth and local-first crash-reporting samples; no vendor telemetry by default (`docs/releases/1.6.0-report.md`). |
+| D07t | Deferred / no-go | In-app Snackbar is the fallback; revisit with interactive activation and per-preset footprint evidence (`docs/releases/1.6.0-report.md`). |
+| D07s | Guidance shipped; signing execution remains owner-owned | Documentation distinguishes script verification from a genuinely signed artifact; no signing certificate or signed build is claimed. |
+| D08r | Decision complete | CLI-first; no dedicated VSIX required (`docs/decisions/ADR-0019-scaffolding-generators-and-vs-integration.md`). |
+| D09r | Partial spike shipped; required visual gate deferred | Deterministic shell-surface invariant check exists; screenshot comparison remains advisory until capture is reliably deterministic. |
+| D10 / D27 | Still deferred | No 8 GB reference-machine run is available; proxy measurements must not be represented as low-spec proof. |
+| D12 | Monitor; no remediation needed | `Microsoft.ApplicationInsights` remains test-project-only; recheck if it enters app output or raises a privacy concern. |
+| D13 | Still deferred / no-go | Shader prototype did not satisfy toolchain and low-spec proof conditions; revisit only with both available (`docs/releases/1.5.0-report.md`). |
+| D14 | Partial | Keyboard-operable reorder/split shipped; OLE pointer-drag gesture remains deferred pending runner-proof design. |
+| D15 | Shipped | Top and Tabbed shells shipped in 1.4.0; multi-window remains separately deferred as D26. |
+| D16–D18 | Shipped with documented exclusions | Localization, chart theming, DataGrid/TreeView shipped; WPF-UI TimePicker was rejected in favor of a gallery-scoped recipe. |
+| D19 | Shipped | Per-service module flags and presence/absence contracts shipped in 1.6.0. |
+| D20 | Shipped | Template package/release mechanics are documented and used; registry publication remains an owner-controlled action where applicable. |
+| D21 | Shipped | UI skips are counted and the required UI gate rejects skips (`docs/releases/1.1.0-report.md`). |
+| D22 | Shipped | Per-run template hive/log isolation and cleanup are implemented; current source and packed matrices pass. |
+| D23 | Shipped | Startup measurement resolves the generated app executable dynamically (`docs/releases/1.1.0-report.md`). |
+| D24 | Shipped | README and in-app Home copy were corrected (`docs/releases/1.1.0-report.md`). |
+| D25 | Still deferred | WPF-UI hot-switch instability remains; requires passing UI automation on a fixed toolkit version. |
+| D26 | Still deferred | No testable multi-window consumer; workspace actions remain in-window by construction. |
