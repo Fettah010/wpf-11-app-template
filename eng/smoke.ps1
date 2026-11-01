@@ -16,8 +16,9 @@ function Invoke-Step([string]$Name, [scriptblock]$Cmd) {
   Write-Host "`n== $Name ==" -ForegroundColor Cyan
   & $Cmd
   if ($LASTEXITCODE -ne 0) {
-    Write-Host "FAILED: $Name (exit $LASTEXITCODE)" -ForegroundColor Red
-    exit $LASTEXITCODE
+    $exitCode = $LASTEXITCODE
+    Write-Host "FAILED: $Name (exit $exitCode)" -ForegroundColor Red
+    throw "$Name failed with exit code $exitCode."
   }
   Write-Host "OK: $Name" -ForegroundColor Green
 }

@@ -7,7 +7,9 @@
   risking replacement of unreadable settings.
 - **More reliable release gates**: shell UI automation uses supported UI
   Automation patterns where available, and the generator gate disables
-  persistent MSBuild servers in isolated redirected builds.
+  persistent MSBuild servers in isolated redirected builds. Generated-app
+  smoke scripts now propagate a failed test command instead of continuing to
+  a success-shaped launch result.
 - **Migration baseline**: add a provisional 1.x compatibility inventory and
   2.0 migration examples, a deferred-work disposition register, and refreshed
   dependency/package and performance evidence. Proposed 2.0 contracts remain
