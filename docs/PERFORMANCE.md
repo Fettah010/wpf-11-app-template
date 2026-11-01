@@ -149,7 +149,7 @@ low-spec evidence.
 | Idle 30 s CPU | 0% of one core equivalent; raw 0/0/0 | `eng/measure-idle.ps1 -IdleSeconds 30` |
 | Working set after idle | 144.3 MB | Same idle run |
 | Motion profiles | Startup medians 0.78–0.82 s; working-set medians 143.9–144.3 MB; idle 0% | `eng/measure-motion.ps1 -Runs 3 -IdleSeconds 5`; Auto, Balanced, Rich, Reduced, Off |
-| Template package | 227,728 bytes compressed | Local working-tree `DevTemWPF.Templates.1.8.0.nupkg`; not an application runtime footprint or 1.9 release asset |
+| Template package | 227,757 bytes compressed | Clean-clone local `DevTemWPF.Templates.1.8.0.nupkg`; not an application runtime footprint or 1.9 release asset |
 
 The 1.8.0 report's prototype measurement on the same broad hardware class
 recorded 0.86 s startup median and 137.2 MB working-set median. The current

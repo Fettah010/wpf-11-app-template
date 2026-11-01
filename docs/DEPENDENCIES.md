@@ -18,14 +18,15 @@ package has a live consumer (0.9.0 review).
   adds no dependency; reconsider against the then-current advisories before
   the release candidate.
 - Exact local template package tested: `DevTemWPF.Templates.1.8.0.nupkg`,
-  227,728 bytes, SHA-256
-  `2012B5EE190F326C4977C3DA3167F0D26D8F8842AA7F6FEE978851B880EBF605`.
+  packed from clean-clone source commit
+  `15134736665ef35e96d6d4bd90b296a938e7e632`, 227,757 bytes, SHA-256
+  `E9D2BEC412B1773EE516ABF219B56AB664F79989BC183E17E57D0FA8EAFC864D`.
   This is a working-tree verification artifact carrying the existing 1.8.0
   package metadata, **not** a 1.9.0 release package or a published asset.
   Its archive includes `README.md`, `LICENSE`, and this notice; the content
   inventory found no `bin`/`obj`/test-result entries, developer absolute
   paths, or scanned secret markers. Source and packed generator/template
-  gates passed against this exact artifact.
+  gates passed against this exact artifact after the smoke fail-fast fix.
 - Environment: .NET SDK 10.0.403 / runtime 10.0.14; Windows 11 Pro build
   26300. No new runtime or test package was introduced by the 1.9 changes.
 
