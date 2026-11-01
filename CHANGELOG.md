@@ -24,19 +24,21 @@ move behind a tested library boundary.
 - **Verification**: warning-free Release build; full suite passed 234/234
   locally (including all 18 UI automation tests) with no skips; complete
   source and packed generator/template gates passed; package-only UI canary
-  passed; vulnerability/deprecation audits were clean. All five PR checks
-  passed and the stack merged. The first default-branch release preflight
-  passed build, test, UI, generator, and package-canary gates, then caught
-  package-build artifacts under the UI library's `obj` folder in the source
-  template residue check. The exclusion fix is in a follow-up PR; a green
-  hosted rerun and default-branch preflight are required before the candidate
-  can be pinned or the scheduled release published. The fix and a redundant
-  resize-test click correction have since merged in PR #11; the release was
-  rescheduled for 23:50 UTC after the original preflight missed its window.
-  The following preflight showed that restore creates a generated project's
-  `.nuget/packages` cache outside `bin`/`obj`. The residue check now excludes
-  that build-output cache while still scanning generated source and project
-  files; a green hosted rerun is required before release.
+  passed; vulnerability/deprecation audits were clean. The pinned release
+  commit `9e9e6fbbc1a1082167f6049450fe867b482990bb` passed the complete
+  GitHub-hosted release gate in [run 40986511464](https://github.com/Fettah010/wpf-11-app-template/actions/runs/40986511464).
+  Release follow-up PR #16 adds parallel template shards, a non-interactive
+  local test mode, and diagnostics; all required checks passed in
+  [run 40985370347](https://github.com/Fettah010/wpf-11-app-template/actions/runs/40985370347).
+  GitHub Release [v1.8.0](https://github.com/Fettah010/wpf-11-app-template/releases/tag/v1.8.0)
+  was published on 2026-10-30 with the verified template package and checksum.
+  Package SHA-256:
+  `aef32ffd3f25db7ed0d40d144cf26b2da53533f92c334969f6cf486a412ef305`.
+- **More reliable template gates**: each native command now has isolated
+  diagnostic logs, and smoke scripts return an explicit success code after
+  passing. CI runs source and packed preset checks concurrently while retaining
+  aggregate required checks. Local `-NoLaunch` runs keep unit/integration
+  coverage without opening WPF windows or running interactive UI automation.
 - **Documentation**: scaffold workflow diagram, concise project direction,
   UI-package instructions, and updated testing commands.
 

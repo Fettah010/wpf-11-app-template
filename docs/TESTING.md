@@ -48,12 +48,36 @@ powershell -ExecutionPolicy Bypass -File eng/test-generators.ps1 -PackagePath ar
 # full preset/module matrix from source or package
 powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1
 powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -PackagePath <nupkg>
+
+# local build/test matrix without opening foreground WPF windows
+powershell -ExecutionPolicy Bypass -File eng/test-templates.ps1 -Shells Sidebar -NoLaunch
 ```
 
 Both scripts install into a throwaway `DOTNET_CLI_HOME`, so the developer's
 global `dotnet new` registrations are never modified. `test-generators.ps1`
 fails on any leftover template token (`DevTemWpf`, `Sample*`, undefined `App*`
 styles), on a non-zero-warning build, or on a failing generated test.
+`test-templates.ps1 -NoLaunch` skips generated-app window-launch checks and
+interactive UI automation, which require an interactive desktop; it still
+generates, restores, builds, and runs all unit/integration tests in the selected
+matrix cases. Required CI/release gates intentionally omit `-NoLaunch`, so
+launch and UI automation remain enforced. For a hidden local run with log files:
+
+```powershell
+$root = (Get-Location).Path
+$stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+$out = Join-Path $env:TEMP "devtem-matrix-$stamp.out.log"
+$err = Join-Path $env:TEMP "devtem-matrix-$stamp.err.log"
+$script = Join-Path $root 'eng\test-templates.ps1'
+$processArgs = "-NoProfile -ExecutionPolicy Bypass -File `"$script`" -Shells Sidebar -NoLaunch"
+$run = Start-Process powershell.exe -ArgumentList $processArgs -WorkingDirectory $root `
+  -WindowStyle Hidden -PassThru -RedirectStandardOutput $out -RedirectStandardError $err
+"PID=$($run.Id) OUT=$out ERR=$err"
+```
+
+Preset cases now run as independent CI matrix shards; the existing preset check
+stays green only when all preset, optional-module, and item-generator shards
+pass.
 `test-ui-package.ps1` verifies the experimental `DevTemWpf.UI` package from a
 clean temporary consumer with no reference to the gallery app; it also checks
 Comfortable/Compact token values and runtime density replacement.
