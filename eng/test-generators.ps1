@@ -82,6 +82,9 @@ $residueTokens = @(
 )
 
 $oldCliHome = $env:DOTNET_CLI_HOME
+$oldNodeReuse = $env:MSBUILDDISABLENODEREUSE
+$oldMsBuildServer = $env:DOTNET_CLI_USE_MSBUILD_SERVER
+$oldSharedCompilation = $env:UseSharedCompilation
 
 function Assert-True([bool]$Condition, [string]$Message) {
   if (-not $Condition) {
@@ -115,6 +118,12 @@ function Invoke-Native([string]$Exe, [string[]]$Arguments, [string]$WorkDir) {
 try {
   New-Item -ItemType Directory -Path $cliHome -Force | Out-Null
   $env:DOTNET_CLI_HOME = $cliHome
+  # Generated builds run through redirected Start-Process handles. Disable
+  # persistent build servers so they cannot keep those handles open after
+  # the build completes.
+  $env:MSBUILDDISABLENODEREUSE = '1'
+  $env:DOTNET_CLI_USE_MSBUILD_SERVER = '0'
+  $env:UseSharedCompilation = 'false'
 
   # --- Install app + item templates (from a package when given) ---
   Write-Host "`n== install templates ==" -ForegroundColor Cyan
@@ -198,6 +207,9 @@ try {
 }
 finally {
   $env:DOTNET_CLI_HOME = $oldCliHome
+  $env:MSBUILDDISABLENODEREUSE = $oldNodeReuse
+  $env:DOTNET_CLI_USE_MSBUILD_SERVER = $oldMsBuildServer
+  $env:UseSharedCompilation = $oldSharedCompilation
   if ($KeepWork -or $failures -gt 0) {
     Write-Host "Work dir kept: $work" -ForegroundColor Yellow
   }

@@ -5,7 +5,8 @@ namespace DevTemWpf.App.Services;
 
 /// <summary>
 /// JSON-file settings. Corrupt/missing files fall back to defaults and are
-/// repaired on the next save — startup never fails because of settings.
+/// repaired on the next save. Other read failures propagate to avoid replacing
+/// settings that could not be read.
 /// </summary>
 public sealed class SettingsService : ISettingsService
 {
@@ -48,9 +49,18 @@ public sealed class SettingsService : ISettingsService
                 Current = JsonSerializer.Deserialize<ShellSettings>(json, JsonOptions) ?? new ShellSettings();
                 return false;
             }
-            catch
+            catch (FileNotFoundException)
             {
-                // Missing, unreadable, or corrupt → safe defaults (resilience rule).
+                Current = new ShellSettings();
+                return true;
+            }
+            catch (DirectoryNotFoundException)
+            {
+                Current = new ShellSettings();
+                return true;
+            }
+            catch (JsonException)
+            {
                 Current = new ShellSettings();
                 return true;
             }
