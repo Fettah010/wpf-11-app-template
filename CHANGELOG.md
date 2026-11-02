@@ -17,7 +17,9 @@
   preview canaries.
 - **More reliable packed-template diagnostics**: child log output no longer
   contaminates the template matrix's Boolean result after a failed smoke
-  process. Added a reproducible interactive large-list/effects profile.
+  process. Generated-app all-pages UI navigation now prefers supported
+  UI Automation activation patterns over a coordinate click. Added a
+  reproducible interactive large-list/effects profile.
 - **Release status**: candidate only; hosted packed-shell rerun and
   clean-clone verification of the committed 1.9.0 package remain pending.
   No 1.9.0 tag, GitHub Release, or NuGet publication has been made.

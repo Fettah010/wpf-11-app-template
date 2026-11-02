@@ -513,16 +513,14 @@ public sealed class ShellFlowsTests : IDisposable
         {
             foreach (var (navItem, contentName) in stops)
             {
-                // Foreground first: coordinate clicks land reliably only when
-                // our window is frontmost (parallel runs steal focus otherwise).
+                // Foreground first for the mouse fallback; use an accessible
+                // activation pattern whenever the navigation item exposes one.
                 window.Focus();
                 try
                 {
-                    // Coordinate click: proven path for nav items (all visible).
-                    // Both lookups retry: the tree rebuilds on every navigation.
                     var item = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(navItem)),
                         TimeSpan.FromSeconds(10), $"nav item '{navItem}'");
-                    item.Click();
+                    ActivateNavigationItem(item);
                     WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(contentName)),
                         TimeSpan.FromSeconds(10), $"{navItem} page content '{contentName}'");
                 }
