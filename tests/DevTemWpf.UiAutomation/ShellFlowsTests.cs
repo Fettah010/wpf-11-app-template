@@ -849,17 +849,38 @@ public sealed class ShellFlowsTests : IDisposable
 
     private static void ActivateNavigationItem(AutomationElement item)
     {
-        if (item.Patterns.Invoke.TryGetPattern(out var invokePattern))
+        for (var current = item; current is not null; current = current.Parent)
         {
-            invokePattern.Invoke();
+            if (current.Patterns.Invoke.TryGetPattern(out var invokePattern))
+            {
+                invokePattern.Invoke();
+                return;
+            }
+
+            if (current.Patterns.SelectionItem.TryGetPattern(out var selectionPattern))
+            {
+                selectionPattern.Select();
+                return;
+            }
         }
-        else if (item.Patterns.SelectionItem.TryGetPattern(out var selectionPattern))
-        {
-            selectionPattern.Select();
-        }
-        else
+
+        try
         {
             item.Click();
+        }
+        catch (FlaUI.Core.Exceptions.NoClickablePointException ex)
+        {
+            // Some visible NavigationView peers omit the UIA clickable point.
+            var bounds = item.BoundingRectangle;
+            if (item.IsOffscreen || bounds.Width <= 0 || bounds.Height <= 0)
+            {
+                throw new InvalidOperationException(
+                    $"Navigation item '{item.Name}' has no activation pattern or visible bounds.", ex);
+            }
+
+            Mouse.Click(
+                new System.Drawing.Point(bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2),
+                MouseButton.Left);
         }
     }
 

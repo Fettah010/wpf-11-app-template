@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.9.0 - 1.x stabilization (candidate; not released)
+## 1.9.0 - 1.x stabilization and 2.0 migration baseline
 
 - **Settings integrity**: missing/corrupt settings still recover to defaults,
   while unrelated read failures and cancellation propagate rather than
@@ -20,9 +20,11 @@
   process. Generated-app all-pages UI navigation now prefers supported
   UI Automation activation patterns over a coordinate click. Added a
   reproducible interactive large-list/effects profile.
-- **Release status**: candidate only; hosted packed-shell rerun and
-  clean-clone verification of the committed 1.9.0 package remain pending.
-  No 1.9.0 tag, GitHub Release, or NuGet publication has been made.
+- **Release**: Published on GitHub as [`v1.9.0`](https://github.com/Fettah010/wpf-11-app-template/releases/tag/v1.9.0)
+  from merge commit `362fafeb60669ddf3e3804fff49b5a1fdb38d3ec`. The
+  `DevTemWPF.Templates.1.9.0.nupkg` asset is 227,724 bytes with SHA-256
+  `118A313D8F086610BD194CC343A275814C692C28D8306CDD3C52A8DB1ECCBEEB`.
+  NuGet publication was not performed.
 
 ## 1.8.0 - Architecture preparation
 
