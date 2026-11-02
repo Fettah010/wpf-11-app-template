@@ -133,3 +133,48 @@ Inside budgets. No resident additions in rc.1 (packaging/tests/docs only).
 Inside ratified budgets (≤1.0s, ≤150 MB) but memory headroom is thin —
 first post-1.0 perf work should reclaim working set before adding resident
 features.
+
+## 1.9.0 working-tree baseline (measured 2026-11-01; package built 2026-11-02)
+
+Proxy hardware: Windows 11 Pro build 26300, .NET SDK 10.0.403 / runtime
+10.0.14, AMD Ryzen 7 8700G with Radeon 780M, 31.1 GB visible RAM. This is
+not the roadmap's 8 GB reference machine. Display DPI/refresh rate, power
+mode, and storage profile were not recorded; results should not be treated as
+low-spec evidence.
+
+| Metric | Result | How |
+|---|---|---|
+| Cold start (launch → window) | 0.81 s median, 0.84 s max | `eng/measure-startup.ps1 -Runs 5`; samples 0.84/0.78/0.81/0.81/0.78 s |
+| Working set after start | 145.5 MB median, 149.2 MB max | Same five runs, sampled 2 s after window |
+| Idle 30 s CPU | 0% of one core equivalent; raw 0/0/0 | `eng/measure-idle.ps1 -IdleSeconds 30` |
+| Working set after idle | 144.3 MB | Same idle run |
+| Motion profiles | Startup medians 0.78–0.82 s; working-set medians 143.9–144.3 MB; idle 0% | `eng/measure-motion.ps1 -Runs 3 -IdleSeconds 5`; Auto, Balanced, Rich, Reduced, Off |
+| Template package | 227,750 bytes compressed | Local `DevTemWPF.Templates.1.9.0.nupkg` candidate; not an application runtime footprint or published asset |
+
+Interactive proxy profile, captured on the same machine at 96 DPI and
+2560x1440 with the Release app:
+
+| Metric | Result | How |
+|---|---|---|
+| Data grid load | 10,000 data rows; UIA reports 10,001 rows including the add-row placeholder; 404 ms to observe the loaded grid | `eng/measure-large-list-effects.ps1 -Runs 3 -EffectSampleSeconds 3 -PageDownEvents 20`; one load sample |
+| Large-list input | 20 PageDown events: 31.7 ms median dispatch, 33.3 ms maximum; working set 156.8 MB after the 10k-row load | Same run; timing is input dispatch, not a rendered-frame latency |
+| Decorative-effect CPU | Baseline 0%; Gradient 3.12%; Warp 1.56% of one core, median of three 3-second samples per profile | Same run; Rich motion, effects enabled, Gradient and Warp measured separately |
+| Effect switch response | Median UIA state transition: master 19.1 ms, Ripple 19.5 ms, Gradient 20.8 ms, Warp 21.0 ms | Same run; three on/off cycles per switch |
+
+These are a reproducible local proxy observation, not a low-spec result or a
+ratified performance threshold. The sample's working set is measured with
+10,000 rows loaded and should not be compared directly to the ≤150 MB idle
+budget. The saved visual review captured Home, Controls, and Settings at the
+desktop size and Tabbed Settings at 1280x800 in System, Light, and Dark
+themes. No clipping or overlap was observed in those captures; effective DPI
+was 96, so other DPI scales and high-contrast rendering were not exercised.
+
+The 1.8.0 report's prototype measurement on the same broad hardware class
+recorded 0.86 s startup median and 137.2 MB working-set median. The current
+median startup is within the existing ≤1.0 s modern-hardware budget, while
+the measured working set is about 8.3 MB higher. Treat this as a signal to
+track, not a causal regression claim: the 1.9 settings and UI-test changes do
+not add runtime dependencies, and a controlled before/after profile was not
+run from the same commit/configuration. The ≤150 MB modern-hardware budget is
+not exceeded, but headroom is limited. The 8 GB reference-machine gate stays
+open.

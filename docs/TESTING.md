@@ -125,3 +125,20 @@ run on worker threads — construct UI objects inside the test method.
   (0.2.0+ shells, 0.7.0 distribution). See the version plan's test section.
 - Manual checks per milestone (keyboard tab order, theme fallback, DPI)
   are recorded in the completion report with screenshots where useful.
+
+## Interactive large-list and effects profile
+
+On an interactive Windows desktop, run the Release app's 10,000-row grid,
+keyboard page-down, and individually enabled gradient/warp effects profile:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File eng/measure-large-list-effects.ps1 `
+  -Runs 3 -EffectSampleSeconds 5 -PageDownEvents 20
+```
+
+The script temporarily seeds a Rich-motion profile, then restores the
+settings file byte-for-byte. It reports the actual app window DPI and machine
+details, UI Automation grid row count, load and input-dispatch timing, working
+set, per-effect CPU samples, and effect-switch latency. Run it only when the
+Release app is not already open. These are environment-specific measurements,
+not universal pass thresholds or proof for the 8 GB reference machine.

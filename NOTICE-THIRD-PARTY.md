@@ -1,4 +1,4 @@
-# Third-party notices (0.9.0)
+# Third-party notices (verified 2026-11-01)
 
 This project is MIT-licensed (`LICENSE`). It references these third-party
 packages, each under its own license:

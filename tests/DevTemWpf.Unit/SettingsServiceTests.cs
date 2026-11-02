@@ -113,8 +113,25 @@ public sealed class SettingsServiceTests : IDisposable
         await File.WriteAllTextAsync(_path, "{ not json", TestContext.Current.CancellationToken);
         var service = new SettingsService(_path);
 
-        await service.LoadAsync(TestContext.Current.CancellationToken);
+        Assert.True(await service.LoadAsync(TestContext.Current.CancellationToken));
 
+        Assert.Equal(new ShellSettings(), service.Current);
+    }
+
+    [Fact]
+    public async Task LoadAsync_ReadFailurePropagatesWithoutReplacingSettingsFile()
+    {
+        const string originalSettings = """{"Theme":1}""";
+        await File.WriteAllTextAsync(_path, originalSettings, TestContext.Current.CancellationToken);
+        var service = new SettingsService(_path);
+
+        await using (var lockedFile = new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.None))
+        {
+            await Assert.ThrowsAsync<IOException>(
+                () => service.LoadAsync(TestContext.Current.CancellationToken));
+        }
+
+        Assert.Equal(originalSettings, await File.ReadAllTextAsync(_path, TestContext.Current.CancellationToken));
         Assert.Equal(new ShellSettings(), service.Current);
     }
 

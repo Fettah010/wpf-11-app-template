@@ -63,9 +63,9 @@ function Invoke-Native([string]$Exe, [string[]]$Arguments, [string]$WorkDir) {
     # Both streams are tailed: the generated smoke/build scripts report through
     # stdout (Write-Host), so stderr alone hid the real failure.
     Write-Host '--- stderr (tail) ---' -ForegroundColor DarkYellow
-    Get-Content $logErr -Tail 25 -ErrorAction SilentlyContinue
+    Get-Content $logErr -Tail 25 -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_ }
     Write-Host '--- stdout (tail) ---' -ForegroundColor DarkYellow
-    Get-Content $logOut -Tail 40 -ErrorAction SilentlyContinue
+    Get-Content $logOut -Tail 40 -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_ }
     $script:failures++
     return $false
   }

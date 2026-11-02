@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.9.0 - 1.x stabilization (candidate; not released)
+
+- **Settings integrity**: missing/corrupt settings still recover to defaults,
+  while unrelated read failures and cancellation propagate rather than
+  risking replacement of unreadable settings.
+- **More reliable release gates**: shell UI automation uses supported UI
+  Automation patterns where available, and the generator gate disables
+  persistent MSBuild servers in isolated redirected builds. Generated-app
+  smoke scripts now propagate a failed test command instead of continuing to
+  a success-shaped launch result.
+- **Migration baseline**: add a provisional 1.x compatibility inventory and
+  2.0 migration examples, a deferred-work disposition register, and refreshed
+  dependency/package and performance evidence. The owner reviewed the
+  inventory and dispositions; proposed 2.0 contracts remain open pending
+  preview canaries.
+- **More reliable packed-template diagnostics**: child log output no longer
+  contaminates the template matrix's Boolean result after a failed smoke
+  process. Generated-app all-pages UI navigation now prefers supported
+  UI Automation activation patterns over a coordinate click. Added a
+  reproducible interactive large-list/effects profile.
+- **Release status**: candidate only; hosted packed-shell rerun and
+  clean-clone verification of the committed 1.9.0 package remain pending.
+  No 1.9.0 tag, GitHub Release, or NuGet publication has been made.
+
 ## 1.8.0 - Architecture preparation
 
 Architecture proof for the 2.0 package-boundary direction. The app and

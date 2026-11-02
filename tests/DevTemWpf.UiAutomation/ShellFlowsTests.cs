@@ -357,7 +357,11 @@ public sealed class ShellFlowsTests : IDisposable
         return window;
     }
 
-    private static T WaitFor<T>(Func<T?> probe, TimeSpan timeout, string what) where T : class
+    private static T WaitFor<T>(
+        Func<T?> probe,
+        TimeSpan timeout,
+        string what,
+        Func<string>? timeoutDetails = null) where T : class
     {
         var deadline = DateTime.UtcNow + timeout;
         while (DateTime.UtcNow < deadline)
@@ -378,7 +382,20 @@ public sealed class ShellFlowsTests : IDisposable
             Thread.Sleep(150);
         }
 
-        throw new InvalidOperationException($"Timed out waiting for {what}.");
+        var details = string.Empty;
+        if (timeoutDetails is not null)
+        {
+            try
+            {
+                details = $" {timeoutDetails()}";
+            }
+            catch (Exception ex)
+            {
+                details = $" Timeout diagnostics unavailable ({ex.GetType().Name}).";
+            }
+        }
+
+        throw new InvalidOperationException($"Timed out waiting for {what}.{details}");
     }
 
     private static void WaitWhile(Func<bool> condition, TimeSpan timeout, string what)
@@ -496,16 +513,14 @@ public sealed class ShellFlowsTests : IDisposable
         {
             foreach (var (navItem, contentName) in stops)
             {
-                // Foreground first: coordinate clicks land reliably only when
-                // our window is frontmost (parallel runs steal focus otherwise).
+                // Foreground first for the mouse fallback; use an accessible
+                // activation pattern whenever the navigation item exposes one.
                 window.Focus();
                 try
                 {
-                    // Coordinate click: proven path for nav items (all visible).
-                    // Both lookups retry: the tree rebuilds on every navigation.
                     var item = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(navItem)),
                         TimeSpan.FromSeconds(10), $"nav item '{navItem}'");
-                    item.Click();
+                    ActivateNavigationItem(item);
                     WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(contentName)),
                         TimeSpan.FromSeconds(10), $"{navItem} page content '{contentName}'");
                 }
@@ -832,8 +847,32 @@ public sealed class ShellFlowsTests : IDisposable
         }
     }
 
-    private static void SelectShellOption(AutomationElement window, string option)
+    private static void ActivateNavigationItem(AutomationElement item)
     {
+        if (item.Patterns.Invoke.TryGetPattern(out var invokePattern))
+        {
+            invokePattern.Invoke();
+        }
+        else if (item.Patterns.SelectionItem.TryGetPattern(out var selectionPattern))
+        {
+            selectionPattern.Select();
+        }
+        else
+        {
+            item.Click();
+        }
+    }
+
+    private static void NavigateToItem(Window window, string name)
+    {
+        var item = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(name)),
+            TimeSpan.FromSeconds(10), $"nav item '{name}'");
+        ActivateNavigationItem(item);
+    }
+
+    private static void SelectShellOption(Window window, string option)
+    {
+        NavigateToItem(window, "Settings");
         var shell = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Navigation style selector")),
             TimeSpan.FromSeconds(10), "shell selector");
         shell.Patterns.ExpandCollapse.Pattern.Expand();
@@ -1177,8 +1216,6 @@ public sealed class ShellFlowsTests : IDisposable
         try
         {
             window.Focus();
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
-                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
             SelectShellOption(window, "Tabbed");
             WaitForShellPersisted(3); // ShellMode.Tabbed
             (window, app) = RelaunchAfterRestart(window, app, automation);
@@ -1300,8 +1337,6 @@ public sealed class ShellFlowsTests : IDisposable
 
             // Restore the default shell so later runs start Sidebar-first.
             window.Focus();
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
-                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
             SelectShellOption(window, "Sidebar");
             WaitForShellPersisted(1); // ShellMode.Sidebar
             (window, app) = RelaunchAfterRestart(window, app, automation);
@@ -1445,8 +1480,6 @@ public sealed class ShellFlowsTests : IDisposable
             // Persist Tabbed through the settings selector, then restart
             // into the workspace chrome (ADR-0015).
             window.Focus();
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
-                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
             SelectShellOption(window, "Tabbed");
             WaitForShellPersisted(3); // ShellMode.Tabbed
             (window, app) = RelaunchAfterRestart(window, app, automation);
@@ -1466,7 +1499,8 @@ public sealed class ShellFlowsTests : IDisposable
             WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data")),
                 TimeSpan.FromSeconds(10), "nav item 'Data'").Click();
             var dataTab = WaitFor(() => FindTabItem(window, "Data"),
-                TimeSpan.FromSeconds(10), "data tab");
+                TimeSpan.FromSeconds(10), "data tab",
+                () => $"Observed tab headers: [{string.Join(", ", TabTitles(window))}].");
             Assert.NotNull(dataTab);
             var grid = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Data grid")),
                 TimeSpan.FromSeconds(10), "data grid inside document");
@@ -1496,8 +1530,7 @@ public sealed class ShellFlowsTests : IDisposable
 
             // Remaining tabs persist across a restart (selected = last).
             window.Focus();
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
-                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
+            NavigateToItem(window, "Settings");
             WaitForWorkspaceSelected("settings");
             SelectShellOption(window, "Tabbed");
             (window, app) = RelaunchAfterRestart(window, app, automation);
@@ -1513,8 +1546,6 @@ public sealed class ShellFlowsTests : IDisposable
 
             // Restore the default shell so later runs start Sidebar-first.
             window.Focus();
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
-                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
             SelectShellOption(window, "Sidebar");
             WaitForShellPersisted(1); // ShellMode.Sidebar
             (window, app) = RelaunchAfterRestart(window, app, automation);
@@ -1566,8 +1597,6 @@ public sealed class ShellFlowsTests : IDisposable
             // Persist Top through the settings selector (same path a user
             // takes), then restart into the Top chrome.
             window.Focus();
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
-                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
             SelectShellOption(window, "Top");
             WaitForShellPersisted(2); // ShellMode.Top
             (window, app) = RelaunchAfterRestart(window, app, automation);
@@ -1577,7 +1606,7 @@ public sealed class ShellFlowsTests : IDisposable
                 window.Focus();
                 var item = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(navItem)),
                     TimeSpan.FromSeconds(10), $"nav item '{navItem}' in Top shell");
-                item.Click();
+                ActivateNavigationItem(item);
                 var content = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName(contentName)),
                     TimeSpan.FromSeconds(10), $"{navItem} page content '{contentName}' in Top shell");
                 Assert.NotNull(content);
@@ -1586,15 +1615,11 @@ public sealed class ShellFlowsTests : IDisposable
             // Restore the default shell so later runs start Sidebar-first,
             // and prove the relaunched app is back on the default chrome.
             window.Focus();
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Settings")),
-                TimeSpan.FromSeconds(10), "nav item 'Settings'").Click();
             SelectShellOption(window, "Sidebar");
             WaitForShellPersisted(1); // ShellMode.Sidebar
             (window, app) = RelaunchAfterRestart(window, app, automation);
-
             window.Focus();
-            WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home")),
-                TimeSpan.FromSeconds(10), "nav item 'Home' in Sidebar shell").Click();
+            NavigateToItem(window, "Home");
             var headline = WaitFor(() => window.FindFirstDescendant(cf => cf.ByName("Home headline")),
                 TimeSpan.FromSeconds(10), "home content in Sidebar shell");
             Assert.NotNull(headline);
